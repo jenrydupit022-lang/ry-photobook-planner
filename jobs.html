@@ -287,107 +287,51 @@
 
 
     <!-- STATS -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-
-      <!-- TOTAL -->
+    <section class="grid grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4">
       <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
-
         <div class="flex items-center justify-between">
-
-          <p class="text-xs font-bold text-slate-500">
-            Total Jobs
-          </p>
-
-          <span class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
-            📋
-          </span>
-
+          <p class="text-xs font-bold text-slate-500">Total Jobs</p>
+          <span class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">📋</span>
         </div>
-
-        <p
-          id="totalJobsStat"
-          class="text-3xl font-black mt-3"
-        >
-          0
-        </p>
-
+        <p id="totalJobsStat" class="text-3xl font-black mt-3">0</p>
+        <p class="text-[10px] text-slate-400 font-bold mt-1">client / order rows</p>
       </div>
 
+      <div class="bg-white border border-teal-200 rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold text-teal-700">Total Photobooks</p>
+          <span class="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center">📚</span>
+        </div>
+        <p id="totalPhotobooksStat" class="text-3xl font-black text-teal-600 mt-3">0</p>
+        <p class="text-[10px] text-slate-400 font-bold mt-1">based on quantity</p>
+      </div>
 
-      <!-- PENDING -->
       <div class="bg-white border border-amber-200 rounded-2xl p-4 sm:p-5">
-
         <div class="flex items-center justify-between">
-
-          <p class="text-xs font-bold text-amber-700">
-            Pending
-          </p>
-
-          <span class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
-            ⏳
-          </span>
-
+          <p class="text-xs font-bold text-amber-700">Pending</p>
+          <span class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">⏳</span>
         </div>
-
-        <p
-          id="pendingStat"
-          class="text-3xl font-black text-amber-600 mt-3"
-        >
-          0
-        </p>
-
+        <p id="pendingStat" class="text-3xl font-black text-amber-600 mt-3">0</p>
+        <p class="text-[10px] text-slate-400 font-bold mt-1">photobooks</p>
       </div>
 
-
-      <!-- ONGOING -->
       <div class="bg-white border border-blue-200 rounded-2xl p-4 sm:p-5">
-
         <div class="flex items-center justify-between">
-
-          <p class="text-xs font-bold text-blue-700">
-            Ongoing
-          </p>
-
-          <span class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
-            ✏️
-          </span>
-
+          <p class="text-xs font-bold text-blue-700">Ongoing</p>
+          <span class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">✏️</span>
         </div>
-
-        <p
-          id="ongoingStat"
-          class="text-3xl font-black text-blue-600 mt-3"
-        >
-          0
-        </p>
-
+        <p id="ongoingStat" class="text-3xl font-black text-blue-600 mt-3">0</p>
+        <p class="text-[10px] text-slate-400 font-bold mt-1">photobooks</p>
       </div>
 
-
-      <!-- DONE -->
       <div class="bg-white border border-emerald-200 rounded-2xl p-4 sm:p-5">
-
         <div class="flex items-center justify-between">
-
-          <p class="text-xs font-bold text-emerald-700">
-            Done Layout
-          </p>
-
-          <span class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
-            ✓
-          </span>
-
+          <p class="text-xs font-bold text-emerald-700">Done Layout</p>
+          <span class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">✓</span>
         </div>
-
-        <p
-          id="doneStat"
-          class="text-3xl font-black text-emerald-600 mt-3"
-        >
-          0
-        </p>
-
+        <p id="doneStat" class="text-3xl font-black text-emerald-600 mt-3">0</p>
+        <p class="text-[10px] text-slate-400 font-bold mt-1">photobooks</p>
       </div>
-
     </section>
 
 
@@ -860,6 +804,9 @@
 
     const totalJobsStat =
       document.getElementById("totalJobsStat");
+
+    const totalPhotobooksStat =
+      document.getElementById("totalPhotobooksStat");
 
     const pendingStat =
       document.getElementById("pendingStat");
@@ -1910,33 +1857,39 @@
       const monthJobs =
         getMonthJobs();
 
+      const quantityTotal = list =>
+        list.reduce(
+          (total, job) =>
+            total + Math.max(0, Number(job.quantity) || 0),
+          0
+        );
 
       totalJobsStat.textContent =
         monthJobs.length;
 
+      totalPhotobooksStat.textContent =
+        quantityTotal(monthJobs);
 
       pendingStat.textContent =
-        monthJobs.filter(
-          job =>
-            job.status ===
-            "pending"
-        ).length;
-
+        quantityTotal(
+          monthJobs.filter(
+            job => job.status === "pending"
+          )
+        );
 
       ongoingStat.textContent =
-        monthJobs.filter(
-          job =>
-            job.status ===
-            "ongoing"
-        ).length;
-
+        quantityTotal(
+          monthJobs.filter(
+            job => job.status === "ongoing"
+          )
+        );
 
       doneStat.textContent =
-        monthJobs.filter(
-          job =>
-            job.status ===
-            "done"
-        ).length;
+        quantityTotal(
+          monthJobs.filter(
+            job => job.status === "done"
+          )
+        );
     }
 
 
