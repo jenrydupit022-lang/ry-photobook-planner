@@ -282,14 +282,25 @@
 
       </div>
 
-      <button
-        type="button"
-        onclick="window.print()"
-        class="no-print bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap"
-      >
-        Print
-        <span class="hidden sm:inline">Plan</span>
-      </button>
+      <div class="no-print flex items-center gap-2">
+
+  <a
+    href="index.html"
+    class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap"
+  >
+    ← Dashboard
+  </a>
+
+  <button
+    type="button"
+    onclick="window.print()"
+    class="bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap"
+  >
+    Print
+    <span class="hidden sm:inline">Plan</span>
+  </button>
+
+</div>
 
     </div>
 
