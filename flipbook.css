@@ -1,47 +1,620 @@
-/* R&Y reusable animated photobook flipbook */
-.ry-flipbook-section{margin-top:2rem;background:#fff;border:1px solid #e2e8f0;border-radius:1rem;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.04)}
-.ry-flipbook-head{padding:1.25rem 1.5rem;border-bottom:1px solid #e2e8f0;display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
-.ry-flipbook-kicker{font-size:.7rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#0d9488}
-.ry-flipbook-title{font-size:1.35rem;font-weight:900;margin-top:.2rem}
-.ry-flipbook-sub{font-size:.8rem;color:#64748b;margin-top:.35rem;max-width:720px}
-.ry-flipbook-stage{min-height:420px;padding:28px 16px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 15%,rgba(99,217,201,.16),transparent 32%),linear-gradient(180deg,#f8fbfa,#edf4f1);overflow:hidden}
-.ry-flipbook-book{filter:drop-shadow(0 20px 24px rgba(15,23,42,.16))}
-.ry-book-page{background:#fff;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(15,23,42,.08)}
-.ry-page-inner{width:100%;height:100%;padding:7%;display:flex;flex-direction:column;background:linear-gradient(145deg,#fff,#f8fbfa);position:relative}
-.ry-page-number{font-size:10px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5%}
-.ry-photo-grid{flex:1;display:grid;gap:3%;min-height:0}
-.ry-photo-slot{min-width:0;min-height:0;border:2px dashed #83d7c8;border-radius:7px;background:linear-gradient(145deg,rgba(99,217,201,.18),rgba(139,203,120,.16));display:flex;align-items:center;justify-content:center;color:#0f766e;font-size:10px;font-weight:900}
-.ry-photo-grid.count-1{grid-template:1fr/1fr}
-.ry-photo-grid.count-2.landscape{grid-template:1fr/repeat(2,1fr)}
-.ry-photo-grid.count-2.portrait{grid-template:repeat(2,1fr)/1fr}
-.ry-photo-grid.count-2.square{grid-template:1fr/repeat(2,1fr)}
-.ry-photo-grid.count-3.landscape{grid-template:repeat(2,1fr)/1.45fr 1fr}
-.ry-photo-grid.count-3.landscape .ry-photo-slot:first-child{grid-row:1/3}
-.ry-photo-grid.count-3.portrait{grid-template:1.35fr repeat(2,1fr)/1fr}
-.ry-photo-grid.count-3.square{grid-template:1.3fr 1fr/repeat(2,1fr)}
-.ry-photo-grid.count-3.square .ry-photo-slot:first-child{grid-column:1/3}
-.ry-photo-grid.count-4{grid-template:repeat(2,1fr)/repeat(2,1fr)}
-.ry-photo-grid.count-5.landscape{grid-template:repeat(2,1fr)/1.35fr repeat(2,1fr)}
-.ry-photo-grid.count-5.landscape .ry-photo-slot:first-child{grid-row:1/3}
-.ry-photo-grid.count-5.portrait{grid-template:1.25fr repeat(2,1fr)/repeat(2,1fr)}
-.ry-photo-grid.count-5.portrait .ry-photo-slot:first-child{grid-column:1/3}
-.ry-photo-grid.count-5.square{grid-template:repeat(2,1fr)/repeat(3,1fr)}
-.ry-photo-grid.count-5.square .ry-photo-slot:first-child{grid-row:1/3}
-.ry-photo-grid.count-6.landscape,.ry-photo-grid.count-6.square{grid-template:repeat(2,1fr)/repeat(3,1fr)}
-.ry-photo-grid.count-6.portrait{grid-template:repeat(3,1fr)/repeat(2,1fr)}
-.ry-photo-grid.count-7.landscape,.ry-photo-grid.count-8.landscape{grid-template:repeat(2,1fr)/repeat(4,1fr)}
-.ry-photo-grid.count-7.square,.ry-photo-grid.count-8.square{grid-template:repeat(2,1fr)/repeat(4,1fr)}
-.ry-photo-grid.count-7.portrait,.ry-photo-grid.count-8.portrait{grid-template:repeat(4,1fr)/repeat(2,1fr)}
-.ry-photo-grid.count-7 .ry-photo-slot:last-child{grid-column:span 2}
-.ry-cover .ry-page-inner{align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#63d9c9,#8bcb78);padding:10%}
-.ry-cover-mark{width:20%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.86);display:grid;place-items:center;font-weight:1000;font-size:clamp(13px,2vw,24px);box-shadow:0 10px 25px rgba(15,23,42,.12)}
-.ry-cover-title{font-weight:1000;font-size:clamp(14px,2.2vw,28px);margin-top:7%;color:#0f172a}
-.ry-cover-sub{font-size:clamp(8px,1vw,12px);margin-top:2%;color:#334155}
-.ry-back-cover .ry-page-inner{background:linear-gradient(135deg,#8bcb78,#63d9c9)}
-.ry-flipbook-controls{padding:14px 16px;display:flex;align-items:center;justify-content:center;gap:12px;border-top:1px solid #e2e8f0;flex-wrap:wrap}
-.ry-flipbook-btn{border:1px solid #cbd5e1;background:#fff;border-radius:12px;padding:10px 16px;font-size:12px;font-weight:900;color:#334155;cursor:pointer}
-.ry-flipbook-btn:hover{background:#f8fafc}
-.ry-flipbook-counter{min-width:140px;text-align:center;font-size:12px;font-weight:900;color:#475569}
-.ry-flipbook-empty{padding:50px 20px;text-align:center;color:#94a3b8;font-size:13px}
-@media(max-width:640px){.ry-flipbook-stage{min-height:390px;padding:22px 8px}.ry-flipbook-head{padding:18px}.ry-flipbook-btn{padding:10px 13px}.ry-photo-slot{border-width:1px;font-size:8px}}
-@media print{.ry-flipbook-section{display:none!important}}
+/* =========================================================
+   R&Y PRINTING LAB — ANIMATED PHOTOBOOK FLIPBOOK
+   ========================================================= */
+
+.ry-flipbook-section {
+  margin-top: 2rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ry-flipbook-head {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.ry-flipbook-kicker {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0d9488;
+}
+
+.ry-flipbook-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin-top: 0.2rem;
+  color: #0f172a;
+}
+
+.ry-flipbook-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+  max-width: 720px;
+}
+
+
+/* =========================================================
+   FLIPBOOK STAGE
+   ========================================================= */
+
+.ry-flipbook-stage {
+  min-height: 500px;
+  padding: 35px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at 50% 15%,
+      rgba(99, 217, 201, 0.18),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      #f8fbfa,
+      #edf4f1
+    );
+
+  overflow: hidden;
+}
+
+.ry-flipbook-book {
+  margin: 0 auto;
+
+  filter:
+    drop-shadow(
+      0 22px 28px rgba(15, 23, 42, 0.18)
+    );
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.ry-book-page {
+  background: #ffffff;
+
+  overflow: hidden;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.1);
+
+  user-select: none;
+}
+
+.ry-page-inner {
+  width: 100%;
+  height: 100%;
+
+  padding: 6%;
+
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #f8fbfa
+    );
+}
+
+
+/* =========================================================
+   PAGE LABEL
+   ========================================================= */
+
+.ry-page-label {
+  flex-shrink: 0;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  color: #94a3b8;
+
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  margin-bottom: 4%;
+}
+
+
+/* =========================================================
+   PHOTO GRID
+   ========================================================= */
+
+.ry-photo-grid {
+  flex: 1;
+
+  width: 100%;
+  min-height: 0;
+
+  display: grid;
+
+  gap: 3%;
+}
+
+
+/* =========================================================
+   PHOTO PLACEHOLDER
+   ========================================================= */
+
+.ry-photo-slot {
+  min-width: 0;
+  min-height: 0;
+
+  border: 2px dashed #63cdbc;
+
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(99, 217, 201, 0.20),
+      rgba(139, 203, 120, 0.16)
+    );
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color: #0f766e;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   1 PHOTO
+   ========================================================= */
+
+.ry-photo-grid.count-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+
+/* =========================================================
+   2 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-2.landscape {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+}
+
+.ry-photo-grid.count-2.portrait {
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-2.square {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+}
+
+
+/* =========================================================
+   3 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-3.landscape {
+  grid-template-columns: 1.45fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-3.landscape
+.ry-photo-slot:first-child {
+  grid-row: 1 / 3;
+}
+
+.ry-photo-grid.count-3.portrait {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1.35fr repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-3.square {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1.3fr 1fr;
+}
+
+.ry-photo-grid.count-3.square
+.ry-photo-slot:first-child {
+  grid-column: 1 / 3;
+}
+
+
+/* =========================================================
+   4 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-4 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+
+/* =========================================================
+   5 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-5.landscape {
+  grid-template-columns: 1.35fr repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-5.landscape
+.ry-photo-slot:first-child {
+  grid-row: 1 / 3;
+}
+
+.ry-photo-grid.count-5.portrait {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1.25fr repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-5.portrait
+.ry-photo-slot:first-child {
+  grid-column: 1 / 3;
+}
+
+.ry-photo-grid.count-5.square {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-5.square
+.ry-photo-slot:first-child {
+  grid-row: 1 / 3;
+}
+
+
+/* =========================================================
+   6 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-6.landscape,
+.ry-photo-grid.count-6.square {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-6.portrait {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+
+/* =========================================================
+   7 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-7.landscape,
+.ry-photo-grid.count-7.square {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-7.portrait {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.ry-photo-grid.count-7
+.ry-photo-slot:last-child {
+  grid-column: span 2;
+}
+
+
+/* =========================================================
+   8 PHOTOS
+   ========================================================= */
+
+.ry-photo-grid.count-8.landscape,
+.ry-photo-grid.count-8.square {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.ry-photo-grid.count-8.portrait {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+
+/* =========================================================
+   BLANK PAGE
+   ========================================================= */
+
+.ry-empty-page {
+  flex: 1;
+
+  border: 2px dashed #cbd5e1;
+
+  border-radius: 10px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   PAGE FOOTER
+   ========================================================= */
+
+.ry-page-footer {
+  flex-shrink: 0;
+
+  margin-top: 4%;
+
+  text-align: center;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  color: #94a3b8;
+}
+
+
+/* =========================================================
+   FRONT + BACK COVER
+   ========================================================= */
+
+.ry-cover-page {
+  background:
+    linear-gradient(
+      135deg,
+      #63d9c9,
+      #8bcb78
+    ) !important;
+}
+
+.ry-cover-page .ry-cover-content {
+  width: 100%;
+  height: 100%;
+
+  padding: 10%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(255, 255, 255, 0.30),
+      transparent 35%
+    );
+}
+
+.ry-cover-small {
+  font-size: 9px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.16em;
+
+  color: rgba(15, 23, 42, 0.65);
+
+  margin-bottom: 5%;
+}
+
+.ry-cover-title {
+  font-size: clamp(
+    18px,
+    2.2vw,
+    30px
+  );
+
+  font-weight: 1000;
+
+  color: #0f172a;
+
+  line-height: 1.05;
+}
+
+.ry-cover-subtitle {
+  font-size: clamp(
+    9px,
+    1vw,
+    12px
+  );
+
+  font-weight: 700;
+
+  color: #334155;
+
+  margin-top: 4%;
+}
+
+
+/* =========================================================
+   STPAGEFLIP GENERATED ELEMENTS
+   ========================================================= */
+
+.stf__parent {
+  margin: 0 auto !important;
+}
+
+.stf__wrapper {
+  margin: 0 auto !important;
+}
+
+.stf__block {
+  background: transparent !important;
+}
+
+.stf__item {
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+.ry-flipbook-controls {
+  padding: 14px 16px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  border-top: 1px solid #e2e8f0;
+
+  flex-wrap: wrap;
+
+  background: #ffffff;
+}
+
+.ry-flipbook-btn {
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  padding: 10px 16px;
+
+  font-size: 12px;
+  font-weight: 900;
+
+  color: #334155;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ry-flipbook-btn:hover {
+  background: #f8fafc;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 12px rgba(15, 23, 42, 0.08);
+}
+
+.ry-flipbook-counter {
+  min-width: 150px;
+
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 900;
+
+  color: #475569;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.ry-flipbook-empty {
+  padding: 50px 20px;
+
+  text-align: center;
+
+  color: #94a3b8;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .ry-flipbook-stage {
+    min-height: 400px;
+
+    padding:
+      22px 6px;
+  }
+
+  .ry-flipbook-head {
+    padding: 18px;
+  }
+
+  .ry-flipbook-btn {
+    padding:
+      10px 13px;
+  }
+
+  .ry-flipbook-counter {
+    min-width: 110px;
+  }
+
+  .ry-photo-slot {
+    border-width: 1px;
+
+    font-size: 7px;
+  }
+
+  .ry-page-label {
+    font-size: 8px;
+  }
+
+  .ry-page-footer {
+    font-size: 7px;
+  }
+
+}
+
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
+@media print {
+
+  .ry-flipbook-section {
+    display: none !important;
+  }
+
+}
