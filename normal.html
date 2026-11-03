@@ -982,10 +982,80 @@
         </div>
       </div>
       <div class="ry-flipbook-controls">
-        <button type="button" class="ry-flipbook-btn" onclick="RYFlipbook.prev()">← Previous</button>
-        <span id="ryFlipbookCounter" class="ry-flipbook-counter">No preview</span>
-        <button type="button" class="ry-flipbook-btn" onclick="RYFlipbook.next()">Next →</button>
-      </div>
+
+  <button
+    type="button"
+    class="ry-flipbook-btn"
+    onclick="RYFlipbook.prev()"
+    title="Previous page"
+  >
+    ← Previous
+  </button>
+
+  <div class="ry-zoom-controls">
+
+    <button
+      type="button"
+      class="ry-flipbook-btn ry-icon-btn"
+      onclick="RYFlipbook.zoomOut()"
+      title="Zoom out"
+    >
+      −
+    </button>
+
+    <span
+      id="ryFlipbookZoom"
+      class="ry-zoom-value"
+    >
+      100%
+    </span>
+
+    <button
+      type="button"
+      class="ry-flipbook-btn ry-icon-btn"
+      onclick="RYFlipbook.zoomIn()"
+      title="Zoom in"
+    >
+      +
+    </button>
+
+    <button
+      type="button"
+      class="ry-flipbook-btn"
+      onclick="RYFlipbook.resetZoom()"
+      title="Reset zoom"
+    >
+      Reset
+    </button>
+
+  </div>
+
+  <span
+    id="ryFlipbookCounter"
+    class="ry-flipbook-counter"
+  >
+    No preview
+  </span>
+
+  <button
+    type="button"
+    class="ry-flipbook-btn ry-fullscreen-btn"
+    onclick="RYFlipbook.toggleFullscreen()"
+    title="Fullscreen"
+  >
+    ⛶ Fullscreen
+  </button>
+
+  <button
+    type="button"
+    class="ry-flipbook-btn"
+    onclick="RYFlipbook.next()"
+    title="Next page"
+  >
+    Next →
+  </button>
+
+</div>  
     </section>
 
   </main>

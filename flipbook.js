@@ -1,7 +1,13 @@
 (function () {
   let pageFlip = null;
 
+  let zoomLevel = 1;
+  const MIN_ZOOM = 0.6;
+  const MAX_ZOOM = 2;
+  const ZOOM_STEP = 0.1;
+
   const $ = (id) => document.getElementById(id);
+
 
   // =====================================================
   // BOOK SIZE / ORIENTATION
@@ -18,6 +24,7 @@
     return width > height ? "landscape" : "portrait";
   }
 
+
   function getDimensions(size = {}) {
     const width = Number(size.width) || 10;
     const height = Number(size.height) || 7;
@@ -27,15 +34,20 @@
     if (width >= height) {
       return {
         width: maxSide,
-        height: Math.round(maxSide * (height / width)),
+        height: Math.round(
+          maxSide * (height / width)
+        ),
       };
     }
 
     return {
-      width: Math.round(maxSide * (width / height)),
+      width: Math.round(
+        maxSide * (width / height)
+      ),
       height: maxSide,
     };
   }
+
 
   // =====================================================
   // PAGE HTML
@@ -72,27 +84,41 @@
     `;
   }
 
-  function makeInsidePage(count, pageNumber, size) {
+
+  function makeInsidePage(
+    count,
+    pageNumber,
+    size
+  ) {
     const orientation = getOrientation(size);
 
     return `
       <div class="ry-book-page">
+
         <div class="ry-page-inner">
 
           <div class="ry-page-label">
             PAGE ${pageNumber}
           </div>
 
-          ${makePhotoSlots(count, orientation)}
+          ${makePhotoSlots(
+            count,
+            orientation
+          )}
 
           <div class="ry-page-footer">
-            ${count} ${Number(count) === 1 ? "photo" : "photos"}
+            ${count}
+            ${Number(count) === 1
+              ? "photo"
+              : "photos"}
           </div>
 
         </div>
+
       </div>
     `;
   }
+
 
   function makeCover(size, isBack = false) {
     const orientation = getOrientation(size);
@@ -103,6 +129,7 @@
           class="ry-book-page ry-cover-page ${orientation}"
           data-density="hard"
         >
+
           <div class="ry-cover-content">
 
             <div class="ry-cover-small">
@@ -118,6 +145,7 @@
             </div>
 
           </div>
+
         </div>
       `;
     }
@@ -127,6 +155,7 @@
         class="ry-book-page ry-cover-page ${orientation}"
         data-density="hard"
       >
+
         <div class="ry-cover-content">
 
           <div class="ry-cover-small">
@@ -142,17 +171,22 @@
           </div>
 
         </div>
+
       </div>
     `;
   }
+
 
   // =====================================================
   // HOST MANAGEMENT
   // =====================================================
 
   function getStage() {
-    return document.querySelector(".ry-flipbook-stage");
+    return document.querySelector(
+      ".ry-flipbook-stage"
+    );
   }
+
 
   function createFreshHost() {
     const stage = getStage();
@@ -166,25 +200,27 @@
     }
 
     /*
-     * IMPORTANT:
-     * PageFlip can modify/remove DOM elements when destroy()
-     * is called.
+     * PageFlip can remove/modify its DOM
+     * during destroy().
      *
-     * Instead of trusting the old #ryFlipbook element,
-     * we create a completely fresh one every time.
+     * Always rebuild a fresh host.
      */
 
     stage.innerHTML = "";
 
-    const host = document.createElement("div");
+    const host =
+      document.createElement("div");
 
     host.id = "ryFlipbook";
     host.className = "ry-flipbook-book";
 
     stage.appendChild(host);
 
+    applyZoom();
+
     return host;
   }
+
 
   // =====================================================
   // DESTROY
@@ -209,12 +245,14 @@
     }
   }
 
+
   // =====================================================
   // COUNTER
   // =====================================================
 
   function updateCounter() {
-    const counter = $("ryFlipbookCounter");
+    const counter =
+      $("ryFlipbookCounter");
 
     if (!counter || !pageFlip) {
       return;
@@ -228,7 +266,9 @@
         pageFlip.getPageCount();
 
       if (!total) {
-        counter.textContent = "No preview";
+        counter.textContent =
+          "No preview";
+
         return;
       }
 
@@ -257,6 +297,166 @@
     }
   }
 
+
+  // =====================================================
+  // ZOOM
+  // =====================================================
+
+  function clampZoom(value) {
+    return Math.min(
+      MAX_ZOOM,
+      Math.max(MIN_ZOOM, value)
+    );
+  }
+
+
+  function updateZoomLabel() {
+    const label =
+      $("ryFlipbookZoom");
+
+    if (!label) {
+      return;
+    }
+
+    label.textContent =
+      `${Math.round(
+        zoomLevel * 100
+      )}%`;
+  }
+
+
+  function applyZoom() {
+    const host =
+      $("ryFlipbook");
+
+    if (host) {
+      host.style.transform =
+        `scale(${zoomLevel})`;
+
+      host.style.transformOrigin =
+        "center center";
+    }
+
+    updateZoomLabel();
+  }
+
+
+  function setZoom(value) {
+    zoomLevel =
+      clampZoom(value);
+
+    applyZoom();
+  }
+
+
+  function zoomIn() {
+    setZoom(
+      Number(
+        (zoomLevel + ZOOM_STEP)
+          .toFixed(2)
+      )
+    );
+  }
+
+
+  function zoomOut() {
+    setZoom(
+      Number(
+        (zoomLevel - ZOOM_STEP)
+          .toFixed(2)
+      )
+    );
+  }
+
+
+  function resetZoom() {
+    setZoom(1);
+  }
+
+
+  // =====================================================
+  // FULLSCREEN
+  // =====================================================
+
+  function getFullscreenSection() {
+    return $("flipbookPreviewSection");
+  }
+
+
+  function isFullscreen() {
+    return Boolean(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement
+    );
+  }
+
+
+  function enterFullscreen() {
+    const section =
+      getFullscreenSection();
+
+    if (!section) {
+      return;
+    }
+
+    if (section.requestFullscreen) {
+      section
+        .requestFullscreen()
+        .catch((error) => {
+          console.warn(
+            "Fullscreen error:",
+            error
+          );
+        });
+
+      return;
+    }
+
+    if (section.webkitRequestFullscreen) {
+      section.webkitRequestFullscreen();
+    }
+  }
+
+
+  function exitFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+
+      return;
+    }
+
+    if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+
+
+  function toggleFullscreen() {
+    if (isFullscreen()) {
+      exitFullscreen();
+    } else {
+      enterFullscreen();
+    }
+  }
+
+
+  function updateFullscreenButton() {
+    const button =
+      document.querySelector(
+        ".ry-fullscreen-btn"
+      );
+
+    if (!button) {
+      return;
+    }
+
+    button.textContent =
+      isFullscreen()
+        ? "✕ Exit Fullscreen"
+        : "⛶ Fullscreen";
+  }
+
+
   // =====================================================
   // CLEAR PREVIEW
   // =====================================================
@@ -265,17 +465,10 @@
     message =
       "Calculate a layout to generate the flipbook preview."
   ) {
-    /*
-     * Destroy old PageFlip first.
-     */
     destroyFlipbook();
 
-    /*
-     * IMPORTANT:
-     * Do NOT try to reuse the old host.
-     * Create a fresh host after destroy().
-     */
-    const host = createFreshHost();
+    const host =
+      createFreshHost();
 
     if (host) {
       host.innerHTML = `
@@ -293,6 +486,7 @@
         "No preview";
     }
   }
+
 
   // =====================================================
   // BUILD PAGE ELEMENTS
@@ -343,6 +537,7 @@
     host.appendChild(fragment);
   }
 
+
   // =====================================================
   // RENDER FLIPBOOK
   // =====================================================
@@ -351,9 +546,6 @@
     distribution,
     size = {}
   ) {
-    /*
-     * Validate calculator result first.
-     */
 
     if (
       !Array.isArray(distribution) ||
@@ -362,10 +554,6 @@
       clear();
       return;
     }
-
-    /*
-     * Check PageFlip library.
-     */
 
     if (
       !window.St ||
@@ -382,18 +570,10 @@
       return;
     }
 
-    /*
-     * Kill previous PageFlip.
-     */
-
     destroyFlipbook();
 
-    /*
-     * NEVER reuse the old host.
-     * Make a fresh one after destroying PageFlip.
-     */
-
-    const host = createFreshHost();
+    const host =
+      createFreshHost();
 
     if (!host) {
       return;
@@ -406,10 +586,6 @@
       counter.textContent =
         "Loading preview...";
     }
-
-    /*
-     * Build clean pages.
-     */
 
     buildPages(
       host,
@@ -434,9 +610,6 @@
       getDimensions(size);
 
     try {
-      /*
-       * Create new PageFlip instance.
-       */
 
       pageFlip =
         new window.St.PageFlip(
@@ -501,17 +674,9 @@
           }
         );
 
-      /*
-       * Load the freshly-created page elements.
-       */
-
       pageFlip.loadFromHTML(
         pageElements
       );
-
-      /*
-       * Events
-       */
 
       pageFlip.on(
         "flip",
@@ -534,10 +699,6 @@
         }
       );
 
-      /*
-       * Initial counter update.
-       */
-
       requestAnimationFrame(
         function () {
 
@@ -546,6 +707,7 @@
 
               if (pageFlip) {
                 updateCounter();
+                applyZoom();
               }
 
             }
@@ -555,15 +717,11 @@
       );
 
     } catch (error) {
+
       console.error(
         "Flipbook initialization error:",
         error
       );
-
-      /*
-       * Avoid calling clear() while the broken
-       * PageFlip instance may still be modifying DOM.
-       */
 
       pageFlip = null;
 
@@ -585,8 +743,9 @@
     }
   }
 
+
   // =====================================================
-  // CONTROLS
+  // PAGE CONTROLS
   // =====================================================
 
   function next() {
@@ -604,6 +763,7 @@
     }
   }
 
+
   function prev() {
     if (!pageFlip) {
       return;
@@ -619,6 +779,77 @@
     }
   }
 
+
+  // =====================================================
+  // MOUSE WHEEL ZOOM
+  // Only active while fullscreen.
+  // =====================================================
+
+  document.addEventListener(
+    "wheel",
+    function (event) {
+
+      if (!isFullscreen()) {
+        return;
+      }
+
+      const section =
+        getFullscreenSection();
+
+      if (
+        !section ||
+        !section.contains(event.target)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (event.deltaY < 0) {
+        zoomIn();
+      } else {
+        zoomOut();
+      }
+
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  // =====================================================
+  // FULLSCREEN EVENTS
+  // =====================================================
+
+  document.addEventListener(
+    "fullscreenchange",
+    function () {
+      updateFullscreenButton();
+
+      requestAnimationFrame(
+        function () {
+          applyZoom();
+        }
+      );
+    }
+  );
+
+
+  document.addEventListener(
+    "webkitfullscreenchange",
+    function () {
+      updateFullscreenButton();
+
+      requestAnimationFrame(
+        function () {
+          applyZoom();
+        }
+      );
+    }
+  );
+
+
   // =====================================================
   // PUBLIC API
   // =====================================================
@@ -626,8 +857,15 @@
   window.RYFlipbook = {
     render,
     clear,
+
     next,
     prev,
+
+    zoomIn,
+    zoomOut,
+    resetZoom,
+
+    toggleFullscreen
   };
 
 })();

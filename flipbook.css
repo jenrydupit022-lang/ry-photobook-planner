@@ -914,6 +914,172 @@
 /* =========================================================
    PRINT
    ========================================================= */
+   /* =========================================================
+   ZOOM CONTROLS
+   ========================================================= */
+
+.ry-zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.ry-icon-btn {
+  width: 40px;
+  min-width: 40px;
+  padding-left: 0;
+  padding-right: 0;
+
+  font-size: 18px;
+  line-height: 1;
+}
+
+.ry-zoom-value {
+  min-width: 58px;
+
+  text-align: center;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  color: #475569;
+
+  padding: 8px 9px;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+
+/* =========================================================
+   FULLSCREEN
+   ========================================================= */
+
+#flipbookPreviewSection:fullscreen {
+  width: 100vw;
+  height: 100vh;
+
+  margin: 0;
+
+  border: none;
+  border-radius: 0;
+
+  background: #eef5f2;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#flipbookPreviewSection:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+
+  margin: 0;
+
+  border: none;
+  border-radius: 0;
+
+  background: #eef5f2;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#flipbookPreviewSection:fullscreen
+.ry-flipbook-head,
+#flipbookPreviewSection:-webkit-full-screen
+.ry-flipbook-head {
+  flex-shrink: 0;
+}
+
+#flipbookPreviewSection:fullscreen
+.ry-flipbook-stage,
+#flipbookPreviewSection:-webkit-full-screen
+.ry-flipbook-stage {
+  flex: 1;
+
+  min-height: 0;
+
+  width: 100%;
+
+  overflow: auto;
+
+  padding:
+    55px
+    30px
+    70px;
+}
+
+#flipbookPreviewSection:fullscreen
+.ry-flipbook-controls,
+#flipbookPreviewSection:-webkit-full-screen
+.ry-flipbook-controls {
+  flex-shrink: 0;
+
+  position: relative;
+
+  z-index: 30;
+}
+
+
+/* =========================================================
+   ZOOM ANIMATION
+   ========================================================= */
+
+.ry-flipbook-book {
+  transition:
+    transform 0.18s ease;
+}
+
+
+/* =========================================================
+   FULLSCREEN BUTTON
+   ========================================================= */
+
+.ry-fullscreen-btn {
+  border-color:
+    rgba(13, 148, 136, 0.30);
+
+  background: #f0fdfa;
+
+  color: #0f766e;
+}
+
+.ry-fullscreen-btn:hover {
+  background: #ccfbf1;
+
+  border-color: #5eead4;
+}
+
+
+/* =========================================================
+   MOBILE TOOLBAR
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+  .ry-flipbook-controls {
+    gap: 8px;
+  }
+
+  .ry-zoom-controls {
+    order: 3;
+
+    width: 100%;
+  }
+
+  .ry-fullscreen-btn {
+    order: 4;
+  }
+
+  .ry-zoom-value {
+    min-width: 52px;
+  }
+
+}
 
 @media print {
 
