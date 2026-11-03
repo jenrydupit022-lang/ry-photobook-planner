@@ -98,15 +98,11 @@
 
         <div>
 
-          <h1
-            class="font-black text-base sm:text-xl"
-          >
+          <h1 class="font-black text-base sm:text-xl">
             R&Y Photobook Planner
           </h1>
 
-          <p
-            class="text-[10px] sm:text-xs text-slate-500"
-          >
+          <p class="text-[10px] sm:text-xs text-slate-500">
             Smart Photo Planning by R&Y Printing Lab
           </p>
 
@@ -138,9 +134,7 @@
 
     <!-- INTRO -->
 
-    <section
-      class="max-w-3xl"
-    >
+    <section class="max-w-3xl">
 
       <div
         class="brand-gradient inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
@@ -162,10 +156,10 @@
       <h2
         class="text-3xl sm:text-5xl font-black tracking-tight mt-5 leading-tight"
       >
-        Upload your finished
+        Turn your finished PDF into a
 
         <span class="brand-text">
-          photobook design.
+          digital photobook.
         </span>
       </h2>
 
@@ -173,9 +167,9 @@
       <p
         class="text-sm sm:text-base text-slate-500 mt-4 leading-relaxed max-w-2xl"
       >
-        Upload your finished Canva photobook pages and preview
-        them as an animated digital photobook before sending
-        the design to your client.
+        Export the finished photobook from Canva as one PDF,
+        upload it here and preview the actual design with
+        animated page turning.
       </p>
 
     </section>
@@ -203,25 +197,25 @@
           <p
             class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]"
           >
-            Upload Design
+            Upload Finished Design
           </p>
 
-          <h3
-            class="text-xl font-black mt-1"
-          >
-            Photobook Pages
+          <h3 class="text-xl font-black mt-1">
+            Photobook PDF
           </h3>
 
           <p
             class="text-xs text-slate-500 mt-2 leading-relaxed"
           >
-            Upload the actual finished layout exported from Canva.
+            Upload one finished PDF exported from Canva.
           </p>
 
         </div>
 
 
-        <!-- BOOK SIZE -->
+        <!-- =====================================
+             BOOK SIZE
+             ===================================== -->
 
         <div class="mt-6">
 
@@ -258,152 +252,62 @@
         </div>
 
 
-        <!-- FRONT COVER -->
+        <!-- =====================================
+             PDF UPLOAD
+             ===================================== -->
 
         <div class="mt-6">
 
           <label
             class="block text-xs font-black text-slate-700 mb-2"
           >
-            Front Cover
+            Finished Canva PDF
           </label>
 
+
           <label
-            for="frontCoverInput"
+            for="photobookPdfInput"
             class="upload-box"
           >
 
             <div class="upload-icon">
-              +
+              PDF
             </div>
 
             <div>
 
               <p class="upload-title">
-                Upload Front Cover
+                Choose Photobook PDF
               </p>
 
               <p class="upload-sub">
-                JPG or PNG
+                One complete PDF file
               </p>
 
             </div>
 
           </label>
 
+
           <input
-            id="frontCoverInput"
+            id="photobookPdfInput"
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="application/pdf,.pdf"
             hidden
           >
 
+
           <div
-            id="frontCoverInfo"
+            id="pdfFileInfo"
             class="file-info hidden"
           ></div>
 
         </div>
 
 
-        <!-- INSIDE PAGES -->
-
-        <div class="mt-5">
-
-          <label
-            class="block text-xs font-black text-slate-700 mb-2"
-          >
-            Inside Pages
-          </label>
-
-          <label
-            for="insidePagesInput"
-            class="upload-box"
-          >
-
-            <div class="upload-icon">
-              +
-            </div>
-
-            <div>
-
-              <p class="upload-title">
-                Upload Inside Pages
-              </p>
-
-              <p class="upload-sub">
-                Select multiple JPG / PNG files
-              </p>
-
-            </div>
-
-          </label>
-
-          <input
-            id="insidePagesInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            hidden
-          >
-
-          <div
-            id="insidePagesInfo"
-            class="file-info hidden"
-          ></div>
-
-        </div>
-
-
-        <!-- BACK COVER -->
-
-        <div class="mt-5">
-
-          <label
-            class="block text-xs font-black text-slate-700 mb-2"
-          >
-            Back Cover
-          </label>
-
-          <label
-            for="backCoverInput"
-            class="upload-box"
-          >
-
-            <div class="upload-icon">
-              +
-            </div>
-
-            <div>
-
-              <p class="upload-title">
-                Upload Back Cover
-              </p>
-
-              <p class="upload-sub">
-                JPG or PNG
-              </p>
-
-            </div>
-
-          </label>
-
-          <input
-            id="backCoverInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-          >
-
-          <div
-            id="backCoverInfo"
-            class="file-info hidden"
-          ></div>
-
-        </div>
-
-
-        <!-- ORDER INFO -->
+        <!-- =====================================
+             PAGE ORDER INFO
+             ===================================== -->
 
         <div
           class="mt-5 bg-slate-50 border border-slate-200 rounded-2xl p-4"
@@ -412,21 +316,87 @@
           <p
             class="text-xs font-black text-slate-700"
           >
-            Page Order
+            PDF Page Order
           </p>
 
-          <p
-            class="text-[11px] text-slate-500 mt-1 leading-relaxed"
+          <div
+            class="text-[11px] text-slate-500 mt-2 leading-relaxed space-y-1"
           >
-            Inside pages will follow the filename order.
-            For best results, export them as
-            01, 02, 03, 04 and so on.
-          </p>
+
+            <p>
+              <strong>Page 1</strong>
+              — Front Cover
+            </p>
+
+            <p>
+              <strong>Middle Pages</strong>
+              — Inside Photobook Pages
+            </p>
+
+            <p>
+              <strong>Last Page</strong>
+              — Back Cover
+            </p>
+
+          </div>
 
         </div>
 
 
-        <!-- GENERATE -->
+        <!-- =====================================
+             PDF STATS
+             ===================================== -->
+
+        <div
+          id="pdfStats"
+          class="hidden mt-4 grid grid-cols-2 gap-2"
+        >
+
+          <div
+            class="bg-teal-50 border border-teal-100 rounded-xl p-3 text-center"
+          >
+
+            <p
+              id="pdfTotalPages"
+              class="text-xl font-black text-teal-700"
+            >
+              0
+            </p>
+
+            <p
+              class="text-[9px] font-black text-slate-400 uppercase"
+            >
+              PDF Pages
+            </p>
+
+          </div>
+
+
+          <div
+            class="bg-green-50 border border-green-100 rounded-xl p-3 text-center"
+          >
+
+            <p
+              id="pdfInsidePages"
+              class="text-xl font-black text-green-700"
+            >
+              0
+            </p>
+
+            <p
+              class="text-[9px] font-black text-slate-400 uppercase"
+            >
+              Inside Pages
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================
+             GENERATE
+             ===================================== -->
 
         <button
           id="generateFlipbookBtn"
@@ -437,14 +407,12 @@
         </button>
 
 
-        <!-- CLEAR -->
-
         <button
           id="clearUploadBtn"
           type="button"
           class="w-full mt-2 rounded-2xl py-3 px-4 text-xs font-black text-slate-600 border border-slate-200 hover:bg-slate-50 transition"
         >
-          Clear Uploads
+          Clear PDF
         </button>
 
 
@@ -459,7 +427,7 @@
 
 
       <!-- =====================================
-           FLIPBOOK SIDE
+           FLIPBOOK PREVIEW
            ===================================== -->
 
       <section
@@ -468,11 +436,9 @@
       >
 
 
-        <!-- PREVIEW HEADER -->
+        <!-- HEADER -->
 
-        <div
-          class="client-preview-head"
-        >
+        <div class="client-preview-head">
 
           <div>
 
@@ -491,7 +457,7 @@
             <p
               class="text-xs text-slate-500 mt-1"
             >
-              Your actual uploaded Canva pages will appear here.
+              The actual pages from your uploaded PDF will appear here.
             </p>
 
           </div>
@@ -501,30 +467,26 @@
             id="previewBadge"
             class="preview-badge"
           >
-            NO DESIGN
+            NO PDF
           </span>
 
         </div>
 
 
-        <!-- FLIPBOOK STAGE -->
+        <!-- =====================================
+             STAGE
+             ===================================== -->
 
-        <div
-          class="client-flipbook-stage"
-        >
+        <div class="client-flipbook-stage">
 
           <div
             id="clientFlipbook"
             class="client-flipbook-book"
           >
 
-            <div
-              class="client-flipbook-empty"
-            >
+            <div class="client-flipbook-empty">
 
-              <div
-                class="empty-book-icon"
-              >
+              <div class="empty-book-icon">
                 📖
               </div>
 
@@ -533,8 +495,8 @@
               </h4>
 
               <p>
-                Upload your front cover, inside pages
-                and back cover, then click Generate Flipbook.
+                Upload your finished Canva PDF
+                and click Generate Flipbook.
               </p>
 
             </div>
@@ -544,11 +506,12 @@
         </div>
 
 
-        <!-- CONTROLS -->
+        <!-- =====================================
+             CONTROLS
+             ===================================== -->
 
-        <div
-          class="client-flipbook-controls"
-        >
+        <div class="client-flipbook-controls">
+
 
           <button
             id="clientPrevBtn"
@@ -559,9 +522,7 @@
           </button>
 
 
-          <div
-            class="client-zoom-controls"
-          >
+          <div class="client-zoom-controls">
 
             <button
               id="clientZoomOutBtn"
@@ -630,11 +591,11 @@
         </div>
 
 
-        <!-- FUTURE SHARE FEATURE -->
+        <!-- =====================================
+             FUTURE CLIENT SHARING
+             ===================================== -->
 
-        <div
-          class="future-share-box"
-        >
+        <div class="future-share-box">
 
           <div>
 
@@ -647,8 +608,8 @@
             <p
               class="text-[11px] text-slate-500 mt-1"
             >
-              Public buyer links will be added after
-              the upload preview is fully working.
+              After PDF preview is stable, we'll add
+              saved projects and buyer preview links.
             </p>
 
           </div>
@@ -685,33 +646,41 @@
       class="w-14 h-14 mx-auto rounded-full"
     >
 
-    <p
-      class="font-black text-sm mt-3"
-    >
+    <p class="font-black text-sm mt-3">
       R&Y Printing Lab
     </p>
 
-    <p
-      class="text-xs text-slate-400 mt-1"
-    >
+    <p class="text-xs text-slate-400 mt-1">
       Finished Photobook Client Preview
     </p>
 
   </footer>
 
 
-  <!-- PAGE FLIP LIBRARY -->
+  <!-- =========================================
+       PDF.JS
+       Reads and renders uploaded PDF pages
+       ========================================= -->
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+  ></script>
+
+
+  <!-- =========================================
+       PAGE FLIP
+       ========================================= -->
 
   <script
     src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"
   ></script>
 
 
-  <!-- CLIENT FLIPBOOK SCRIPT -->
+  <!-- =========================================
+       CLIENT FLIPBOOK
+       ========================================= -->
 
-  <script
-    src="client-flipbook.js"
-  ></script>
+  <script src="client-flipbook.js"></script>
 
 
 </body>

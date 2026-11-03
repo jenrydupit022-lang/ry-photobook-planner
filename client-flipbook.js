@@ -6,12 +6,10 @@
   // =====================================================
 
   let pageFlip = null;
+  let pdfFile = null;
+  let pdfDocument = null;
 
-  let frontCoverFile = null;
-  let insidePageFiles = [];
-  let backCoverFile = null;
-
-  let activeObjectUrls = [];
+  let renderedPageUrls = [];
 
   let zoomLevel = 1;
 
@@ -19,35 +17,30 @@
   const MAX_ZOOM = 2;
   const ZOOM_STEP = 0.1;
 
-
-  // =====================================================
-  // HELPERS
-  // =====================================================
-
   const $ = (id) => document.getElementById(id);
 
+
+  // =====================================================
+  // PDF.JS SETUP
+  // =====================================================
+
+  if (window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+
+
+  // =====================================================
+  // STATUS
+  // =====================================================
 
   function showStatus(message, type = "info") {
     const status = $("uploadStatus");
 
-    if (!status) {
-      return;
-    }
+    if (!status) return;
 
-    status.classList.remove(
-      "hidden",
-      "bg-red-50",
-      "text-red-700",
-      "border-red-200",
-      "bg-emerald-50",
-      "text-emerald-700",
-      "border-emerald-200",
-      "bg-blue-50",
-      "text-blue-700",
-      "border-blue-200"
-    );
-
-    status.classList.add("border");
+    status.className =
+      "mt-4 rounded-xl px-4 py-3 text-xs font-bold border";
 
     if (type === "error") {
       status.classList.add(
@@ -76,38 +69,29 @@
   function hideStatus() {
     const status = $("uploadStatus");
 
-    if (status) {
-      status.classList.add("hidden");
+    if (!status) return;
+
+    status.classList.add("hidden");
+  }
+
+
+  // =====================================================
+  // FILE SIZE
+  // =====================================================
+
+  function formatFileSize(bytes) {
+    if (!bytes) return "0 KB";
+
+    const mb =
+      bytes / (1024 * 1024);
+
+    if (mb >= 1) {
+      return `${mb.toFixed(2)} MB`;
     }
-  }
 
-
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-
-  // =====================================================
-  // NATURAL FILE SORT
-  // 1, 2, 3, 10 instead of 1, 10, 2, 3
-  // =====================================================
-
-  function naturalSortFiles(files) {
-    return [...files].sort((a, b) =>
-      a.name.localeCompare(
-        b.name,
-        undefined,
-        {
-          numeric: true,
-          sensitivity: "base"
-        }
-      )
-    );
+    return `${Math.round(
+      bytes / 1024
+    )} KB`;
   }
 
 
@@ -116,50 +100,46 @@
   // =====================================================
 
   function getBookSize() {
-    const select = $("bookSize");
-
-    const value = select
-      ? select.value
-      : "10x7";
+    const value =
+      $("bookSize")?.value || "10x7";
 
     const sizes = {
       "6x6": {
         width: 6,
-        height: 6,
-        orientation: "square"
+        height: 6
       },
 
       "8x7": {
         width: 8,
-        height: 7,
-        orientation: "landscape"
+        height: 7
       },
 
       "10x7": {
         width: 10,
-        height: 7,
-        orientation: "landscape"
+        height: 7
       },
 
       "7x10": {
         width: 7,
-        height: 10,
-        orientation: "portrait"
+        height: 10
       }
     };
 
-    return sizes[value] || sizes["10x7"];
+    return sizes[value] ||
+      sizes["10x7"];
   }
 
 
   function getPageDimensions() {
-    const size = getBookSize();
+    const size =
+      getBookSize();
 
     const maxSide = 430;
 
     if (size.width >= size.height) {
       return {
         width: maxSide,
+
         height: Math.round(
           maxSide *
           (size.height / size.width)
@@ -172,144 +152,21 @@
         maxSide *
         (size.width / size.height)
       ),
+
       height: maxSide
     };
   }
 
 
   // =====================================================
-  // FILE INFO
+  // DESTROY PAGEFLIP
   // =====================================================
-
-  function updateFrontCoverInfo() {
-    const info = $("frontCoverInfo");
-
-    if (!info) {
-      return;
-    }
-
-    if (!frontCoverFile) {
-      info.classList.add("hidden");
-      info.innerHTML = "";
-      return;
-    }
-
-    info.classList.remove("hidden");
-
-    info.innerHTML =
-      `✓ ${escapeHtml(frontCoverFile.name)}`;
-  }
-
-
-  function updateInsidePagesInfo() {
-    const info = $("insidePagesInfo");
-
-    if (!info) {
-      return;
-    }
-
-    if (!insidePageFiles.length) {
-      info.classList.add("hidden");
-      info.innerHTML = "";
-      return;
-    }
-
-    const previewNames =
-      insidePageFiles
-        .slice(0, 4)
-        .map((file) =>
-          escapeHtml(file.name)
-        )
-        .join("<br>");
-
-    const extra =
-      insidePageFiles.length > 4
-        ? `<br>+ ${insidePageFiles.length - 4} more`
-        : "";
-
-    info.classList.remove("hidden");
-
-    info.innerHTML = `
-      ✓ ${insidePageFiles.length}
-      inside page${insidePageFiles.length === 1 ? "" : "s"}
-      selected
-      <div style="margin-top:5px; opacity:.75;">
-        ${previewNames}
-        ${extra}
-      </div>
-    `;
-  }
-
-
-  function updateBackCoverInfo() {
-    const info = $("backCoverInfo");
-
-    if (!info) {
-      return;
-    }
-
-    if (!backCoverFile) {
-      info.classList.add("hidden");
-      info.innerHTML = "";
-      return;
-    }
-
-    info.classList.remove("hidden");
-
-    info.innerHTML =
-      `✓ ${escapeHtml(backCoverFile.name)}`;
-  }
-
-
-  // =====================================================
-  // OBJECT URL MANAGEMENT
-  // =====================================================
-
-  function revokeObjectUrls() {
-    activeObjectUrls.forEach((url) => {
-      try {
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.warn(
-          "Could not revoke image URL:",
-          error
-        );
-      }
-    });
-
-    activeObjectUrls = [];
-  }
-
-
-  function createImageUrl(file) {
-    const url =
-      URL.createObjectURL(file);
-
-    activeObjectUrls.push(url);
-
-    return url;
-  }
-
-
-  // =====================================================
-  // PAGEFLIP LIFECYCLE
-  // IMPORTANT:
-  // Same fresh-host strategy as our working calculator.
-  // =====================================================
-
-  function getStage() {
-    return document.querySelector(
-      ".client-flipbook-stage"
-    );
-  }
-
 
   function destroyFlipbook() {
-    if (!pageFlip) {
-      return;
-    }
+    if (!pageFlip) return;
 
-    const oldPageFlip = pageFlip;
+    const oldPageFlip =
+      pageFlip;
 
     pageFlip = null;
 
@@ -324,12 +181,25 @@
   }
 
 
+  // =====================================================
+  // FRESH HOST
+  // Same lifecycle strategy as our working calculator.
+  // =====================================================
+
+  function getStage() {
+    return document.querySelector(
+      ".client-flipbook-stage"
+    );
+  }
+
+
   function createFreshHost() {
-    const stage = getStage();
+    const stage =
+      getStage();
 
     if (!stage) {
       console.warn(
-        "Client flipbook stage was not found."
+        "Client flipbook stage not found."
       );
 
       return null;
@@ -340,7 +210,9 @@
     const host =
       document.createElement("div");
 
-    host.id = "clientFlipbook";
+    host.id =
+      "clientFlipbook";
+
     host.className =
       "client-flipbook-book";
 
@@ -353,121 +225,417 @@
 
 
   // =====================================================
-  // PAGE CREATION
+  // BADGE
+  // =====================================================
+
+  function setPreviewBadge(
+    text,
+    ready = false
+  ) {
+    const badge =
+      $("previewBadge");
+
+    if (!badge) return;
+
+    badge.textContent = text;
+
+    if (ready) {
+      badge.classList.add(
+        "is-ready"
+      );
+    } else {
+      badge.classList.remove(
+        "is-ready"
+      );
+    }
+  }
+
+
+  // =====================================================
+  // PDF INFO
+  // =====================================================
+
+  function updatePdfInfo() {
+    const info =
+      $("pdfFileInfo");
+
+    if (!info) return;
+
+    if (!pdfFile) {
+      info.classList.add(
+        "hidden"
+      );
+
+      info.innerHTML = "";
+
+      return;
+    }
+
+    info.classList.remove(
+      "hidden"
+    );
+
+    info.innerHTML = `
+      <strong>✓ ${escapeHtml(
+        pdfFile.name
+      )}</strong>
+
+      <div style="
+        margin-top:4px;
+        opacity:.75;
+      ">
+        ${formatFileSize(
+          pdfFile.size
+        )}
+      </div>
+    `;
+  }
+
+
+  function updatePdfStats(
+    totalPages = 0
+  ) {
+    const stats =
+      $("pdfStats");
+
+    const total =
+      $("pdfTotalPages");
+
+    const inside =
+      $("pdfInsidePages");
+
+    if (
+      !stats ||
+      !total ||
+      !inside
+    ) {
+      return;
+    }
+
+    if (!totalPages) {
+      stats.classList.add(
+        "hidden"
+      );
+
+      total.textContent = "0";
+      inside.textContent = "0";
+
+      return;
+    }
+
+    stats.classList.remove(
+      "hidden"
+    );
+
+    total.textContent =
+      String(totalPages);
+
+    inside.textContent =
+      String(
+        Math.max(
+          0,
+          totalPages - 2
+        )
+      );
+  }
+
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
+  // =====================================================
+  // READ PDF
+  // =====================================================
+
+  async function loadPdf(file) {
+    if (!window.pdfjsLib) {
+      throw new Error(
+        "PDF.js library was not loaded."
+      );
+    }
+
+    const arrayBuffer =
+      await file.arrayBuffer();
+
+    const loadingTask =
+      window.pdfjsLib.getDocument({
+        data: arrayBuffer
+      });
+
+    return await loadingTask.promise;
+  }
+
+
+  // =====================================================
+  // RENDER ONE PDF PAGE TO IMAGE
+  // =====================================================
+
+  async function renderPdfPageToImage(
+    pdf,
+    pageNumber
+  ) {
+    const page =
+      await pdf.getPage(
+        pageNumber
+      );
+
+    /*
+     * Render at higher resolution so Canva
+     * designs remain sharp while zooming.
+     */
+
+    const baseViewport =
+      page.getViewport({
+        scale: 1
+      });
+
+    const targetWidth = 1600;
+
+    const scale =
+      targetWidth /
+      baseViewport.width;
+
+    const viewport =
+      page.getViewport({
+        scale
+      });
+
+    const canvas =
+      document.createElement(
+        "canvas"
+      );
+
+    const context =
+      canvas.getContext(
+        "2d",
+        {
+          alpha: false
+        }
+      );
+
+    canvas.width =
+      Math.ceil(
+        viewport.width
+      );
+
+    canvas.height =
+      Math.ceil(
+        viewport.height
+      );
+
+    context.fillStyle =
+      "#ffffff";
+
+    context.fillRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    await page.render({
+      canvasContext: context,
+      viewport
+    }).promise;
+
+    /*
+     * WebP keeps preview quality high
+     * without making browser memory
+     * unnecessarily huge.
+     */
+
+    return canvas.toDataURL(
+      "image/webp",
+      0.92
+    );
+  }
+
+
+  // =====================================================
+  // RENDER ALL PDF PAGES
+  // =====================================================
+
+  async function renderAllPdfPages(
+    pdf,
+    onProgress
+  ) {
+    const urls = [];
+
+    for (
+      let pageNumber = 1;
+      pageNumber <= pdf.numPages;
+      pageNumber++
+    ) {
+      if (onProgress) {
+        onProgress(
+          pageNumber,
+          pdf.numPages
+        );
+      }
+
+      const imageUrl =
+        await renderPdfPageToImage(
+          pdf,
+          pageNumber
+        );
+
+      urls.push(imageUrl);
+
+      /*
+       * Give browser a tiny break between
+       * large Canva pages.
+       */
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            0
+          )
+      );
+    }
+
+    return urls;
+  }
+
+
+  // =====================================================
+  // CREATE PAGE
   // =====================================================
 
   function createPageElement(
     imageUrl,
-    options = {}
+    pageNumber,
+    totalPages
   ) {
-    const {
-      cover = false,
-      label = ""
-    } = options;
-
     const page =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
+    const isFrontCover =
+      pageNumber === 1;
+
+    const isBackCover =
+      pageNumber ===
+      totalPages;
 
     page.className =
-      cover
+      (
+        isFrontCover ||
+        isBackCover
+      )
         ? "client-book-page client-cover-page"
         : "client-book-page";
 
-    if (cover) {
+    if (
+      isFrontCover ||
+      isBackCover
+    ) {
       page.setAttribute(
         "data-density",
         "hard"
       );
     }
 
-    if (label) {
+    if (isFrontCover) {
       page.setAttribute(
         "aria-label",
-        label
+        "Front Cover"
+      );
+    } else if (isBackCover) {
+      page.setAttribute(
+        "aria-label",
+        "Back Cover"
+      );
+    } else {
+      page.setAttribute(
+        "aria-label",
+        `Inside Page ${
+          pageNumber - 1
+        }`
       );
     }
 
     const image =
-      document.createElement("img");
+      document.createElement(
+        "img"
+      );
 
     image.className =
       "client-page-image";
 
-    image.src = imageUrl;
-    image.alt = label || "Photobook page";
-    image.draggable = false;
+    image.src =
+      imageUrl;
 
-    page.appendChild(image);
+    image.draggable =
+      false;
+
+    if (isFrontCover) {
+      image.alt =
+        "Front Cover";
+    } else if (isBackCover) {
+      image.alt =
+        "Back Cover";
+    } else {
+      image.alt =
+        `Photobook Page ${
+          pageNumber - 1
+        }`;
+    }
+
+    page.appendChild(
+      image
+    );
 
     return page;
   }
 
 
-  function buildPages(host) {
-    revokeObjectUrls();
+  // =====================================================
+  // BUILD PAGES
+  // =====================================================
 
-    // FRONT COVER
-    const frontUrl =
-      createImageUrl(frontCoverFile);
+  function buildFlipbookPages(
+    host,
+    pageUrls
+  ) {
+    const totalPages =
+      pageUrls.length;
 
-    host.appendChild(
-      createPageElement(
-        frontUrl,
-        {
-          cover: true,
-          label: "Front Cover"
-        }
-      )
-    );
-
-
-    // INSIDE PAGES
-    insidePageFiles.forEach(
-      (file, index) => {
-
-        const imageUrl =
-          createImageUrl(file);
+    pageUrls.forEach(
+      (imageUrl, index) => {
 
         host.appendChild(
           createPageElement(
             imageUrl,
-            {
-              cover: false,
-              label:
-                `Page ${index + 1}`
-            }
+            index + 1,
+            totalPages
           )
         );
 
       }
     );
-
-
-    // BACK COVER
-    const backUrl =
-      createImageUrl(backCoverFile);
-
-    host.appendChild(
-      createPageElement(
-        backUrl,
-        {
-          cover: true,
-          label: "Back Cover"
-        }
-      )
-    );
   }
 
 
   // =====================================================
-  // IMAGE PRELOAD
-  // Prevents PageFlip from sizing before images are ready.
+  // WAIT FOR IMAGES
   // =====================================================
 
   function waitForImages(host) {
     const images =
       Array.from(
-        host.querySelectorAll("img")
+        host.querySelectorAll(
+          "img"
+        )
       );
 
     if (!images.length) {
@@ -475,36 +643,43 @@
     }
 
     return Promise.all(
-      images.map((image) => {
+      images.map(
+        (image) => {
 
-        if (
-          image.complete &&
-          image.naturalWidth > 0
-        ) {
-          return Promise.resolve();
+          if (
+            image.complete &&
+            image.naturalWidth > 0
+          ) {
+            return Promise.resolve();
+          }
+
+          return new Promise(
+            (resolve) => {
+
+              const finish =
+                () => resolve();
+
+              image.addEventListener(
+                "load",
+                finish,
+                {
+                  once: true
+                }
+              );
+
+              image.addEventListener(
+                "error",
+                finish,
+                {
+                  once: true
+                }
+              );
+
+            }
+          );
+
         }
-
-        return new Promise((resolve) => {
-
-          const done = () => {
-            resolve();
-          };
-
-          image.addEventListener(
-            "load",
-            done,
-            { once: true }
-          );
-
-          image.addEventListener(
-            "error",
-            done,
-            { once: true }
-          );
-
-        });
-
-      })
+      )
     );
   }
 
@@ -517,16 +692,21 @@
     const counter =
       $("clientPageCounter");
 
-    if (!counter || !pageFlip) {
+    if (
+      !counter ||
+      !pageFlip
+    ) {
       return;
     }
 
     try {
       const current =
-        pageFlip.getCurrentPageIndex();
+        pageFlip
+          .getCurrentPageIndex();
 
       const total =
-        pageFlip.getPageCount();
+        pageFlip
+          .getPageCount();
 
       if (!total) {
         counter.textContent =
@@ -542,7 +722,10 @@
         return;
       }
 
-      if (current >= total - 1) {
+      if (
+        current >=
+        total - 1
+      ) {
         counter.textContent =
           "Back Cover";
 
@@ -550,80 +733,16 @@
       }
 
       counter.textContent =
-        `Page ${current} of ${total - 2}`;
+        `Page ${current} of ${
+          total - 2
+        }`;
 
     } catch (error) {
       console.warn(
-        "Client counter warning:",
+        "Counter warning:",
         error
       );
     }
-  }
-
-
-  // =====================================================
-  // PREVIEW BADGE
-  // =====================================================
-
-  function setPreviewReady(ready) {
-    const badge =
-      $("previewBadge");
-
-    if (!badge) {
-      return;
-    }
-
-    if (ready) {
-      badge.textContent =
-        "DESIGN READY";
-
-      badge.classList.add(
-        "is-ready"
-      );
-    } else {
-      badge.textContent =
-        "NO DESIGN";
-
-      badge.classList.remove(
-        "is-ready"
-      );
-    }
-  }
-
-
-  // =====================================================
-  // VALIDATION
-  // =====================================================
-
-  function validateUploads() {
-    if (!frontCoverFile) {
-      showStatus(
-        "Please upload the front cover first.",
-        "error"
-      );
-
-      return false;
-    }
-
-    if (!insidePageFiles.length) {
-      showStatus(
-        "Please upload at least one inside page.",
-        "error"
-      );
-
-      return false;
-    }
-
-    if (!backCoverFile) {
-      showStatus(
-        "Please upload the back cover.",
-        "error"
-      );
-
-      return false;
-    }
-
-    return true;
   }
 
 
@@ -632,75 +751,193 @@
   // =====================================================
 
   async function generateFlipbook() {
-    if (!validateUploads()) {
+    if (!pdfFile) {
+      showStatus(
+        "Please upload a photobook PDF first.",
+        "error"
+      );
+
       return;
     }
 
-    hideStatus();
+    if (
+      !window.pdfjsLib
+    ) {
+      showStatus(
+        "PDF reader could not be loaded.",
+        "error"
+      );
+
+      return;
+    }
 
     if (
       !window.St ||
       !window.St.PageFlip
     ) {
       showStatus(
-        "The flipbook animation library could not be loaded.",
+        "Flipbook animation library could not be loaded.",
         "error"
       );
 
       return;
     }
 
-    const generateButton =
+    const button =
       $("generateFlipbookBtn");
 
-    if (generateButton) {
-      generateButton.disabled = true;
-      generateButton.textContent =
-        "Generating...";
+    if (button) {
+      button.disabled = true;
+
+      button.textContent =
+        "Reading PDF...";
     }
 
+    hideStatus();
+
     destroyFlipbook();
+
+    setPreviewBadge(
+      "LOADING PDF",
+      false
+    );
 
     const host =
       createFreshHost();
 
     if (!host) {
       showStatus(
-        "Flipbook preview area could not be found.",
+        "Preview area could not be found.",
         "error"
       );
 
-      if (generateButton) {
-        generateButton.disabled = false;
-        generateButton.textContent =
+      if (button) {
+        button.disabled = false;
+        button.textContent =
           "Generate Flipbook";
       }
 
       return;
     }
 
-    try {
-      buildPages(host);
+    host.innerHTML = `
+      <div class="client-flipbook-empty">
 
-      await waitForImages(host);
+        <div class="empty-book-icon">
+          📄
+        </div>
+
+        <h4>
+          Reading photobook PDF...
+        </h4>
+
+        <p id="pdfRenderProgress">
+          Preparing pages...
+        </p>
+
+      </div>
+    `;
+
+    try {
+      // LOAD PDF
+
+      pdfDocument =
+        await loadPdf(
+          pdfFile
+        );
+
+      const totalPages =
+        pdfDocument.numPages;
+
+      if (totalPages < 3) {
+        throw new Error(
+          "Photobook PDF needs at least 3 pages: front cover, inside page and back cover."
+        );
+      }
+
+      updatePdfStats(
+        totalPages
+      );
+
+
+      // RENDER PDF PAGES
+
+      if (button) {
+        button.textContent =
+          `Rendering 0 / ${totalPages}`;
+      }
+
+      renderedPageUrls =
+        await renderAllPdfPages(
+          pdfDocument,
+          (
+            current,
+            total
+          ) => {
+
+            const progress =
+              $("pdfRenderProgress");
+
+            if (progress) {
+              progress.textContent =
+                `Rendering page ${current} of ${total}...`;
+            }
+
+            if (button) {
+              button.textContent =
+                `Rendering ${current} / ${total}`;
+            }
+
+          }
+        );
+
+
+      // DESTROY ANY OLD PAGEFLIP AGAIN
+      // then rebuild a totally fresh host.
+
+      destroyFlipbook();
+
+      const freshHost =
+        createFreshHost();
+
+      if (!freshHost) {
+        throw new Error(
+          "Could not rebuild preview area."
+        );
+      }
+
+
+      buildFlipbookPages(
+        freshHost,
+        renderedPageUrls
+      );
+
+
+      await waitForImages(
+        freshHost
+      );
+
 
       const pageElements =
-        host.querySelectorAll(
+        freshHost.querySelectorAll(
           ".client-book-page"
         );
 
       if (!pageElements.length) {
         throw new Error(
-          "No photobook pages were generated."
+          "No PDF pages were generated."
         );
       }
+
+
+      // CREATE PAGEFLIP
 
       const dimensions =
         getPageDimensions();
 
       pageFlip =
         new window.St.PageFlip(
-          host,
+          freshHost,
           {
             width:
               dimensions.width,
@@ -761,6 +998,7 @@
           }
         );
 
+
       pageFlip.loadFromHTML(
         pageElements
       );
@@ -808,42 +1046,50 @@
       );
 
 
-      setPreviewReady(true);
+      setPreviewBadge(
+        "PDF READY",
+        true
+      );
+
 
       showStatus(
-        `${insidePageFiles.length + 2} photobook pages loaded successfully.`,
+        `${totalPages} PDF pages loaded successfully. Front cover and back cover included.`,
         "success"
       );
 
     } catch (error) {
       console.error(
-        "Client flipbook error:",
+        "PDF flipbook error:",
         error
       );
 
-      pageFlip = null;
+      destroyFlipbook();
 
-      setPreviewReady(false);
+      setPreviewBadge(
+        "PDF ERROR",
+        false
+      );
 
-      const freshHost =
+      const errorHost =
         createFreshHost();
 
-      if (freshHost) {
-        freshHost.innerHTML = `
+      if (errorHost) {
+        errorHost.innerHTML = `
           <div class="client-flipbook-empty">
 
             <div class="empty-book-icon">
-              ⚠
+              ⚠️
             </div>
 
             <h4>
-              Preview error
+              Could not load PDF
             </h4>
 
             <p>
-              The photobook could not be generated.
-              Please check your uploaded images
-              and try again.
+              ${escapeHtml(
+                error.message ||
+                "Please check the PDF and try again."
+              )}
             </p>
 
           </div>
@@ -851,14 +1097,16 @@
       }
 
       showStatus(
-        "Unable to generate the photobook preview.",
+        error.message ||
+        "Unable to generate PDF flipbook.",
         "error"
       );
 
     } finally {
-      if (generateButton) {
-        generateButton.disabled = false;
-        generateButton.textContent =
+      if (button) {
+        button.disabled = false;
+
+        button.textContent =
           "Generate Flipbook";
       }
     }
@@ -866,13 +1114,11 @@
 
 
   // =====================================================
-  // PAGE CONTROLS
+  // NEXT / PREVIOUS
   // =====================================================
 
   function nextPage() {
-    if (!pageFlip) {
-      return;
-    }
+    if (!pageFlip) return;
 
     try {
       pageFlip.flipNext();
@@ -886,9 +1132,7 @@
 
 
   function previousPage() {
-    if (!pageFlip) {
-      return;
-    }
+    if (!pageFlip) return;
 
     try {
       pageFlip.flipPrev();
@@ -920,9 +1164,7 @@
     const label =
       $("clientZoomValue");
 
-    if (!label) {
-      return;
-    }
+    if (!label) return;
 
     label.textContent =
       `${Math.round(
@@ -1003,55 +1245,43 @@
   }
 
 
-  function enterFullscreen() {
+  function toggleFullscreen() {
     const section =
       getFullscreenSection();
 
-    if (!section) {
-      return;
-    }
+    if (!section) return;
 
-    if (section.requestFullscreen) {
-      section
-        .requestFullscreen()
-        .catch((error) => {
-          console.warn(
-            "Fullscreen error:",
-            error
-          );
-        });
+    if (isFullscreen()) {
+      if (
+        document.exitFullscreen
+      ) {
+        document.exitFullscreen();
+      } else if (
+        document.webkitExitFullscreen
+      ) {
+        document.webkitExitFullscreen();
+      }
 
       return;
     }
 
     if (
+      section.requestFullscreen
+    ) {
+      section
+        .requestFullscreen()
+        .catch(
+          (error) => {
+            console.warn(
+              "Fullscreen error:",
+              error
+            );
+          }
+        );
+    } else if (
       section.webkitRequestFullscreen
     ) {
       section.webkitRequestFullscreen();
-    }
-  }
-
-
-  function exitFullscreen() {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-
-      return;
-    }
-
-    if (
-      document.webkitExitFullscreen
-    ) {
-      document.webkitExitFullscreen();
-    }
-  }
-
-
-  function toggleFullscreen() {
-    if (isFullscreen()) {
-      exitFullscreen();
-    } else {
-      enterFullscreen();
     }
   }
 
@@ -1060,9 +1290,7 @@
     const button =
       $("clientFullscreenBtn");
 
-    if (!button) {
-      return;
-    }
+    if (!button) return;
 
     button.textContent =
       isFullscreen()
@@ -1075,43 +1303,30 @@
   // CLEAR
   // =====================================================
 
-  function clearUploads() {
+  function clearPdf() {
     destroyFlipbook();
 
-    revokeObjectUrls();
+    pdfFile = null;
+    pdfDocument = null;
+    renderedPageUrls = [];
 
-    frontCoverFile = null;
-    insidePageFiles = [];
-    backCoverFile = null;
+    const input =
+      $("photobookPdfInput");
 
-    const frontInput =
-      $("frontCoverInput");
-
-    const insideInput =
-      $("insidePagesInput");
-
-    const backInput =
-      $("backCoverInput");
-
-    if (frontInput) {
-      frontInput.value = "";
+    if (input) {
+      input.value = "";
     }
 
-    if (insideInput) {
-      insideInput.value = "";
-    }
+    updatePdfInfo();
+    updatePdfStats(0);
 
-    if (backInput) {
-      backInput.value = "";
-    }
-
-    updateFrontCoverInfo();
-    updateInsidePagesInfo();
-    updateBackCoverInfo();
-
-    setPreviewReady(false);
+    setPreviewBadge(
+      "NO PDF",
+      false
+    );
 
     zoomLevel = 1;
+
     updateZoomLabel();
 
     const counter =
@@ -1138,9 +1353,8 @@
           </h4>
 
           <p>
-            Upload your front cover,
-            inside pages and back cover,
-            then click Generate Flipbook.
+            Upload your finished Canva PDF
+            and click Generate Flipbook.
           </p>
 
         </div>
@@ -1152,192 +1366,280 @@
 
 
   // =====================================================
-  // FILE INPUT EVENTS
+  // PDF INPUT
   // =====================================================
 
-  const frontCoverInput =
-    $("frontCoverInput");
+  const pdfInput =
+    $("photobookPdfInput");
 
-  if (frontCoverInput) {
-    frontCoverInput.addEventListener(
+  if (pdfInput) {
+    pdfInput.addEventListener(
       "change",
       function () {
 
-        frontCoverFile =
+        const file =
           this.files &&
           this.files.length
             ? this.files[0]
             : null;
 
-        updateFrontCoverInfo();
+        if (!file) {
+          pdfFile = null;
 
-        setPreviewReady(false);
-      }
-    );
-  }
+          updatePdfInfo();
 
+          return;
+        }
 
-  const insidePagesInput =
-    $("insidePagesInput");
+        const isPdf =
+          file.type ===
+            "application/pdf" ||
+          file.name
+            .toLowerCase()
+            .endsWith(".pdf");
 
-  if (insidePagesInput) {
-    insidePagesInput.addEventListener(
-      "change",
-      function () {
+        if (!isPdf) {
+          this.value = "";
 
-        insidePageFiles =
-          this.files
-            ? naturalSortFiles(
-                Array.from(this.files)
-              )
-            : [];
+          pdfFile = null;
 
-        updateInsidePagesInfo();
+          updatePdfInfo();
 
-        setPreviewReady(false);
-      }
-    );
-  }
+          showStatus(
+            "Please select a PDF file.",
+            "error"
+          );
 
+          return;
+        }
 
-  const backCoverInput =
-    $("backCoverInput");
+        destroyFlipbook();
 
-  if (backCoverInput) {
-    backCoverInput.addEventListener(
-      "change",
-      function () {
+        pdfFile = file;
+        pdfDocument = null;
+        renderedPageUrls = [];
 
-        backCoverFile =
-          this.files &&
-          this.files.length
-            ? this.files[0]
-            : null;
+        updatePdfInfo();
 
-        updateBackCoverInfo();
+        updatePdfStats(0);
 
-        setPreviewReady(false);
+        setPreviewBadge(
+          "PDF SELECTED",
+          false
+        );
+
+        const counter =
+          $("clientPageCounter");
+
+        if (counter) {
+          counter.textContent =
+            "Ready to generate";
+        }
+
+        showStatus(
+          "PDF selected. Click Generate Flipbook.",
+          "info"
+        );
+
       }
     );
   }
 
 
   // =====================================================
-  // BUTTON EVENTS
+  // BUTTONS
   // =====================================================
 
-  const generateButton =
-    $("generateFlipbookBtn");
-
-  if (generateButton) {
-    generateButton.addEventListener(
+  $("generateFlipbookBtn")
+    ?.addEventListener(
       "click",
       generateFlipbook
     );
-  }
 
 
-  const clearButton =
-    $("clearUploadBtn");
-
-  if (clearButton) {
-    clearButton.addEventListener(
+  $("clearUploadBtn")
+    ?.addEventListener(
       "click",
-      clearUploads
+      clearPdf
     );
-  }
 
 
-  const previousButton =
-    $("clientPrevBtn");
-
-  if (previousButton) {
-    previousButton.addEventListener(
+  $("clientPrevBtn")
+    ?.addEventListener(
       "click",
       previousPage
     );
-  }
 
 
-  const nextButton =
-    $("clientNextBtn");
-
-  if (nextButton) {
-    nextButton.addEventListener(
+  $("clientNextBtn")
+    ?.addEventListener(
       "click",
       nextPage
     );
-  }
 
 
-  const zoomOutButton =
-    $("clientZoomOutBtn");
-
-  if (zoomOutButton) {
-    zoomOutButton.addEventListener(
+  $("clientZoomOutBtn")
+    ?.addEventListener(
       "click",
       zoomOut
     );
-  }
 
 
-  const zoomInButton =
-    $("clientZoomInBtn");
-
-  if (zoomInButton) {
-    zoomInButton.addEventListener(
+  $("clientZoomInBtn")
+    ?.addEventListener(
       "click",
       zoomIn
     );
-  }
 
 
-  const resetZoomButton =
-    $("clientResetZoomBtn");
-
-  if (resetZoomButton) {
-    resetZoomButton.addEventListener(
+  $("clientResetZoomBtn")
+    ?.addEventListener(
       "click",
       resetZoom
     );
-  }
 
 
-  const fullscreenButton =
-    $("clientFullscreenBtn");
-
-  if (fullscreenButton) {
-    fullscreenButton.addEventListener(
+  $("clientFullscreenBtn")
+    ?.addEventListener(
       "click",
       toggleFullscreen
     );
-  }
 
 
   // =====================================================
   // BOOK SIZE CHANGE
-  // Rebuild preview if a design is already loaded.
+  // Rebuild PageFlip without rerendering PDF canvases.
   // =====================================================
 
-  const bookSizeSelect =
-    $("bookSize");
-
-  if (bookSizeSelect) {
-    bookSizeSelect.addEventListener(
+  $("bookSize")
+    ?.addEventListener(
       "change",
-      function () {
+      async function () {
 
         if (
-          frontCoverFile &&
-          insidePageFiles.length &&
-          backCoverFile
+          !renderedPageUrls.length
         ) {
-          generateFlipbook();
+          return;
+        }
+
+        destroyFlipbook();
+
+        const host =
+          createFreshHost();
+
+        if (!host) return;
+
+        buildFlipbookPages(
+          host,
+          renderedPageUrls
+        );
+
+        await waitForImages(
+          host
+        );
+
+        const pageElements =
+          host.querySelectorAll(
+            ".client-book-page"
+          );
+
+        const dimensions =
+          getPageDimensions();
+
+        try {
+          pageFlip =
+            new window.St.PageFlip(
+              host,
+              {
+                width:
+                  dimensions.width,
+
+                height:
+                  dimensions.height,
+
+                size:
+                  "stretch",
+
+                minWidth:
+                  220,
+
+                maxWidth:
+                  650,
+
+                minHeight:
+                  220,
+
+                maxHeight:
+                  650,
+
+                maxShadowOpacity:
+                  0.5,
+
+                showCover:
+                  true,
+
+                mobileScrollSupport:
+                  false,
+
+                usePortrait:
+                  true,
+
+                autoSize:
+                  true,
+
+                flippingTime:
+                  850,
+
+                swipeDistance:
+                  25,
+
+                useMouseEvents:
+                  true,
+
+                startPage:
+                  0,
+
+                drawShadow:
+                  true,
+
+                showPageCorners:
+                  true,
+
+                disableFlipByClick:
+                  false
+              }
+            );
+
+          pageFlip.loadFromHTML(
+            pageElements
+          );
+
+          pageFlip.on(
+            "flip",
+            updateCounter
+          );
+
+          pageFlip.on(
+            "init",
+            updateCounter
+          );
+
+          requestAnimationFrame(
+            function () {
+              updateCounter();
+              applyZoom();
+            }
+          );
+
+        } catch (error) {
+          console.error(
+            "Resize rebuild error:",
+            error
+          );
         }
 
       }
     );
-  }
 
 
   // =====================================================
@@ -1347,15 +1649,11 @@
   document.addEventListener(
     "fullscreenchange",
     function () {
-
       updateFullscreenButton();
 
       requestAnimationFrame(
-        function () {
-          applyZoom();
-        }
+        applyZoom
       );
-
     }
   );
 
@@ -1363,21 +1661,17 @@
   document.addEventListener(
     "webkitfullscreenchange",
     function () {
-
       updateFullscreenButton();
 
       requestAnimationFrame(
-        function () {
-          applyZoom();
-        }
+        applyZoom
       );
-
     }
   );
 
 
   // =====================================================
-  // FULLSCREEN MOUSE-WHEEL ZOOM
+  // MOUSE WHEEL ZOOM IN FULLSCREEN
   // =====================================================
 
   let lastWheelTime = 0;
@@ -1395,27 +1689,31 @@
 
       if (
         !section ||
-        !section.contains(event.target)
+        !section.contains(
+          event.target
+        )
       ) {
         return;
       }
+
+      event.preventDefault();
 
       const now =
         Date.now();
 
       if (
-        now - lastWheelTime <
+        now -
+        lastWheelTime <
         80
       ) {
-        event.preventDefault();
         return;
       }
 
       lastWheelTime = now;
 
-      event.preventDefault();
-
-      if (event.deltaY < 0) {
+      if (
+        event.deltaY < 0
+      ) {
         zoomIn();
       } else {
         zoomOut();
@@ -1429,19 +1727,7 @@
 
 
   // =====================================================
-  // CLEANUP
-  // =====================================================
-
-  window.addEventListener(
-    "beforeunload",
-    function () {
-      revokeObjectUrls();
-    }
-  );
-
-
-  // =====================================================
-  // INITIAL STATE
+  // INITIAL
   // =====================================================
 
   updateZoomLabel();
