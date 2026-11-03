@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Client Flipbook | R&Y Photobook Planner</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+    rel="stylesheet"
+    href="client-flipbook.css"
+  >
+
+  <style>
+    :root {
+      --mint: #63d9c9;
+      --green: #8bcb78;
+      --dark: #111827;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(99, 217, 201, 0.18),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at bottom right,
+          rgba(139, 203, 120, 0.15),
+          transparent 30%
+        ),
+        #f6faf8;
+
+      color: var(--dark);
+    }
+
+    .brand-gradient {
+      background: linear-gradient(
+        135deg,
+        var(--mint),
+        var(--green)
+      );
+    }
+
+    .brand-text {
+      background: linear-gradient(
+        90deg,
+        #23aa9b,
+        #63a953
+      );
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  </style>
+</head>
+
+
+<body class="min-h-screen">
+
+
+  <!-- =========================================
+       HEADER
+       ========================================= -->
+
+  <header
+    class="bg-white/90 backdrop-blur border-b border-slate-200"
+  >
+
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3"
+    >
+
+      <a
+        href="index.html"
+        class="flex items-center gap-3"
+      >
+
+        <img
+          src="ryn.png"
+          alt="R&Y Printing Lab"
+          class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover"
+        >
+
+        <div>
+
+          <h1
+            class="font-black text-base sm:text-xl"
+          >
+            R&Y Photobook Planner
+          </h1>
+
+          <p
+            class="text-[10px] sm:text-xs text-slate-500"
+          >
+            Smart Photo Planning by R&Y Printing Lab
+          </p>
+
+        </div>
+
+      </a>
+
+
+      <a
+        href="index.html"
+        class="ml-auto px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-black hover:bg-slate-800 transition"
+      >
+        ← Dashboard
+      </a>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================================
+       MAIN
+       ========================================= -->
+
+  <main
+    class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
+  >
+
+
+    <!-- INTRO -->
+
+    <section
+      class="max-w-3xl"
+    >
+
+      <div
+        class="brand-gradient inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+      >
+
+        <span
+          class="w-2 h-2 bg-slate-900 rounded-full"
+        ></span>
+
+        <span
+          class="text-[10px] sm:text-xs font-black tracking-wider"
+        >
+          CLIENT FLIPBOOK
+        </span>
+
+      </div>
+
+
+      <h2
+        class="text-3xl sm:text-5xl font-black tracking-tight mt-5 leading-tight"
+      >
+        Upload your finished
+
+        <span class="brand-text">
+          photobook design.
+        </span>
+      </h2>
+
+
+      <p
+        class="text-sm sm:text-base text-slate-500 mt-4 leading-relaxed max-w-2xl"
+      >
+        Upload your finished Canva photobook pages and preview
+        them as an animated digital photobook before sending
+        the design to your client.
+      </p>
+
+    </section>
+
+
+    <!-- =========================================
+         WORKSPACE
+         ========================================= -->
+
+    <section
+      class="grid xl:grid-cols-[380px_1fr] gap-6 mt-8"
+    >
+
+
+      <!-- =====================================
+           LEFT PANEL
+           ===================================== -->
+
+      <aside
+        class="bg-white border border-slate-200 rounded-3xl shadow-sm p-5 sm:p-6 h-fit"
+      >
+
+        <div>
+
+          <p
+            class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]"
+          >
+            Upload Design
+          </p>
+
+          <h3
+            class="text-xl font-black mt-1"
+          >
+            Photobook Pages
+          </h3>
+
+          <p
+            class="text-xs text-slate-500 mt-2 leading-relaxed"
+          >
+            Upload the actual finished layout exported from Canva.
+          </p>
+
+        </div>
+
+
+        <!-- BOOK SIZE -->
+
+        <div class="mt-6">
+
+          <label
+            for="bookSize"
+            class="block text-xs font-black text-slate-700 mb-2"
+          >
+            Photobook Size
+          </label>
+
+          <select
+            id="bookSize"
+            class="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm font-bold outline-none focus:border-teal-400 bg-white"
+          >
+
+            <option value="6x6">
+              6 × 6 Square
+            </option>
+
+            <option value="8x7">
+              8 × 7 Landscape
+            </option>
+
+            <option value="10x7" selected>
+              10 × 7 Landscape
+            </option>
+
+            <option value="7x10">
+              7 × 10 Portrait
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- FRONT COVER -->
+
+        <div class="mt-6">
+
+          <label
+            class="block text-xs font-black text-slate-700 mb-2"
+          >
+            Front Cover
+          </label>
+
+          <label
+            for="frontCoverInput"
+            class="upload-box"
+          >
+
+            <div class="upload-icon">
+              +
+            </div>
+
+            <div>
+
+              <p class="upload-title">
+                Upload Front Cover
+              </p>
+
+              <p class="upload-sub">
+                JPG or PNG
+              </p>
+
+            </div>
+
+          </label>
+
+          <input
+            id="frontCoverInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+          >
+
+          <div
+            id="frontCoverInfo"
+            class="file-info hidden"
+          ></div>
+
+        </div>
+
+
+        <!-- INSIDE PAGES -->
+
+        <div class="mt-5">
+
+          <label
+            class="block text-xs font-black text-slate-700 mb-2"
+          >
+            Inside Pages
+          </label>
+
+          <label
+            for="insidePagesInput"
+            class="upload-box"
+          >
+
+            <div class="upload-icon">
+              +
+            </div>
+
+            <div>
+
+              <p class="upload-title">
+                Upload Inside Pages
+              </p>
+
+              <p class="upload-sub">
+                Select multiple JPG / PNG files
+              </p>
+
+            </div>
+
+          </label>
+
+          <input
+            id="insidePagesInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            hidden
+          >
+
+          <div
+            id="insidePagesInfo"
+            class="file-info hidden"
+          ></div>
+
+        </div>
+
+
+        <!-- BACK COVER -->
+
+        <div class="mt-5">
+
+          <label
+            class="block text-xs font-black text-slate-700 mb-2"
+          >
+            Back Cover
+          </label>
+
+          <label
+            for="backCoverInput"
+            class="upload-box"
+          >
+
+            <div class="upload-icon">
+              +
+            </div>
+
+            <div>
+
+              <p class="upload-title">
+                Upload Back Cover
+              </p>
+
+              <p class="upload-sub">
+                JPG or PNG
+              </p>
+
+            </div>
+
+          </label>
+
+          <input
+            id="backCoverInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+          >
+
+          <div
+            id="backCoverInfo"
+            class="file-info hidden"
+          ></div>
+
+        </div>
+
+
+        <!-- ORDER INFO -->
+
+        <div
+          class="mt-5 bg-slate-50 border border-slate-200 rounded-2xl p-4"
+        >
+
+          <p
+            class="text-xs font-black text-slate-700"
+          >
+            Page Order
+          </p>
+
+          <p
+            class="text-[11px] text-slate-500 mt-1 leading-relaxed"
+          >
+            Inside pages will follow the filename order.
+            For best results, export them as
+            01, 02, 03, 04 and so on.
+          </p>
+
+        </div>
+
+
+        <!-- GENERATE -->
+
+        <button
+          id="generateFlipbookBtn"
+          type="button"
+          class="brand-gradient w-full mt-6 rounded-2xl py-3.5 px-4 text-sm font-black text-slate-900 shadow-sm hover:shadow-md transition"
+        >
+          Generate Flipbook
+        </button>
+
+
+        <!-- CLEAR -->
+
+        <button
+          id="clearUploadBtn"
+          type="button"
+          class="w-full mt-2 rounded-2xl py-3 px-4 text-xs font-black text-slate-600 border border-slate-200 hover:bg-slate-50 transition"
+        >
+          Clear Uploads
+        </button>
+
+
+        <!-- STATUS -->
+
+        <div
+          id="uploadStatus"
+          class="hidden mt-4 rounded-xl px-4 py-3 text-xs font-bold"
+        ></div>
+
+      </aside>
+
+
+      <!-- =====================================
+           FLIPBOOK SIDE
+           ===================================== -->
+
+      <section
+        id="clientFlipbookSection"
+        class="client-preview-card"
+      >
+
+
+        <!-- PREVIEW HEADER -->
+
+        <div
+          class="client-preview-head"
+        >
+
+          <div>
+
+            <p
+              class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]"
+            >
+              Finished Design Preview
+            </p>
+
+            <h3
+              class="text-xl sm:text-2xl font-black mt-1"
+            >
+              Client Flipbook
+            </h3>
+
+            <p
+              class="text-xs text-slate-500 mt-1"
+            >
+              Your actual uploaded Canva pages will appear here.
+            </p>
+
+          </div>
+
+
+          <span
+            id="previewBadge"
+            class="preview-badge"
+          >
+            NO DESIGN
+          </span>
+
+        </div>
+
+
+        <!-- FLIPBOOK STAGE -->
+
+        <div
+          class="client-flipbook-stage"
+        >
+
+          <div
+            id="clientFlipbook"
+            class="client-flipbook-book"
+          >
+
+            <div
+              class="client-flipbook-empty"
+            >
+
+              <div
+                class="empty-book-icon"
+              >
+                📖
+              </div>
+
+              <h4>
+                No photobook loaded
+              </h4>
+
+              <p>
+                Upload your front cover, inside pages
+                and back cover, then click Generate Flipbook.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CONTROLS -->
+
+        <div
+          class="client-flipbook-controls"
+        >
+
+          <button
+            id="clientPrevBtn"
+            type="button"
+            class="client-control-btn"
+          >
+            ← Previous
+          </button>
+
+
+          <div
+            class="client-zoom-controls"
+          >
+
+            <button
+              id="clientZoomOutBtn"
+              type="button"
+              class="client-control-btn client-icon-btn"
+              title="Zoom out"
+            >
+              −
+            </button>
+
+
+            <span
+              id="clientZoomValue"
+              class="client-zoom-value"
+            >
+              100%
+            </span>
+
+
+            <button
+              id="clientZoomInBtn"
+              type="button"
+              class="client-control-btn client-icon-btn"
+              title="Zoom in"
+            >
+              +
+            </button>
+
+
+            <button
+              id="clientResetZoomBtn"
+              type="button"
+              class="client-control-btn"
+            >
+              Reset
+            </button>
+
+          </div>
+
+
+          <span
+            id="clientPageCounter"
+            class="client-page-counter"
+          >
+            No preview
+          </span>
+
+
+          <button
+            id="clientFullscreenBtn"
+            type="button"
+            class="client-control-btn client-fullscreen-btn"
+          >
+            ⛶ Fullscreen
+          </button>
+
+
+          <button
+            id="clientNextBtn"
+            type="button"
+            class="client-control-btn"
+          >
+            Next →
+          </button>
+
+        </div>
+
+
+        <!-- FUTURE SHARE FEATURE -->
+
+        <div
+          class="future-share-box"
+        >
+
+          <div>
+
+            <p
+              class="text-xs font-black text-slate-700"
+            >
+              Client Sharing
+            </p>
+
+            <p
+              class="text-[11px] text-slate-500 mt-1"
+            >
+              Public buyer links will be added after
+              the upload preview is fully working.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            disabled
+            class="future-share-btn"
+          >
+            Share Link — Soon
+          </button>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================================
+       FOOTER
+       ========================================= -->
+
+  <footer
+    class="max-w-7xl mx-auto px-4 pb-10 text-center"
+  >
+
+    <img
+      src="ryn.png"
+      alt="R&Y Printing Lab"
+      class="w-14 h-14 mx-auto rounded-full"
+    >
+
+    <p
+      class="font-black text-sm mt-3"
+    >
+      R&Y Printing Lab
+    </p>
+
+    <p
+      class="text-xs text-slate-400 mt-1"
+    >
+      Finished Photobook Client Preview
+    </p>
+
+  </footer>
+
+
+  <!-- PAGE FLIP LIBRARY -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"
+  ></script>
+
+
+  <!-- CLIENT FLIPBOOK SCRIPT -->
+
+  <script
+    src="client-flipbook.js"
+  ></script>
+
+
+</body>
+</html>

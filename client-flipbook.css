@@ -1,0 +1,728 @@
+    /* =========================================================
+   R&Y CLIENT FLIPBOOK
+   ========================================================= */
+
+.client-preview-card {
+  min-width: 0;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #dbe7e2;
+  border-radius: 24px;
+
+  box-shadow:
+    0 12px 35px rgba(17, 24, 39, 0.06);
+}
+
+
+/* =========================================================
+   PREVIEW HEADER
+   ========================================================= */
+
+.client-preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.preview-badge {
+  flex-shrink: 0;
+
+  padding: 8px 11px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+
+  background: #f8fafc;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.preview-badge.is-ready {
+  border-color: #99f6e4;
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+
+/* =========================================================
+   UPLOAD BOXES
+   ========================================================= */
+
+.upload-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+
+  background: #f8fafc;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.upload-box:hover {
+  border-color: #63d9c9;
+  background: #f0fdfa;
+  transform: translateY(-1px);
+}
+
+.upload-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #63d9c9,
+    #8bcb78
+  );
+
+  color: #111827;
+
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.upload-title {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.upload-sub {
+  margin: 2px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   FILE INFO
+   ========================================================= */
+
+.file-info {
+  margin-top: 8px;
+
+  padding: 9px 11px;
+
+  border: 1px solid #ccfbf1;
+  border-radius: 10px;
+
+  background: #f0fdfa;
+
+  color: #0f766e;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   FLIPBOOK STAGE
+   ========================================================= */
+
+.client-flipbook-stage {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 570px;
+
+  padding: 45px 25px 65px;
+
+  overflow: auto;
+
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0) 45%
+    ),
+    linear-gradient(
+      135deg,
+      #e9faf6 0%,
+      #f4fbf6 50%,
+      #eaf7e5 100%
+    );
+}
+
+
+/* FLOOR SHADOW */
+
+.client-flipbook-stage::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  bottom: 38px;
+
+  width: min(70%, 650px);
+  height: 28px;
+
+  transform: translateX(-50%);
+
+  border-radius: 50%;
+
+  background: rgba(15, 23, 42, 0.13);
+
+  filter: blur(18px);
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   FLIPBOOK HOST
+   ========================================================= */
+
+.client-flipbook-book {
+  position: relative;
+
+  z-index: 2;
+
+  margin: auto;
+
+  transition:
+    transform 0.18s ease;
+
+  transform-origin: center center;
+
+  filter:
+    drop-shadow(
+      0 20px 25px rgba(15, 23, 42, 0.12)
+    );
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.client-flipbook-empty {
+  width: min(420px, 90%);
+
+  padding: 35px 25px;
+
+  border: 2px dashed rgba(15, 118, 110, 0.20);
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.78);
+
+  text-align: center;
+
+  backdrop-filter: blur(8px);
+}
+
+.empty-book-icon {
+  margin-bottom: 10px;
+
+  font-size: 38px;
+}
+
+.client-flipbook-empty h4 {
+  margin: 0;
+
+  color: #334155;
+
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.client-flipbook-empty p {
+  max-width: 320px;
+
+  margin: 7px auto 0;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   ACTUAL PHOTOBOOK PAGE
+   ========================================================= */
+
+.client-book-page {
+  position: relative;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid rgba(15, 23, 42, 0.08);
+
+  box-shadow:
+    inset 0 0 18px rgba(15, 23, 42, 0.035);
+
+  user-select: none;
+}
+
+.client-page-image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  background: #ffffff;
+
+  pointer-events: none;
+
+  user-select: none;
+}
+
+
+/* subtle paper edge */
+
+.client-book-page::after {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 7px;
+
+  background: linear-gradient(
+    to left,
+    rgba(15, 23, 42, 0.08),
+    transparent
+  );
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   COVER
+   ========================================================= */
+
+.client-cover-page {
+  background: #111827;
+}
+
+.client-cover-page .client-page-image {
+  object-fit: contain;
+}
+
+
+/* =========================================================
+   PAGE FLIP GENERATED ELEMENTS
+   ========================================================= */
+
+.client-flipbook-book .stf__parent {
+  margin: auto !important;
+}
+
+.client-flipbook-book .stf__wrapper {
+  box-shadow:
+    0 24px 55px rgba(15, 23, 42, 0.15);
+}
+
+.client-flipbook-book .stf__item {
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+.client-flipbook-controls {
+  position: relative;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  padding: 16px 18px;
+
+  border-top: 1px solid #e2e8f0;
+
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.client-control-btn {
+  min-height: 38px;
+
+  padding: 9px 13px;
+
+  border: 1px solid #dbe4e8;
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  color: #334155;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.client-control-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+
+  transform: translateY(-1px);
+}
+
+.client-control-btn:active {
+  transform: translateY(0);
+}
+
+.client-control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* =========================================================
+   ZOOM
+   ========================================================= */
+
+.client-zoom-controls {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.client-icon-btn {
+  width: 38px;
+  min-width: 38px;
+
+  padding-left: 0;
+  padding-right: 0;
+
+  font-size: 17px;
+}
+
+.client-zoom-value {
+  min-width: 55px;
+
+  padding: 9px 8px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #f8fafc;
+
+  color: #475569;
+
+  text-align: center;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   COUNTER
+   ========================================================= */
+
+.client-page-counter {
+  min-width: 120px;
+
+  color: #64748b;
+
+  text-align: center;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   FULLSCREEN BUTTON
+   ========================================================= */
+
+.client-fullscreen-btn {
+  border-color: rgba(13, 148, 136, 0.28);
+
+  background: #f0fdfa;
+
+  color: #0f766e;
+}
+
+.client-fullscreen-btn:hover {
+  border-color: #5eead4;
+
+  background: #ccfbf1;
+}
+
+
+/* =========================================================
+   FUTURE SHARE AREA
+   ========================================================= */
+
+.future-share-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 16px 20px;
+
+  border-top: 1px solid #e2e8f0;
+
+  background: #f8fafc;
+}
+
+.future-share-btn {
+  flex-shrink: 0;
+
+  padding: 9px 13px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   FULLSCREEN
+   ========================================================= */
+
+#clientFlipbookSection:fullscreen {
+  width: 100vw;
+  height: 100vh;
+
+  margin: 0;
+
+  border: 0;
+  border-radius: 0;
+
+  background: #eef5f2;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#clientFlipbookSection:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+
+  margin: 0;
+
+  border: 0;
+  border-radius: 0;
+
+  background: #eef5f2;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#clientFlipbookSection:fullscreen
+.client-preview-head,
+#clientFlipbookSection:-webkit-full-screen
+.client-preview-head {
+  flex-shrink: 0;
+
+  background: #ffffff;
+}
+
+#clientFlipbookSection:fullscreen
+.client-flipbook-stage,
+#clientFlipbookSection:-webkit-full-screen
+.client-flipbook-stage {
+  flex: 1;
+
+  width: 100%;
+  min-height: 0;
+
+  padding: 50px 30px 65px;
+}
+
+#clientFlipbookSection:fullscreen
+.client-flipbook-controls,
+#clientFlipbookSection:-webkit-full-screen
+.client-flipbook-controls {
+  flex-shrink: 0;
+}
+
+#clientFlipbookSection:fullscreen
+.future-share-box,
+#clientFlipbookSection:-webkit-full-screen
+.future-share-box {
+  display: none;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+  .client-flipbook-stage {
+    min-height: 520px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .client-preview-card {
+    border-radius: 20px;
+  }
+
+  .client-preview-head {
+    padding: 18px;
+
+    gap: 12px;
+  }
+
+  .preview-badge {
+    padding: 7px 9px;
+
+    font-size: 8px;
+  }
+
+  .client-flipbook-stage {
+    min-height: 440px;
+
+    padding:
+      35px
+      10px
+      55px;
+  }
+
+  .client-flipbook-controls {
+    padding: 13px 10px;
+  }
+
+  .client-zoom-controls {
+    order: 3;
+
+    width: 100%;
+
+    justify-content: center;
+  }
+
+  .client-page-counter {
+    order: 2;
+
+    width: 100%;
+  }
+
+  .client-fullscreen-btn {
+    order: 4;
+  }
+
+  .future-share-box {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .future-share-btn {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  .client-preview-head {
+    flex-direction: column;
+  }
+
+  .client-flipbook-stage {
+    min-height: 390px;
+  }
+
+  .client-control-btn {
+    padding: 8px 10px;
+
+    font-size: 9px;
+  }
+
+}
+
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
+@media print {
+
+  .client-flipbook-controls,
+  .future-share-box {
+    display: none !important;
+  }
+
+}
