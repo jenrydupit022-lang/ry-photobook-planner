@@ -182,8 +182,35 @@
       color: #168c7f;
     }
 
+    .quick-theme-active {
+      background: #dff7f2;
+      color: #168c7f;
+      box-shadow: inset 0 0 0 1px #a9e6dc;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eafaf6;
+      color: #168c7f;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #35bfae;
+    }
+
     .result-flash {
-      animation: resultFlash .8s ease;
+      animation: resultFlash .7s ease;
     }
 
     @keyframes resultFlash {
@@ -200,7 +227,7 @@
       }
     }
 
-    /* MOBILE POLISH */
+    /* MOBILE */
 
     @media (max-width: 640px) {
 
@@ -589,16 +616,25 @@
 
       <div class="mb-6">
 
-        <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
-          Step 2
-        </p>
+        <div class="flex flex-wrap items-center gap-3">
 
-        <h2 class="text-2xl sm:text-3xl font-black mt-1">
+          <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
+            Step 2
+          </p>
+
+          <span class="live-badge">
+            <span class="live-dot"></span>
+            Live Preview
+          </span>
+
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-black mt-2">
           Design Inspiration
         </h2>
 
         <p class="text-sm sm:text-base text-slate-500 mt-2 max-w-2xl leading-relaxed">
-          Enter the client's theme and instantly create useful Pinterest searches for covers and page designs.
+          Change the theme, style or color and the design direction updates instantly.
         </p>
 
       </div>
@@ -606,9 +642,9 @@
 
       <div class="grid lg:grid-cols-[380px_1fr] gap-5 sm:gap-6 items-start">
 
-        <!-- INSPIRATION CONTROLS -->
+        <!-- CONTROLS -->
 
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6 lg:sticky lg:top-24">
 
           <div class="space-y-5">
 
@@ -625,6 +661,10 @@
                 placeholder="Wedding, Birthday, Travel..."
                 class="w-full border border-slate-300 rounded-xl px-4 py-3 font-semibold"
               >
+
+              <p class="text-xs text-slate-400 mt-2">
+                Type any theme. Results update automatically.
+              </p>
 
             </div>
 
@@ -683,14 +723,6 @@
 
             </div>
 
-
-            <button
-              onclick="generateInspiration(true)"
-              class="brand-gradient w-full text-slate-900 rounded-xl py-3.5 font-black shadow-sm hover:opacity-90 transition"
-            >
-              Generate Inspiration
-            </button>
-
           </div>
 
 
@@ -703,27 +735,51 @@
 
             <div class="flex flex-wrap gap-2 mt-3">
 
-              <button onclick="quickTheme('Wedding')" class="quick-theme">
+              <button
+                data-theme="Wedding"
+                onclick="quickTheme('Wedding', this)"
+                class="quick-theme quick-theme-active"
+              >
                 Wedding
               </button>
 
-              <button onclick="quickTheme('Birthday')" class="quick-theme">
+              <button
+                data-theme="Birthday"
+                onclick="quickTheme('Birthday', this)"
+                class="quick-theme"
+              >
                 Birthday
               </button>
 
-              <button onclick="quickTheme('Travel')" class="quick-theme">
+              <button
+                data-theme="Travel"
+                onclick="quickTheme('Travel', this)"
+                class="quick-theme"
+              >
                 Travel
               </button>
 
-              <button onclick="quickTheme('Baby')" class="quick-theme">
+              <button
+                data-theme="Baby"
+                onclick="quickTheme('Baby', this)"
+                class="quick-theme"
+              >
                 Baby
               </button>
 
-              <button onclick="quickTheme('Graduation')" class="quick-theme">
+              <button
+                data-theme="Graduation"
+                onclick="quickTheme('Graduation', this)"
+                class="quick-theme"
+              >
                 Graduation
               </button>
 
-              <button onclick="quickTheme('Family')" class="quick-theme">
+              <button
+                data-theme="Family"
+                onclick="quickTheme('Family', this)"
+                class="quick-theme"
+              >
                 Family
               </button>
 
@@ -731,10 +787,23 @@
 
           </div>
 
+
+          <div class="mt-6 bg-[#eafaf6] border border-[#bceade] rounded-xl p-4">
+
+            <p class="text-xs font-black text-teal-700">
+              Live Inspiration
+            </p>
+
+            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+              No generate button needed. Your design suggestions change automatically.
+            </p>
+
+          </div>
+
         </div>
 
 
-        <!-- INSPIRATION RESULTS -->
+        <!-- RESULTS -->
 
         <div
           id="inspirationResults"
@@ -743,19 +812,33 @@
 
           <div class="p-5 sm:p-6 border-b border-slate-200">
 
-            <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
-              Design Direction
-            </p>
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
 
-            <h3
-              id="inspirationTitle"
-              class="text-xl sm:text-2xl font-black mt-1"
-            ></h3>
+              <div>
 
-            <p
-              id="inspirationDescription"
-              class="text-sm text-slate-500 mt-2 leading-relaxed"
-            ></p>
+                <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
+                  Design Direction
+                </p>
+
+                <h3
+                  id="inspirationTitle"
+                  class="text-xl sm:text-2xl font-black mt-1"
+                ></h3>
+
+                <p
+                  id="inspirationDescription"
+                  class="text-sm text-slate-500 mt-2 leading-relaxed"
+                ></p>
+
+              </div>
+
+
+              <span class="live-badge self-start">
+                <span class="live-dot"></span>
+                Auto
+              </span>
+
+            </div>
 
           </div>
 
@@ -1510,7 +1593,7 @@
 
 
     // =====================================================
-    // DESIGN INSPIRATION
+    // LIVE DESIGN INSPIRATION
     // =====================================================
 
 
@@ -1555,50 +1638,120 @@
       );
 
 
-    let currentPinterestQuery =
-      "";
+    let currentPinterestQuery = "";
 
 
-    function quickTheme(theme) {
+    function clearQuickThemeActive() {
+
+      document
+        .querySelectorAll(".quick-theme")
+        .forEach(
+          button => {
+
+            button.classList.remove(
+              "quick-theme-active"
+            );
+
+          }
+        );
+
+    }
+
+
+    function setQuickThemeActive(theme) {
+
+      clearQuickThemeActive();
+
+
+      document
+        .querySelectorAll(".quick-theme")
+        .forEach(
+          button => {
+
+            if (
+              button.dataset.theme
+                .toLowerCase() ===
+              theme.toLowerCase()
+            ) {
+
+              button.classList.add(
+                "quick-theme-active"
+              );
+
+            }
+
+          }
+        );
+
+    }
+
+
+    function quickTheme(
+      theme,
+      button
+    ) {
 
       themeInput.value =
         theme;
 
-      generateInspiration(true);
+
+      clearQuickThemeActive();
+
+
+      if (button) {
+
+        button.classList.add(
+          "quick-theme-active"
+        );
+
+      }
+
+
+      updateInspiration();
+
+
+      // On phones/tablets, move to results.
+      // On desktop, results are already beside controls.
+
+      if (
+        window.innerWidth < 1024
+      ) {
+
+        setTimeout(
+          () => {
+
+            inspirationResults.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+
+          },
+          100
+        );
+
+      }
 
     }
 
 
-    function scrollToInspirationResults() {
+    function flashResults() {
 
-      setTimeout(() => {
-
-        inspirationResults.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+      inspirationResults.classList.remove(
+        "result-flash"
+      );
 
 
-        inspirationResults.classList.remove(
-          "result-flash"
-        );
+      void inspirationResults.offsetWidth;
 
 
-        void inspirationResults.offsetWidth;
-
-
-        inspirationResults.classList.add(
-          "result-flash"
-        );
-
-      }, 120);
+      inspirationResults.classList.add(
+        "result-flash"
+      );
 
     }
 
 
-    function generateInspiration(
-      shouldScroll = false
-    ) {
+    function updateInspiration() {
 
       const theme =
         themeInput.value.trim()
@@ -1632,90 +1785,55 @@
       const ideas = [
 
         {
-          title:
-            "Cover Design",
-
-          symbol:
-            "✦",
-
+          title: "Cover Design",
+          symbol: "✦",
           text:
             `Main ${style.toLowerCase()} cover direction using ${color.toLowerCase()}.`,
-
           query:
             `${style} ${color} ${theme} photobook cover design`
         },
 
-
         {
-          title:
-            "Minimal Cover",
-
-          symbol:
-            "□",
-
+          title: "Minimal Cover",
+          symbol: "□",
           text:
             "Cleaner cover with fewer elements and more negative space.",
-
           query:
             `minimal ${color} ${theme} photo album cover`
         },
 
-
         {
-          title:
-            "Photo Cover",
-
-          symbol:
-            "▣",
-
+          title: "Photo Cover",
+          symbol: "▣",
           text:
             "Use one strong client photo as the main cover focus.",
-
           query:
             `${style} ${theme} photo cover album design`
         },
 
-
         {
-          title:
-            "Typography",
-
-          symbol:
-            "Aa",
-
+          title: "Typography",
+          symbol: "Aa",
           text:
             "Find matching fonts, title placement and text hierarchy.",
-
           query:
             `${theme} photobook typography ${style}`
         },
 
-
         {
-          title:
-            "Inside Pages",
-
-          symbol:
-            "▦",
-
+          title: "Inside Pages",
+          symbol: "▦",
           text:
             "Find matching interior photobook spreads and layouts.",
-
           query:
             `${style} ${theme} photobook page layout ${color}`
         },
 
-
         {
-          title:
-            "Premium Look",
-
-          symbol:
-            "◇",
-
+          title: "Premium Look",
+          symbol: "◇",
           text:
             "Explore luxury and editorial album presentation.",
-
           query:
             `luxury ${style} ${theme} photo album design ${color}`
         }
@@ -1723,8 +1841,7 @@
       ];
 
 
-      inspirationCards.innerHTML =
-        "";
+      inspirationCards.innerHTML = "";
 
 
       ideas.forEach(
@@ -1741,7 +1858,9 @@
 
 
           const top =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
 
           top.className =
@@ -1749,7 +1868,9 @@
 
 
           const topContent =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
 
           topContent.className =
@@ -1757,7 +1878,9 @@
 
 
           const symbol =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
 
           symbol.className =
@@ -1768,7 +1891,9 @@
 
 
           const themeLabel =
-            document.createElement("p");
+            document.createElement(
+              "p"
+            );
 
 
           themeLabel.className =
@@ -1792,7 +1917,9 @@
 
 
           const content =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
 
           content.className =
@@ -1800,7 +1927,9 @@
 
 
           const title =
-            document.createElement("p");
+            document.createElement(
+              "p"
+            );
 
 
           title.className =
@@ -1811,7 +1940,9 @@
 
 
           const description =
-            document.createElement("p");
+            document.createElement(
+              "p"
+            );
 
 
           description.className =
@@ -1822,7 +1953,9 @@
 
 
           const button =
-            document.createElement("button");
+            document.createElement(
+              "button"
+            );
 
 
           button.className =
@@ -1835,9 +1968,11 @@
           button.addEventListener(
             "click",
             () => {
+
               openPinterest(
                 idea.query
               );
+
             }
           );
 
@@ -1872,11 +2007,12 @@
       );
 
 
-      if (shouldScroll) {
+      setQuickThemeActive(
+        theme
+      );
 
-        scrollToInspirationResults();
 
-      }
+      flashResults();
     }
 
 
@@ -1905,29 +2041,49 @@
     }
 
 
+    // LIVE THEME TYPING
+
     themeInput.addEventListener(
-      "keydown",
-      event => {
+      "input",
+      () => {
 
-        if (
-          event.key === "Enter"
-        ) {
+        clearQuickThemeActive();
 
-          event.preventDefault();
-
-          generateInspiration(true);
-
-        }
+        updateInspiration();
 
       }
     );
 
 
+    // LIVE STYLE CHANGE
+
+    styleInput.addEventListener(
+      "change",
+      () => {
+
+        updateInspiration();
+
+      }
+    );
+
+
+    // LIVE COLOR CHANGE
+
+    colorInput.addEventListener(
+      "change",
+      () => {
+
+        updateInspiration();
+
+      }
+    );
+
+
+    // INITIAL LOAD
+
     calculate();
 
-    // Generate default results on first load,
-    // but DO NOT auto-scroll.
-    generateInspiration(false);
+    updateInspiration();
 
   </script>
 
