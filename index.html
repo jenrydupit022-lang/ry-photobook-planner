@@ -182,6 +182,24 @@
       color: #168c7f;
     }
 
+    .result-flash {
+      animation: resultFlash .8s ease;
+    }
+
+    @keyframes resultFlash {
+      0% {
+        box-shadow: 0 0 0 0 rgba(99,217,201,.55);
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(99,217,201,.18);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(99,217,201,0);
+      }
+    }
+
     /* MOBILE POLISH */
 
     @media (max-width: 640px) {
@@ -667,7 +685,7 @@
 
 
             <button
-              onclick="generateInspiration()"
+              onclick="generateInspiration(true)"
               class="brand-gradient w-full text-slate-900 rounded-xl py-3.5 font-black shadow-sm hover:opacity-90 transition"
             >
               Generate Inspiration
@@ -718,7 +736,10 @@
 
         <!-- INSPIRATION RESULTS -->
 
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div
+          id="inspirationResults"
+          class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden scroll-mt-24"
+        >
 
           <div class="p-5 sm:p-6 border-b border-slate-200">
 
@@ -908,10 +929,7 @@
     }
 
 
-    function getBalancedDistribution(
-      total,
-      pages
-    ) {
+    function getBalancedDistribution(total, pages) {
 
       const base =
         Math.floor(total / pages);
@@ -941,10 +959,7 @@
     }
 
 
-    function getPreferredDistribution(
-      total,
-      pages
-    ) {
+    function getPreferredDistribution(total, pages) {
 
       if (total < pages) {
 
@@ -1288,9 +1303,7 @@
     }
 
 
-    function renderPages(
-      distribution
-    ) {
+    function renderPages(distribution) {
 
       pageList.innerHTML = "";
 
@@ -1516,6 +1529,11 @@
         "colorInput"
       );
 
+    const inspirationResults =
+      document.getElementById(
+        "inspirationResults"
+      );
+
     const inspirationTitle =
       document.getElementById(
         "inspirationTitle"
@@ -1546,12 +1564,41 @@
       themeInput.value =
         theme;
 
-      generateInspiration();
+      generateInspiration(true);
 
     }
 
 
-    function generateInspiration() {
+    function scrollToInspirationResults() {
+
+      setTimeout(() => {
+
+        inspirationResults.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+
+        inspirationResults.classList.remove(
+          "result-flash"
+        );
+
+
+        void inspirationResults.offsetWidth;
+
+
+        inspirationResults.classList.add(
+          "result-flash"
+        );
+
+      }, 120);
+
+    }
+
+
+    function generateInspiration(
+      shouldScroll = false
+    ) {
 
       const theme =
         themeInput.value.trim()
@@ -1693,54 +1740,128 @@
             "inspiration-card border border-slate-200 rounded-xl overflow-hidden bg-white";
 
 
-          card.innerHTML = `
-
-            <div class="brand-gradient h-28 sm:h-32 flex items-center justify-center">
-
-              <div class="text-center text-slate-900">
-
-                <div class="text-3xl font-serif font-black">
-                  ${idea.symbol}
-                </div>
-
-                <p class="text-[9px] uppercase tracking-[.25em] opacity-60 mt-3">
-                  ${theme}
-                </p>
-
-              </div>
-
-            </div>
+          const top =
+            document.createElement("div");
 
 
-            <div class="p-4">
-
-              <p class="font-black">
-                ${idea.title}
-              </p>
+          top.className =
+            "brand-gradient h-28 sm:h-32 flex items-center justify-center";
 
 
-              <p class="text-xs text-slate-500 mt-2 leading-relaxed min-h-[40px]">
-                ${idea.text}
-              </p>
+          const topContent =
+            document.createElement("div");
 
 
-              <button
+          topContent.className =
+            "text-center text-slate-900";
 
-                class="mt-4 text-xs font-black text-teal-600 hover:text-teal-700"
 
-                onclick='openPinterest(${JSON.stringify(
-                  idea.query
-                )})'
+          const symbol =
+            document.createElement("div");
 
-              >
 
-                Find References →
+          symbol.className =
+            "text-3xl font-serif font-black";
 
-              </button>
+          symbol.textContent =
+            idea.symbol;
 
-            </div>
 
-          `;
+          const themeLabel =
+            document.createElement("p");
+
+
+          themeLabel.className =
+            "text-[9px] uppercase tracking-[.25em] opacity-60 mt-3";
+
+          themeLabel.textContent =
+            theme;
+
+
+          topContent.appendChild(
+            symbol
+          );
+
+          topContent.appendChild(
+            themeLabel
+          );
+
+          top.appendChild(
+            topContent
+          );
+
+
+          const content =
+            document.createElement("div");
+
+
+          content.className =
+            "p-4";
+
+
+          const title =
+            document.createElement("p");
+
+
+          title.className =
+            "font-black";
+
+          title.textContent =
+            idea.title;
+
+
+          const description =
+            document.createElement("p");
+
+
+          description.className =
+            "text-xs text-slate-500 mt-2 leading-relaxed min-h-[40px]";
+
+          description.textContent =
+            idea.text;
+
+
+          const button =
+            document.createElement("button");
+
+
+          button.className =
+            "mt-4 text-xs font-black text-teal-600 hover:text-teal-700";
+
+          button.textContent =
+            "Find References →";
+
+
+          button.addEventListener(
+            "click",
+            () => {
+              openPinterest(
+                idea.query
+              );
+            }
+          );
+
+
+          content.appendChild(
+            title
+          );
+
+          content.appendChild(
+            description
+          );
+
+          content.appendChild(
+            button
+          );
+
+
+          card.appendChild(
+            top
+          );
+
+          card.appendChild(
+            content
+          );
 
 
           inspirationCards.appendChild(
@@ -1749,6 +1870,13 @@
 
         }
       );
+
+
+      if (shouldScroll) {
+
+        scrollToInspirationResults();
+
+      }
     }
 
 
@@ -1785,7 +1913,9 @@
           event.key === "Enter"
         ) {
 
-          generateInspiration();
+          event.preventDefault();
+
+          generateInspiration(true);
 
         }
 
@@ -1795,7 +1925,9 @@
 
     calculate();
 
-    generateInspiration();
+    // Generate default results on first load,
+    // but DO NOT auto-scroll.
+    generateInspiration(false);
 
   </script>
 
