@@ -4,6 +4,30 @@
   let renderVersion = 0;
 
   const $ = (id) => document.getElementById(id);
+  function getOrCreateFlipbookHost() {
+  let host = document.getElementById("ryFlipbook");
+
+  if (host && host.isConnected) {
+    return host;
+  }
+
+  const stage = document.querySelector(".ry-flipbook-stage");
+
+  if (!stage) {
+    console.warn('Flipbook stage ".ry-flipbook-stage" was not found.');
+    return null;
+  }
+
+  stage.innerHTML = "";
+
+  host = document.createElement("div");
+  host.id = "ryFlipbook";
+  host.className = "ry-flipbook-book";
+
+  stage.appendChild(host);
+
+  return host;
+}
 
   function getOrientation(size = {}) {
     const width = Number(size.width) || 10;
@@ -206,7 +230,7 @@
 
     destroyFlipbook();
 
-    const host = $("ryFlipbook");
+    let host = getOrCreateFlipbookHost();
 
     if (host) {
       host.innerHTML = `
@@ -500,7 +524,11 @@
         );
       }
     }
+    host = getOrCreateFlipbookHost();
 
+if (!host) {
+  return;
+}
     /*
      * Clear old PageFlip generated DOM.
      */
