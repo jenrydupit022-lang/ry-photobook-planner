@@ -22,12 +22,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>R&Y Photobook Planner | R&Y Printing Lab</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -2276,8 +2278,23 @@
     // ACTIVE LAYOUT JOB QUEUE
     // =====================================================
 
-    const JOBS_STORAGE_KEY = "ryLayoutJobsV2";
-    const PLANNER_LAYOUT_TYPE = "normal";
+    const JOBS_STORAGE_KEY_BASE = "ryLayoutJobsV2";
+
+const PLANNER_SUPABASE_URL =
+  "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+
+const PLANNER_SUPABASE_KEY =
+  "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
+
+const plannerSupabase =
+  window.supabase.createClient(
+    PLANNER_SUPABASE_URL,
+    PLANNER_SUPABASE_KEY
+  );
+
+let plannerCurrentUser = null;
+
+const PLANNER_LAYOUT_TYPE = "normal";
     const plannerJobQueue = document.getElementById("plannerJobQueue");
     const queueEmpty = document.getElementById("queueEmpty");
     const activeJobBanner = document.getElementById("activeJobBanner");
@@ -2288,12 +2305,27 @@
     let selectedPlannerJobId = null;
 
     function getPlannerJobs() {
-      try {
-        return JSON.parse(localStorage.getItem(JOBS_STORAGE_KEY)) || [];
-      } catch (error) {
-        return [];
-      }
+  try {
+    if (!plannerCurrentUser) {
+      return [];
     }
+
+    const userStorageKey =
+      `${JOBS_STORAGE_KEY_BASE}_${plannerCurrentUser.id}`;
+
+    return JSON.parse(
+      localStorage.getItem(userStorageKey)
+    ) || [];
+
+  } catch (error) {
+    console.error(
+      "Could not load current seller jobs:",
+      error
+    );
+
+    return [];
+  }
+}
 
     function plannerEscape(value) {
       return String(value ?? "")
@@ -2400,15 +2432,94 @@
       document.getElementById("totalPictures").scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    queuePendingBtn.addEventListener("click", () => setQueueFilter("pending"));
-    queueOngoingBtn.addEventListener("click", () => setQueueFilter("ongoing"));
-    queueAllBtn.addEventListener("click", () => setQueueFilter("all"));
-    window.addEventListener("storage", renderPlannerQueue);
+    queuePendingBtn.addEventListener(
+  "click",
+  () => setQueueFilter("pending")
+);
 
+queueOngoingBtn.addEventListener(
+  "click",
+  () => setQueueFilter("ongoing")
+);
+
+queueAllBtn.addEventListener(
+  "click",
+  () => setQueueFilter("all")
+);
+
+
+// Refresh queue only for the current seller's storage.
+window.addEventListener(
+  "storage",
+  event => {
+    if (!plannerCurrentUser) {
+      return;
+    }
+
+    const currentSellerStorageKey =
+      `${JOBS_STORAGE_KEY_BASE}_${plannerCurrentUser.id}`;
+
+    if (event.key === currentSellerStorageKey) {
+      renderPlannerQueue();
+    }
+  }
+);
+
+
+// =====================================================
+// LOAD CURRENT SELLER
+// =====================================================
+
+async function initializePlannerSeller() {
+  try {
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
+      await plannerSupabase.auth.getSession();
+
+
+    if (
+      sessionError ||
+      !sessionData.session
+    ) {
+      window.location.replace(
+        "login.html"
+      );
+
+      return;
+    }
+
+
+    plannerCurrentUser =
+      sessionData.session.user;
+
+
+    // Only NOW load this seller's jobs.
     renderPlannerQueue();
 
-    updatePhotobookSizeUI();
-    generateInspiration();
+  } catch (error) {
+    console.error(
+      "Could not load current seller:",
+      error
+    );
+
+    plannerJobQueue.innerHTML = "";
+
+    queueEmpty.classList.remove(
+      "hidden"
+    );
+
+    queueEmpty.textContent =
+      "Could not load seller jobs.";
+  }
+}
+
+
+updatePhotobookSizeUI();
+generateInspiration();
+
+initializePlannerSeller();
 
   </script>
 
