@@ -1141,19 +1141,7 @@ async function initializeCloudSync() {
 }
 
 
-    function getJobs() {
-
-      try {
-
-        return JSON.parse(
-          localStorage.getItem(STORAGE_KEY)
-        ) || [];
-
-      } catch (error) {
-
-        return [];
-      }
-    }
+   
 
 
     function saveJobs() {
