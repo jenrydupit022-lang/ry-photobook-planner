@@ -19,6 +19,9 @@
 
 
 
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -173,7 +176,7 @@
       grid-auto-rows: 1fr;
     }
 
-    /* Size-aware visual layouts */
+
     .layout-preview.book-square { --book-ratio: 1 / 1; }
     .layout-preview.book-landscape { --book-ratio: 10 / 7; }
     .layout-preview.book-portrait { --book-ratio: 7 / 10; }
@@ -182,77 +185,47 @@
       grid-template-columns: 1fr;
       grid-template-rows: repeat(2,1fr);
     }
-
     .layout-preview.book-landscape.layout-2 {
       grid-template-columns: repeat(2,1fr);
       grid-template-rows: 1fr;
     }
-
     .layout-preview.book-portrait.layout-3 {
       grid-template-columns: 1fr;
       grid-template-rows: 1.45fr repeat(2,1fr);
     }
-
-    .layout-preview.book-portrait.layout-3 .photo-box:first-child {
-      grid-column: auto;
-    }
-
+    .layout-preview.book-portrait.layout-3 .photo-box:first-child { grid-column:auto; }
     .layout-preview.book-landscape.layout-3 {
       grid-template-columns: 1.5fr 1fr;
       grid-template-rows: repeat(2,1fr);
     }
-
     .layout-preview.book-landscape.layout-3 .photo-box:first-child {
-      grid-column: auto;
-      grid-row: 1 / 3;
+      grid-column:auto;
+      grid-row:1 / 3;
     }
-
-    .layout-preview.book-portrait.layout-4 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-4 {
-      grid-template-columns: repeat(4,1fr);
-      grid-template-rows: 1fr;
-    }
-
-    .layout-preview.book-portrait.layout-5 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(3,1fr);
-    }
-
-    .layout-preview.book-portrait.layout-5 .photo-box:first-child {
-      grid-row: 1 / 3;
-    }
-
-    .layout-preview.book-landscape.layout-5 {
-      grid-template-columns: 1.5fr repeat(2,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-5 .photo-box:first-child {
-      grid-row: 1 / 3;
-    }
-
     .layout-preview.book-portrait.layout-6 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(3,1fr);
+      grid-template-columns:repeat(2,1fr);
+      grid-template-rows:repeat(3,1fr);
     }
-
     .layout-preview.book-landscape.layout-6 {
-      grid-template-columns: repeat(3,1fr);
-      grid-template-rows: repeat(2,1fr);
+      grid-template-columns:repeat(3,1fr);
+      grid-template-rows:repeat(2,1fr);
     }
 
-    .layout-preview.book-portrait.layout-dense {
-      grid-template-columns: repeat(2,1fr);
+    .inspiration-card {
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
-
-    .layout-preview.book-landscape.layout-dense {
-      grid-template-columns: repeat(4,1fr);
+    .inspiration-card:hover {
+      transform: translateY(-2px);
+      border-color:#9de4da;
+      box-shadow:0 10px 25px rgba(17,24,39,.07);
     }
-
+    .result-flash {
+      animation: resultFlash .65s ease;
+    }
+    @keyframes resultFlash {
+      0% { box-shadow:0 0 0 0 rgba(53,191,174,.35); }
+      100% { box-shadow:0 0 0 10px rgba(53,191,174,0); }
+    }
 
     @media (max-width: 640px) {
       .mobile-logo {
@@ -271,53 +244,6 @@
         min-height: 44px;
       }
     }
-
-
-    .inspiration-card {
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-    }
-
-    .inspiration-card:hover {
-      transform: translateY(-3px);
-      border-color: #9de4da;
-      box-shadow: 0 12px 28px rgba(17,24,39,.08);
-    }
-
-    .pin-board {
-      min-height: 150px;
-      border-radius: 16px;
-      padding: 10px;
-      background:
-        radial-gradient(circle at top left, rgba(99,217,201,.18), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(139,203,120,.18), transparent 35%),
-        #f8fbfa;
-      display: grid;
-      gap: 6px;
-      overflow: hidden;
-    }
-
-    .pin-photo {
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(99,217,201,.85), rgba(139,203,120,.75));
-      border: 3px solid white;
-      box-shadow: 0 3px 10px rgba(17,24,39,.08);
-    }
-
-    .pin-portrait { grid-template-columns: 1fr .72fr; grid-template-rows: 1fr 1fr; }
-    .pin-portrait .pin-photo:first-child { grid-row: 1 / 3; }
-
-    .pin-scrapbook { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(2,1fr); }
-    .pin-scrapbook .pin-photo:nth-child(2) { transform: rotate(4deg); }
-    .pin-scrapbook .pin-photo:nth-child(4) { transform: rotate(-4deg); }
-
-    .pin-clean { grid-template-columns: 1.5fr 1fr; grid-template-rows: 1fr 1fr; }
-    .pin-clean .pin-photo:first-child { grid-row: 1 / 3; }
-
-    .pin-collage { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); }
-    .pin-collage .pin-photo:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
-
-    .pin-story { grid-template-columns: repeat(2,1fr); grid-template-rows: 1.35fr .65fr; }
-    .pin-story .pin-photo:first-child { grid-column: 1 / 3; }
 
     @media print {
       body {
@@ -799,44 +725,38 @@
 
     </div>
 
-    <!-- PERSONALIZED LAYOUT SUGGESTIONS -->
     <section class="mt-6 sm:mt-8 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
       <div class="p-5 sm:p-6 border-b border-slate-200">
         <p class="text-xs font-black text-green-600 uppercase tracking-wider">Layout Suggestions</p>
         <h3 class="font-black text-xl sm:text-2xl mt-1">Personalized Layout Guide</h3>
         <p class="text-sm text-slate-500 mt-2">
-          Suggested page styles based on the selected photobook size and design space.
+          Realistic layout ideas based on the photobook shape and selected design space.
         </p>
       </div>
       <div id="layoutSuggestionGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- DESIGN INSPIRATION SEARCH -->
     <section class="no-print mt-6 sm:mt-8 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
       <div class="grid lg:grid-cols-[380px_1fr]">
 
         <div class="p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-200">
           <p class="text-xs font-black text-green-600 uppercase tracking-wider">Design Inspiration</p>
-          <h3 class="font-black text-xl sm:text-2xl mt-1">Build Your Own Idea</h3>
+          <h3 class="font-black text-xl sm:text-2xl mt-1">Find Your Design Direction</h3>
           <p class="text-sm text-slate-500 mt-2">
-            Enter any theme you want, then choose a style and main color.
+            Type your own theme, choose a style and color, then open matching Pinterest references.
           </p>
 
           <div class="space-y-5 mt-6">
             <div>
               <label class="block text-sm font-bold mb-2">Photobook Theme</label>
-              <input
-                id="inspirationTheme"
-                type="text"
-                value="Wedding"
+              <input id="themeInput" type="text" value="Wedding"
                 placeholder="e.g. Wedding, Korea Trip, Baby, Graduation..."
-                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white font-bold"
-              >
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white font-bold">
             </div>
 
             <div>
               <label class="block text-sm font-bold mb-2">Style</label>
-              <select id="inspirationStyle" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white">
+              <select id="styleInput" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white">
                 <option>Elegant</option>
                 <option>Minimalist</option>
                 <option>Modern</option>
@@ -854,21 +774,11 @@
 
             <div>
               <label class="block text-sm font-bold mb-2">Main Color</label>
-              <select id="inspirationColor" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white">
-                <option>Black</option>
-                <option>White</option>
-                <option>Beige</option>
-                <option>Brown</option>
-                <option>Pink</option>
-                <option>Red</option>
-                <option>Orange</option>
-                <option>Yellow</option>
-                <option>Green</option>
-                <option>Blue</option>
-                <option>Purple</option>
-                <option>Gold</option>
-                <option>Silver</option>
-                <option>Pastel</option>
+              <select id="colorInput" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white">
+                <option>Black</option><option>White</option><option>Beige</option><option>Brown</option>
+                <option>Pink</option><option>Red</option><option>Orange</option><option>Yellow</option>
+                <option>Green</option><option>Blue</option><option>Purple</option><option>Gold</option>
+                <option>Silver</option><option>Pastel</option>
               </select>
             </div>
 
@@ -885,27 +795,25 @@
             <div class="border-t border-slate-200 pt-5">
               <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Quick Themes</p>
               <div class="flex flex-wrap gap-2 mt-3">
-                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Wedding">Wedding</button>
-                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Birthday">Birthday</button>
-                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Travel">Travel</button>
-                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Baby">Baby</button>
-                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Graduation">Graduation</button>
-                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Family">Family</button>
+                <button type="button" onclick="quickTheme('Wedding')" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold">Wedding</button>
+                <button type="button" onclick="quickTheme('Birthday')" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold">Birthday</button>
+                <button type="button" onclick="quickTheme('Travel')" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold">Travel</button>
+                <button type="button" onclick="quickTheme('Baby')" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold">Baby</button>
+                <button type="button" onclick="quickTheme('Graduation')" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold">Graduation</button>
+                <button type="button" onclick="quickTheme('Family')" class="bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold">Family</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div>
+        <div id="inspirationResults">
           <div class="p-5 sm:p-6 border-b border-slate-200">
             <p class="text-xs font-black text-teal-600 uppercase tracking-wider">Design Direction</p>
-            <h3 id="designDirectionTitle" class="font-black text-xl sm:text-2xl mt-1">Elegant Black Wedding</h3>
-            <p id="designDirectionText" class="text-sm text-slate-500 mt-2">
-              Suggested design directions for an elegant wedding photobook using black as the main color.
-            </p>
+            <h3 id="inspirationTitle" class="font-black text-xl sm:text-2xl mt-1">Elegant Black Wedding</h3>
+            <p id="inspirationDescription" class="text-sm text-slate-500 mt-2"></p>
+            <p id="searchPreview" class="text-[11px] text-slate-400 mt-3 font-bold"></p>
           </div>
-
-          <div id="designReferenceGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+          <div id="inspirationCards" class="p-4 sm:p-6 grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         </div>
 
       </div>
@@ -952,12 +860,6 @@
     const customHeightInput = document.getElementById("customHeight");
     const sizeInfoText = document.getElementById("sizeInfoText");
     const layoutSuggestionGrid = document.getElementById("layoutSuggestionGrid");
-    const inspirationTheme = document.getElementById("inspirationTheme");
-    const inspirationStyle = document.getElementById("inspirationStyle");
-    const inspirationColor = document.getElementById("inspirationColor");
-    const designDirectionTitle = document.getElementById("designDirectionTitle");
-    const designDirectionText = document.getElementById("designDirectionText");
-    const designReferenceGrid = document.getElementById("designReferenceGrid");
 
     const pageList =
       document.getElementById("pageList");
@@ -1350,462 +1252,521 @@
     // =====================================================
 
     function getPhotobookSizeInfo() {
-      let width = 6, height = 6;
-
+      let width=6, height=6;
       if (photobookSizeInput.value === "custom") {
-        width = Number(customWidthInput.value) || 0;
-        height = Number(customHeightInput.value) || 0;
+        width=Number(customWidthInput.value)||0;
+        height=Number(customHeightInput.value)||0;
       } else {
-        [width, height] = photobookSizeInput.value.split("x").map(Number);
+        [width,height]=photobookSizeInput.value.split("x").map(Number);
       }
 
-      const orientation = !width || !height
-        ? "Custom"
-        : Math.abs(width - height) < 0.01
-          ? "Square"
-          : width > height
-            ? "Landscape"
-            : "Portrait";
+      const orientation=!width||!height ? "Custom" :
+        Math.abs(width-height)<0.01 ? "Square" :
+        width>height ? "Landscape" : "Portrait";
 
-      const label = width && height
-        ? `${width} × ${height} inches`
-        : "Enter custom size";
-
-      return { width, height, orientation, label };
+      const label=width&&height ? `${width} × ${height} inches` : "Enter custom size";
+      return {width,height,orientation,label};
     }
-
 
     function updatePhotobookSizeUI() {
-      customSizeFields.classList.toggle("hidden", photobookSizeInput.value !== "custom");
-      const size = getPhotobookSizeInfo();
-      sizeInfoText.textContent = `${size.orientation} • ${size.label}`;
+      customSizeFields.classList.toggle("hidden",photobookSizeInput.value!=="custom");
+      const size=getPhotobookSizeInfo();
+      sizeInfoText.textContent=`${size.orientation} • ${size.label}`;
       calculate();
+      generateInspiration();
     }
 
-
     function setPhotobookSizeFromJob(bookSize) {
-      const match = String(bookSize || "").match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
-      if (!match) return;
-
-      const width = Number(match[1]);
-      const height = Number(match[2]);
-      const key = `${width}x${height}`;
-
-      if (["6x6","8x7","7x10","10x7"].includes(key)) {
-        photobookSizeInput.value = key;
+      const match=String(bookSize||"").match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
+      if(!match) return;
+      const w=Number(match[1]), h=Number(match[2]), key=`${w}x${h}`;
+      if(["6x6","8x7","7x10","10x7"].includes(key)) {
+        photobookSizeInput.value=key;
       } else {
-        photobookSizeInput.value = "custom";
-        customWidthInput.value = width;
-        customHeightInput.value = height;
+        photobookSizeInput.value="custom";
+        customWidthInput.value=w;
+        customHeightInput.value=h;
       }
-
       updatePhotobookSizeUI();
     }
 
-
     function getPageInfo(count) {
-      const orientation = getPhotobookSizeInfo().orientation;
+      const o=getPhotobookSizeInfo().orientation;
 
-      if (count === 0) {
-        return { layout:"Empty Design Page", role:"Design / Writing Space", space:"Maximum", className:"layout-1" };
+      if(count===0) return {layout:"Empty Design Page",role:"Design / Writing Space",space:"Maximum",className:"layout-1"};
+      if(count===1) return {layout:o==="Portrait"?"Full Portrait Feature":o==="Landscape"?"Wide Hero Feature":"Full Bleed Feature",role:"Hero / Feature Page",space:"Maximum",className:"layout-1"};
+      if(count===2) return {layout:o==="Portrait"?"Top + Bottom Story":o==="Landscape"?"Side-by-Side Story":"Balanced Pair",role:"Designed Page",space:"High",className:"layout-2"};
+      if(count===3) return {layout:"Hero + 2 Supporting Photos",role:"Flexible Story Page",space:"Good",className:"layout-3"};
+      if(count===4) return {layout:"2×2 Story Grid",role:"Balanced Design Page",space:"Good",className:"layout-4"};
+      if(count===5) return {layout:"Feature + Supporting Collage",role:"Photo-Focused Page",space:"Limited",className:"layout-5"};
+      if(count===6) return {layout:o==="Portrait"?"2×3 Portrait Grid":o==="Landscape"?"3×2 Wide Grid":"3×2 Grid",role:"Photo-Heavy Page",space:"Limited",className:"layout-6"};
+      return {layout:"Creative Mosaic Collage",role:"Crowded Page",space:"Very Limited",className:"layout-dense"};
+    }
+
+    // =====================================================
+    // MINI PREVIEW
+    // =====================================================
+
+    function applyBookRatioToPreview(preview) {
+      const size=getPhotobookSizeInfo();
+      preview.classList.remove("book-square","book-landscape","book-portrait");
+      preview.classList.add(
+        size.orientation==="Portrait" ? "book-portrait" :
+        size.orientation==="Landscape" ? "book-landscape" : "book-square"
+      );
+      if(size.width>0 && size.height>0) preview.style.aspectRatio=`${size.width} / ${size.height}`;
+    }
+
+    function createPreview(
+      count,
+      layoutClass
+    ) {
+
+      const preview =
+        document.createElement(
+          "div"
+        );
+
+
+      preview.className =
+        "layout-preview " +
+        layoutClass;
+
+      applyBookRatioToPreview(preview);
+
+
+      const boxCount =
+        count >= 7
+          ? Math.min(count,12)
+          : Math.max(count,1);
+
+
+      for (
+        let i = 0;
+        i < boxCount;
+        i++
+      ) {
+
+        const box =
+          document.createElement(
+            "div"
+          );
+
+
+        box.className =
+          "photo-box";
+
+
+        if (
+          count === 0
+        ) {
+
+          box.style.background =
+            "#edf3f0";
+        }
+
+
+        preview.appendChild(
+          box
+        );
       }
 
-      if (count === 1) {
-        return {
-          layout: orientation === "Portrait" ? "Full Portrait Feature" :
-                  orientation === "Landscape" ? "Wide Hero Feature" : "Full Bleed Feature",
-          role:"Hero / Feature Page", space:"Maximum", className:"layout-1"
-        };
-      }
 
-      if (count === 2) {
-        return {
-          layout: orientation === "Portrait" ? "Top + Bottom Story" :
-                  orientation === "Landscape" ? "Side-by-Side Story" : "Balanced Pair",
-          role:"Designed Page", space:"High", className:"layout-2"
-        };
-      }
-
-      if (count === 3) {
-        return { layout:"Hero + 2 Supporting Photos", role:"Flexible Story Page", space:"Good", className:"layout-3" };
-      }
-
-      if (count === 4) {
-        return {
-          layout: orientation === "Portrait" ? "Portrait 2×2 Story Grid" :
-                  orientation === "Landscape" ? "Wide 2×2 Story Grid" : "2×2 Story Grid",
-          role:"Balanced Design Page", space:"Good", className:"layout-4"
-        };
-      }
-
-      if (count === 5) {
-        return { layout:"Feature + Supporting Collage", role:"Photo-Focused Page", space:"Limited", className:"layout-5" };
-      }
-
-      if (count === 6) {
-        return {
-          layout: orientation === "Portrait" ? "2×3 Portrait Grid" :
-                  orientation === "Landscape" ? "3×2 Wide Grid" : "3×2 Grid",
-          role:"Photo-Heavy Page", space:"Limited", className:"layout-6"
-        };
-      }
-
-      return { layout:"Creative Mosaic Collage", role:"Crowded Page", space:"Very Limited", className:"layout-dense" };
+      return preview;
     }
 
 
+    // =====================================================
+    // SUMMARY
+    // =====================================================
+
+    function buildSummary(
+      distribution,
+      total,
+      pages
+    ) {
+
+      const counts =
+        {};
+
+
+      distribution.forEach(
+        count => {
+
+          counts[count] =
+            (counts[count] || 0) + 1;
+        }
+      );
+
+
+      const parts =
+        Object.keys(counts)
+
+          .map(Number)
+
+          .sort(
+            (a,b) => a-b
+          )
+
+          .map(
+            photoCount => {
+
+              const pageCount =
+                counts[photoCount];
+
+
+              return (
+                `${pageCount} ` +
+                `${pageCount === 1 ? "page" : "pages"} × ` +
+                `${photoCount} ` +
+                `${photoCount === 1 ? "photo" : "photos"}`
+              );
+            }
+          );
+
+
+      return (
+        `${total} photos across ${pages} pages: ` +
+        parts.join(" + ") +
+        "."
+      );
+    }
+
+
+    // =====================================================
+    // DESIGN SPACE
+    // =====================================================
+
+    function getOverallSpace(
+      average
+    ) {
+
+      if (
+        average <= 2
+      ) {
+
+        return {
+          label: "Excellent",
+          text:
+            "Plenty of room for backgrounds, decorations, text and custom elements.",
+          classes:
+            "bg-emerald-50 border border-emerald-200 text-emerald-800"
+        };
+      }
+
+
+      if (
+        average <= 4
+      ) {
+
+        return {
+          label: "Good",
+          text:
+            "Good balance between photo content and personalized design space.",
+          classes:
+            "bg-teal-50 border border-teal-200 text-teal-800"
+        };
+      }
+
+
+      if (
+        average <= 6
+      ) {
+
+        return {
+          label: "Limited",
+          text:
+            "There is less room for decorations. Keep backgrounds and design elements cleaner.",
+          classes:
+            "bg-amber-50 border border-amber-200 text-amber-800"
+        };
+      }
+
+
+      return {
+        label: "Crowded",
+        text:
+          "The average photo count is high for a personalized layout. Consider adding pages or reducing photos.",
+        classes:
+          "bg-red-50 border border-red-200 text-red-800"
+      };
+    }
+
+
+    // =====================================================
+    // RENDER PAGES
+    // =====================================================
+
+    function renderPages(
+      distribution
+    ) {
+
+      pageList.innerHTML =
+        "";
+
+
+      distribution.forEach(
+        (count,index) => {
+
+          const info =
+            getPageInfo(
+              count
+            );
+
+
+          const card =
+            document.createElement(
+              "div"
+            );
+
+
+          card.className =
+            "page-card border border-slate-200 rounded-xl p-4 bg-white";
+
+
+          const top =
+            document.createElement(
+              "div"
+            );
+
+
+          top.className =
+            "flex items-center justify-between gap-3";
+
+
+          const text =
+            document.createElement(
+              "div"
+            );
+
+
+          text.className =
+            "min-w-0";
+
+
+          text.innerHTML = `
+
+            <p class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">
+              Page ${index + 1}
+            </p>
+
+            <p class="text-base sm:text-lg font-black mt-1">
+              ${count}
+              ${count === 1 ? "Photo" : "Photos"}
+            </p>
+
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
+              ${info.layout}
+            </p>
+          `;
+
+
+          top.appendChild(
+            text
+          );
+
+
+          top.appendChild(
+            createPreview(
+              count,
+              info.className
+            )
+          );
+
+
+          const bottom =
+            document.createElement(
+              "div"
+            );
+
+
+          bottom.className =
+            "border-t border-slate-100 mt-3 pt-3 flex flex-wrap gap-2";
+
+
+          bottom.innerHTML = `
+
+            <span class="bg-[#eef9f6] text-teal-700 px-2.5 py-1 rounded-full text-[10px] font-black">
+              ${info.role}
+            </span>
+
+            <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-[10px] font-bold">
+              ${info.space} Space
+            </span>
+          `;
+
+
+          card.appendChild(
+            top
+          );
+
+
+          card.appendChild(
+            bottom
+          );
+
+
+          pageList.appendChild(
+            card
+          );
+        }
+      );
+    }
+
+
+    // =====================================================
+    // CALCULATE
+    // =====================================================
+
+    function getPersonalizedCapacity() {
+      const o=getPhotobookSizeInfo().orientation;
+      const table={
+        design:{
+          Portrait:{comfortable:2,max:4}, Square:{comfortable:2,max:4},
+          Landscape:{comfortable:2,max:4}, Custom:{comfortable:2,max:4}
+        },
+        balanced:{
+          Portrait:{comfortable:4,max:4}, Square:{comfortable:4,max:6},
+          Landscape:{comfortable:4,max:6}, Custom:{comfortable:4,max:4}
+        },
+        photo:{
+          Portrait:{comfortable:4,max:6}, Square:{comfortable:6,max:6},
+          Landscape:{comfortable:6,max:6}, Custom:{comfortable:4,max:6}
+        }
+      };
+      return {...(table[currentMode][o]||table[currentMode].Custom),label:o};
+    }
+
+    function evaluatePersonalizedFit(total,pages,c) {
+      const maximumTotal=pages*c.max;
+      const comfortableTotal=pages*c.comfortable;
+      const minimumPages=Math.ceil(total/c.max);
+      return {
+        fits:total<=maximumTotal,
+        comfortable:total<=comfortableTotal,
+        maximumTotal,comfortableTotal,minimumPages,
+        extraPages:Math.max(0,minimumPages-pages),
+        excessPhotos:Math.max(0,total-maximumTotal)
+      };
+    }
+
+    function buildPersonalizedRealisticDistribution(total,pages,maxPerPage) {
+      if(total<pages) {
+        return Array.from({length:pages},(_,i)=>i<total?1:0);
+      }
+
+      const allowed=[1,2,4,6].filter(x=>x<=maxPerPage);
+      const memo=new Map();
+
+      function solve(page,remaining) {
+        if(page===pages) return remaining===0 ? {score:0,values:[]} : null;
+        const left=pages-page;
+        if(remaining<left || remaining>left*maxPerPage) return null;
+        const key=`${page}|${remaining}`;
+        if(memo.has(key)) return memo.get(key);
+
+        const avg=remaining/left;
+        let best=null;
+        for(const value of allowed) {
+          if(value>remaining) continue;
+          const next=solve(page+1,remaining-value);
+          if(!next) continue;
+          let penalty=Math.pow(value-avg,2);
+          if(currentMode==="design" && value>2) penalty+=5;
+          if(currentMode==="balanced" && value===6) penalty+=2;
+          if(value===1) penalty+=.5;
+          const candidate={score:penalty+next.score,values:[value,...next.values]};
+          if(!best || candidate.score<best.score) best=candidate;
+        }
+        memo.set(key,best);
+        return best;
+      }
+
+      const result=solve(0,total);
+      return result ? result.values.sort((a,b)=>b-a) : null;
+    }
+
+    function renderDoesNotFit(total,pages,c,fit) {
+      const size=getPhotobookSizeInfo();
+      resultTitle.textContent=`${total} Photos • ${pages} Pages • ${size.label}`;
+      summaryText.innerHTML=`<strong>Does not fit cleanly.</strong> This ${c.label.toLowerCase()} personalized setup allows about <strong>${c.max} photos maximum per usable page</strong>.`;
+      warningBox.classList.remove("hidden");
+      warningBox.innerHTML=`<strong>✕ Add ${fit.extraPages} usable page${fit.extraPages===1?"":"s"} or remove about ${fit.excessPhotos} photo${fit.excessPhotos===1?"":"s"}.</strong><br>Minimum recommended usable pages: <strong>${fit.minimumPages}</strong>.`;
+      designNote.className="mt-4 rounded-xl p-4 text-sm leading-relaxed bg-red-50 border border-red-200 text-red-800";
+      designNote.innerHTML=`<strong>Capacity exceeded.</strong><br>${pages} usable pages can hold about ${fit.maximumTotal} photos with this size and design mode.`;
+      verification.textContent="✕ Does not fit cleanly";
+      pageList.innerHTML=`<div class="md:col-span-2 border border-red-200 bg-red-50 rounded-xl p-5 text-sm text-red-800"><strong>No forced layout generated.</strong><br>The planner stopped instead of squeezing too many photos into unrealistic pages.</div>`;
+      renderLayoutSuggestions();
+    }
+
     function renderLayoutSuggestions() {
-      if (!layoutSuggestionGrid) return;
-
-      const size = getPhotobookSizeInfo();
-      const ideas = currentMode === "design"
-        ? [
-            ["1 Photo", "Hero Feature", "Use one strong image with lots of room for title, quote or decorations.", 1],
-            ["2 Photos", size.orientation === "Portrait" ? "Top + Bottom Story" : "Editorial Pair", "Great for a before/after, couple, detail pair or short story.", 2],
-            ["4 Photos", "Scrapbook Feature", "Keep one area open for stickers, flowers, dates or client text.", 4]
-          ]
-        : currentMode === "photo"
-          ? [
-              ["4 Photos", "Balanced Grid", "Clean personalized page with enough room for small accents.", 4],
-              ["6 Photos", size.orientation === "Portrait" ? "2×3 Portrait Grid" : "3×2 Wide Grid", "Good when more photos must fit while keeping the page organized.", 6],
-              ["2 Photos", "Feature Break", "Use between busy pages to give the album visual breathing room.", 2]
-            ]
-          : [
-              ["2 Photos", size.orientation === "Portrait" ? "Vertical Story Pair" : "Editorial Pair", "A safe personalized layout with room for text and design.", 2],
-              ["4 Photos", "Story Grid", "Balanced choice for photos, backgrounds and small decorations.", 4],
-              ["1 Photo", "Hero Break", "Use on important moments so the photobook does not feel too crowded.", 1]
-            ];
-
-      layoutSuggestionGrid.innerHTML = "";
-
-      ideas.forEach(([countLabel, title, text, count]) => {
-        const info = getPageInfo(count);
-        const card = document.createElement("div");
-        card.className = "border border-slate-200 rounded-xl p-4 bg-[#fbfdfc]";
-
-        const top = document.createElement("div");
-        top.className = "flex items-center justify-between gap-3";
-
-        const copy = document.createElement("div");
-        copy.innerHTML = `
-          <p class="text-[10px] font-black text-teal-600 uppercase">${countLabel}</p>
-          <p class="font-black mt-1">${title}</p>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed">${text}</p>
-        `;
-
-        top.appendChild(copy);
-        top.appendChild(createPreview(count, info.className));
-        card.appendChild(top);
+      if(!layoutSuggestionGrid) return;
+      const size=getPhotobookSizeInfo();
+      const c=getPersonalizedCapacity();
+      const counts=[1,2,4,6].filter(n=>n<=c.max).slice(0,3);
+      layoutSuggestionGrid.innerHTML="";
+      counts.forEach(count=>{
+        const info=getPageInfo(count);
+        const card=document.createElement("div");
+        card.className="border border-slate-200 rounded-xl p-4 bg-[#fbfdfc] flex items-center justify-between gap-4";
+        card.innerHTML=`<div><p class="text-[10px] font-black text-teal-600 uppercase">${count} Photo${count===1?"":"s"}</p><p class="font-black mt-1">${info.layout}</p><p class="text-xs text-slate-500 mt-2">${info.role} • ${info.space} design space</p></div>`;
+        card.appendChild(createPreview(count,info.className));
         layoutSuggestionGrid.appendChild(card);
       });
     }
 
-
-
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-
-    function pinterestSearchUrl(query) {
-      return "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(query);
-    }
-
-
-    function renderDesignInspiration() {
-      if (!designReferenceGrid) return;
-
-      const theme = inspirationTheme.value.trim() || "Photobook";
-      const style = inspirationStyle.value;
-      const color = inspirationColor.value;
-      const size = getPhotobookSizeInfo();
-
-      designDirectionTitle.textContent = `${style} ${color} ${theme}`;
-      designDirectionText.textContent =
-        `Suggested design directions for a ${style.toLowerCase()} ${theme.toLowerCase()} photobook using ${color.toLowerCase()} as the main color.`;
-
-      const ideas = [
-        {
-          icon:"✦",
-          title:"Cover Design",
-          text:`Main ${style.toLowerCase()} cover direction using ${color.toLowerCase()}.`,
-          query:`${theme} photobook ${style} ${color} cover design`
-        },
-        {
-          icon:"□",
-          title:"Minimal Cover",
-          text:"Cleaner cover with fewer elements and more negative space.",
-          query:`${theme} photobook minimal ${color} cover ${style}`
-        },
-        {
-          icon:"▣",
-          title:"Photo Cover",
-          text:"Use one strong client photo as the main cover focus.",
-          query:`${theme} photo cover photobook ${style} ${color}`
-        },
-        {
-          icon:"Aa",
-          title:"Typography",
-          text:"Title, names, dates and typography inspiration.",
-          query:`${theme} photobook typography ${style} ${color}`
-        },
-        {
-          icon:"▦",
-          title:"Inside Layouts",
-          text:`Page composition ideas suited to a ${size.orientation.toLowerCase()} photobook.`,
-          query:`${theme} photobook layout ${style} ${color} ${size.orientation}`
-        },
-        {
-          icon:"◇",
-          title:"Decorations",
-          text:"Backgrounds, borders, accents and decorative element ideas.",
-          query:`${theme} scrapbook photobook decoration ${style} ${color}`
-        }
-      ];
-
-      designReferenceGrid.innerHTML = ideas.map(idea => `
-        <article class="inspiration-card border border-slate-200 rounded-2xl overflow-hidden bg-white">
-          <div class="brand-gradient h-32 flex flex-col items-center justify-center">
-            <div class="text-3xl font-black text-slate-900">${escapeHtml(idea.icon)}</div>
-            <div class="text-[9px] tracking-[.3em] uppercase text-slate-600 mt-4">${escapeHtml(theme)}</div>
-          </div>
-          <div class="p-4">
-            <p class="font-black">${escapeHtml(idea.title)}</p>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">${escapeHtml(idea.text)}</p>
-            <a
-              href="${pinterestSearchUrl(idea.query)}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex mt-4 text-xs font-black text-teal-600 hover:text-teal-700"
-            >
-              Find References →
-            </a>
-          </div>
-        </article>
-      `).join("");
-    }
-
-
     function calculate() {
+      const total=Number(totalPicturesInput.value);
+      const pages=Number(usablePagesInput.value);
 
-      const total =
-        parseInt(
-          totalPicturesInput.value
-        );
-
-
-      const pages =
-        parseInt(
-          usablePagesInput.value
-        );
-
-
-      if (
-        !total ||
-        !pages ||
-        total < 1 ||
-        pages < 1
-      ) {
-
-        pageList.innerHTML = `
-
-          <div class="md:col-span-2 text-center py-12 text-slate-400">
-            Enter valid numbers.
-          </div>
-        `;
-
-
-        summaryText.textContent =
-          "Enter the number of photos and usable pages.";
-
-
-        verification.textContent =
-          "";
-
-
+      if(!total || !pages || total<1 || pages<1) {
+        pageList.innerHTML=`<div class="md:col-span-2 text-center py-12 text-slate-400">Enter valid numbers.</div>`;
+        summaryText.textContent="Enter the number of photos and usable pages.";
+        verification.textContent="";
         return;
       }
 
+      const average=total/pages;
+      const size=getPhotobookSizeInfo();
+      const c=getPersonalizedCapacity();
+      const fit=evaluatePersonalizedFit(total,pages,c);
 
-      const average =
-        total / pages;
+      averageStat.textContent=average.toFixed(2);
+      resultTitle.textContent=`${total} Photos • ${pages} Pages • ${size.label}`;
 
+      const space=getOverallSpace(average);
+      spaceStat.textContent=space.label;
+      designNote.className="mt-4 rounded-xl p-4 text-sm leading-relaxed "+space.classes;
+      designNote.innerHTML=`<strong>Design Space: ${space.label}</strong><br>${space.text}`;
 
-      averageStat.textContent =
-        average.toFixed(2);
+      warningBox.classList.add("hidden");
 
-
-      const sizeInfo = getPhotobookSizeInfo();
-
-      resultTitle.textContent =
-        `${total} Photos • ${pages} Pages • ${sizeInfo.label}`;
-
-
-      const space =
-        getOverallSpace(
-          average
-        );
-
-
-      spaceStat.textContent =
-        space.label;
-
-
-      designNote.className =
-        "mt-4 rounded-xl p-4 text-sm leading-relaxed " +
-        space.classes;
-
-
-      designNote.innerHTML =
-        `<strong>Design Space: ${space.label}</strong><br>${space.text}`;
-
-
-      const capacity = getPersonalizedCapacity();
-      const fit = evaluatePersonalizedFit(total,pages,capacity);
-
-      if (!fit.fits) {
-        renderPersonalizedDoesNotFit(total,pages,capacity,fit);
+      if(!fit.fits) {
+        renderDoesNotFit(total,pages,c,fit);
         return;
       }
 
-      const distribution =
-        buildPersonalizedRealisticDistribution(total,pages,capacity.max);
-
-      summaryText.textContent =
-        buildSummary(
-          distribution,
-          total,
-          pages
-        );
-
-
-      const distributed =
-        distribution.reduce(
-          (sum,value) => sum + value,
-          0
-        );
-
-
-      verification.textContent =
-        `✓ ${distributed} / ${total}`;
-
-
-      // WARNING LOGIC
-
-      warningBox.classList.add(
-        "hidden"
-      );
-
-
-      if (
-        total < pages
-      ) {
-
-        warningBox.classList.remove(
-          "hidden"
-        );
-
-
-        warningBox.innerHTML = `
-
-          <strong>
-            More pages than photos.
-          </strong>
-
-          <br>
-
-          ${pages-total} page(s) can remain empty or be used for text, decorations, guest messages or design-only pages.
-        `;
-
-      } else if (
-        average > 6
-      ) {
-
-        warningBox.classList.remove(
-          "hidden"
-        );
-
-
-        warningBox.innerHTML = `
-
-          <strong>
-            Crowded for a personalized photobook.
-          </strong>
-
-          <br>
-
-          You're averaging ${average.toFixed(1)} photos per page.
-          Consider adding more usable pages or reducing the number of photos if you need more design space.
-        `;
-
-      } else if (
-        currentMode === "design" &&
-        average > 2
-      ) {
-
-        warningBox.classList.remove(
-          "hidden"
-        );
-
-
-        warningBox.innerHTML = `
-
-          <strong>
-            Design Heavy target exceeded.
-          </strong>
-
-          <br>
-
-          With ${total} photos and ${pages} pages, it isn't possible to keep every page at only 1–2 photos.
-          The planner will use some higher-photo pages so all photos still fit.
-        `;
-
-      } else if (
-        currentMode === "balanced" &&
-        average > 4
-      ) {
-
-        warningBox.classList.remove(
-          "hidden"
-        );
-
-
-        warningBox.innerHTML = `
-
-          <strong>
-            Limited design space.
-          </strong>
-
-          <br>
-
-          Balanced Personalized works best around 2–4 photos per page.
-          Some pages need more photos to fit the client's full set.
-        `;
-
+      const distribution=buildPersonalizedRealisticDistribution(total,pages,c.max);
+      if(!distribution) {
+        renderDoesNotFit(total,pages,c,fit);
+        return;
       }
 
+      summaryText.textContent=buildSummary(distribution,total,pages);
+      const distributed=distribution.reduce((sum,value)=>sum+value,0);
+      verification.textContent=`✓ ${distributed} / ${total}`;
 
-      if (fit.fits && !fit.comfortable && warningBox.classList.contains("hidden")) {
+      if(total<pages) {
         warningBox.classList.remove("hidden");
-        warningBox.innerHTML =
-          `<strong>△ Tight but workable.</strong><br>` +
-          `Some pages need more than the comfortable ${capacity.comfortable}-photo density, ` +
-          `but the plan remains within the ${capacity.max}-photo personalized maximum.`;
+        warningBox.innerHTML=`<strong>More pages than photos.</strong><br>${pages-total} page(s) can remain empty or be used for text, decorations, guest messages or design-only pages.`;
+      } else if(!fit.comfortable) {
+        warningBox.classList.remove("hidden");
+        warningBox.innerHTML=`<strong>△ Tight but workable.</strong><br>Some pages need more than the comfortable ${c.comfortable}-photo density, but the plan stays within the ${c.max}-photo maximum for this setup.`;
       }
 
-      renderPages(
-        distribution
-      );
-
+      renderPages(distribution);
       renderLayoutSuggestions();
     }
-
 
     // =====================================================
     // EVENTS
@@ -1822,31 +1783,9 @@
       calculate
     );
 
-    photobookSizeInput.addEventListener("change", () => {
-      updatePhotobookSizeUI();
-      renderDesignInspiration();
-    });
-
-    customWidthInput.addEventListener("input", () => {
-      updatePhotobookSizeUI();
-      renderDesignInspiration();
-    });
-
-    customHeightInput.addEventListener("input", () => {
-      updatePhotobookSizeUI();
-      renderDesignInspiration();
-    });
-
-    inspirationTheme.addEventListener("input", renderDesignInspiration);
-    inspirationStyle.addEventListener("change", renderDesignInspiration);
-    inspirationColor.addEventListener("change", renderDesignInspiration);
-
-    document.querySelectorAll(".quick-theme").forEach(button => {
-      button.addEventListener("click", () => {
-        inspirationTheme.value = button.dataset.theme || "";
-        renderDesignInspiration();
-      });
-    });
+    photobookSizeInput.addEventListener("change",updatePhotobookSizeUI);
+    customWidthInput.addEventListener("input",updatePhotobookSizeUI);
+    customHeightInput.addEventListener("input",updatePhotobookSizeUI);
 
 
     // =====================================================
@@ -1985,10 +1924,100 @@
     renderPlannerQueue();
 
     // INITIAL
-    updatePhotobookSizeUI();
-    renderDesignInspiration();
+    calculate();
 
-  </script>
+  
+    // =====================================================
+    // DESIGN INSPIRATION - WORKING NORMAL-STYLE VERSION
+    // =====================================================
+    const themeInput=document.getElementById("themeInput");
+    const styleInput=document.getElementById("styleInput");
+    const colorInput=document.getElementById("colorInput");
+    const inspirationTitle=document.getElementById("inspirationTitle");
+    const inspirationDescription=document.getElementById("inspirationDescription");
+    const inspirationCards=document.getElementById("inspirationCards");
+    const searchPreview=document.getElementById("searchPreview");
+    const inspirationResults=document.getElementById("inspirationResults");
+    let currentPinterestQuery="";
+
+    function isPhone() {
+      return window.matchMedia("(max-width: 767px)").matches;
+    }
+
+    function scrollToInspirationResults() {
+      if(!isPhone()) return;
+      setTimeout(()=>{
+        inspirationResults.scrollIntoView({behavior:"smooth",block:"start"});
+        inspirationResults.classList.remove("result-flash");
+        void inspirationResults.offsetWidth;
+        inspirationResults.classList.add("result-flash");
+      },100);
+    }
+
+    function quickTheme(theme) {
+      themeInput.value=theme;
+      generateInspiration();
+      scrollToInspirationResults();
+    }
+
+    function generateInspiration() {
+      const theme=themeInput.value.trim()||"Wedding";
+      const style=styleInput.value;
+      const color=colorInput.value;
+      const size=getPhotobookSizeInfo();
+
+      inspirationTitle.textContent=`${style} ${color} ${theme}`;
+      inspirationDescription.textContent=`Suggested design directions for a ${style.toLowerCase()} ${theme.toLowerCase()} photobook using ${color.toLowerCase()} as the main color.`;
+      currentPinterestQuery=`${style} ${color} ${theme} photobook design ${size.orientation}`;
+      searchPreview.textContent=`Search: "${currentPinterestQuery}"`;
+
+      const ideas=[
+        {title:"Cover Design",symbol:"✦",text:`Main ${style.toLowerCase()} cover direction using ${color.toLowerCase()}.`,query:`${style} ${color} ${theme} photobook cover design`},
+        {title:"Minimal Cover",symbol:"□",text:"Cleaner cover with fewer elements and more negative space.",query:`minimal ${color} ${theme} photo album cover`},
+        {title:"Photo Cover",symbol:"▣",text:"Use one strong client photo as the main cover focus.",query:`${style} ${theme} photo cover album design`},
+        {title:"Typography",symbol:"Aa",text:"Find matching fonts, title placement and text hierarchy.",query:`${theme} photobook typography ${style}`},
+        {title:"Inside Pages",symbol:"▦",text:`Find ${size.orientation.toLowerCase()} interior photobook spreads and layouts.`,query:`${style} ${theme} photobook page layout ${color} ${size.orientation}`},
+        {title:"Premium Look",symbol:"◇",text:"Explore luxury and editorial album presentation.",query:`luxury ${style} ${theme} photo album design ${color}`}
+      ];
+
+      inspirationCards.innerHTML="";
+      ideas.forEach(idea=>{
+        const card=document.createElement("div");
+        card.className="inspiration-card border border-slate-200 rounded-xl overflow-hidden bg-white";
+        card.innerHTML=`
+          <div class="brand-gradient h-28 sm:h-32 flex items-center justify-center">
+            <div class="text-center text-slate-900">
+              <div class="text-3xl font-serif font-black">${idea.symbol}</div>
+              <p class="text-[9px] uppercase tracking-[.25em] opacity-60 mt-3"></p>
+            </div>
+          </div>
+          <div class="p-4">
+            <p class="font-black">${idea.title}</p>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed min-h-[40px]">${idea.text}</p>
+            <button type="button" class="pinterest-ref mt-4 text-xs font-black text-teal-600 hover:text-teal-700">Find References →</button>
+          </div>`;
+        card.querySelector(".brand-gradient p").textContent=theme;
+        card.querySelector(".pinterest-ref").addEventListener("click",()=>openPinterest(idea.query));
+        inspirationCards.appendChild(card);
+      });
+    }
+
+    function openPinterest(query) {
+      const url="https://www.pinterest.com/search/pins/?q="+encodeURIComponent(query);
+      window.open(url,"_blank","noopener,noreferrer");
+    }
+
+    themeInput.addEventListener("input",generateInspiration);
+    themeInput.addEventListener("keydown",event=>{
+      if(event.key==="Enter") {
+        generateInspiration();
+        scrollToInspirationResults();
+      }
+    });
+    styleInput.addEventListener("change",generateInspiration);
+    colorInput.addEventListener("change",generateInspiration);
+
+</script>
 
 </body>
 </html>
