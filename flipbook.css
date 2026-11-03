@@ -1,24 +1,39 @@
 /* =========================================================
-   R&Y PRINTING LAB — ANIMATED PHOTOBOOK FLIPBOOK
+   R&Y PRINTING LAB — PREMIUM ANIMATED PHOTOBOOK FLIPBOOK
    ========================================================= */
 
 .ry-flipbook-section {
   margin-top: 2rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 1rem;
+  border-radius: 1.15rem;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 35px rgba(15, 23, 42, 0.05);
 }
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .ry-flipbook-head {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
+
   display: flex;
   gap: 1rem;
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fbfdfc 100%
+    );
 }
 
 .ry-flipbook-kicker {
@@ -41,6 +56,7 @@
   color: #64748b;
   margin-top: 0.35rem;
   max-width: 720px;
+  line-height: 1.55;
 }
 
 
@@ -49,34 +65,80 @@
    ========================================================= */
 
 .ry-flipbook-stage {
-  min-height: 500px;
-  padding: 35px 20px;
+  min-height: 540px;
+  padding: 45px 24px 55px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  position: relative;
+
   background:
     radial-gradient(
-      circle at 50% 15%,
+      circle at 50% 20%,
       rgba(99, 217, 201, 0.18),
-      transparent 35%
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(139, 203, 120, 0.09),
+      transparent 28%
     ),
     linear-gradient(
       180deg,
-      #f8fbfa,
-      #edf4f1
+      #f9fcfb 0%,
+      #eef5f2 100%
     );
 
   overflow: hidden;
 }
 
+
+/* subtle table / floor shadow */
+
+.ry-flipbook-stage::after {
+  content: "";
+  position: absolute;
+
+  left: 50%;
+  bottom: 8%;
+
+  width: min(72%, 760px);
+  height: 55px;
+
+  transform: translateX(-50%);
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(15, 23, 42, 0.20) 0%,
+      rgba(15, 23, 42, 0.08) 40%,
+      transparent 72%
+    );
+
+  filter: blur(9px);
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   BOOK
+   ========================================================= */
+
 .ry-flipbook-book {
   margin: 0 auto;
 
+  position: relative;
+  z-index: 2;
+
   filter:
     drop-shadow(
-      0 22px 28px rgba(15, 23, 42, 0.18)
+      0 24px 28px rgba(15, 23, 42, 0.18)
+    )
+    drop-shadow(
+      0 6px 10px rgba(15, 23, 42, 0.10)
     );
 }
 
@@ -90,11 +152,45 @@
 
   overflow: hidden;
 
+  position: relative;
+
   box-shadow:
-    inset 0 0 0 1px rgba(15, 23, 42, 0.1);
+    inset 0 0 0 1px rgba(15, 23, 42, 0.08),
+    inset 0 0 18px rgba(15, 23, 42, 0.025);
 
   user-select: none;
+
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
+
+
+/* paper texture */
+
+.ry-book-page::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.025),
+      transparent 7%,
+      transparent 93%,
+      rgba(15, 23, 42, 0.025)
+    );
+
+  z-index: 10;
+}
+
+
+/* =========================================================
+   PAGE INNER
+   ========================================================= */
 
 .ry-page-inner {
   width: 100%;
@@ -108,11 +204,43 @@
   position: relative;
 
   background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 255, 255, 0.95),
+      transparent 55%
+    ),
     linear-gradient(
       145deg,
-      #ffffff,
-      #f8fbfa
+      #ffffff 0%,
+      #fbfdfc 55%,
+      #f6faf8 100%
     );
+}
+
+
+/* subtle inside edge */
+
+.ry-page-inner::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 10px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.07),
+      transparent
+    );
+
+  opacity: 0.35;
+
+  pointer-events: none;
 }
 
 
@@ -159,15 +287,20 @@
   min-width: 0;
   min-height: 0;
 
-  border: 2px dashed #63cdbc;
+  border: 2px dashed rgba(13, 148, 136, 0.52);
 
   border-radius: 8px;
 
   background:
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(255, 255, 255, 0.60),
+      transparent 35%
+    ),
     linear-gradient(
       145deg,
       rgba(99, 217, 201, 0.20),
-      rgba(139, 203, 120, 0.16)
+      rgba(139, 203, 120, 0.14)
     );
 
   display: flex;
@@ -183,6 +316,32 @@
   font-weight: 900;
 
   overflow: hidden;
+
+  position: relative;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.ry-photo-slot::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.28),
+      transparent 40%
+    );
+
+  pointer-events: none;
 }
 
 
@@ -365,7 +524,12 @@
   font-size: 12px;
   font-weight: 800;
 
-  background: #f8fafc;
+  background:
+    linear-gradient(
+      145deg,
+      #fbfdfc,
+      #f4f8f6
+    );
 }
 
 
@@ -395,9 +559,27 @@
   background:
     linear-gradient(
       135deg,
-      #63d9c9,
-      #8bcb78
+      #63d9c9 0%,
+      #72d5b4 45%,
+      #8bcb78 100%
     ) !important;
+
+  box-shadow:
+    inset 0 0 0 2px rgba(15, 23, 42, 0.10),
+    inset 0 0 30px rgba(15, 23, 42, 0.08);
+}
+
+.ry-cover-page::before {
+  content: "";
+
+  position: absolute;
+  inset: 5px;
+
+  border: 1px solid rgba(255, 255, 255, 0.24);
+
+  pointer-events: none;
+
+  z-index: 4;
 }
 
 .ry-cover-page .ry-cover-content {
@@ -415,11 +597,18 @@
 
   text-align: center;
 
+  position: relative;
+
   background:
     radial-gradient(
       circle at 30% 20%,
-      rgba(255, 255, 255, 0.30),
-      transparent 35%
+      rgba(255, 255, 255, 0.35),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 75% 80%,
+      rgba(255, 255, 255, 0.12),
+      transparent 30%
     );
 }
 
@@ -447,6 +636,9 @@
   color: #0f172a;
 
   line-height: 1.05;
+
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.20);
 }
 
 .ry-cover-subtitle {
@@ -470,10 +662,19 @@
 
 .stf__parent {
   margin: 0 auto !important;
+
+  position: relative;
+
+  z-index: 2;
 }
 
 .stf__wrapper {
   margin: 0 auto !important;
+
+  filter:
+    drop-shadow(
+      0 16px 18px rgba(15, 23, 42, 0.12)
+    );
 }
 
 .stf__block {
@@ -485,12 +686,27 @@
 }
 
 
+/* realistic inner-book shadow */
+
+.stf__item::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  box-shadow:
+    inset 0 0 10px rgba(15, 23, 42, 0.04);
+}
+
+
 /* =========================================================
    CONTROLS
    ========================================================= */
 
 .ry-flipbook-controls {
-  padding: 14px 16px;
+  padding: 16px 18px;
 
   display: flex;
 
@@ -503,7 +719,12 @@
 
   flex-wrap: wrap;
 
-  background: #ffffff;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff,
+      #fbfdfc
+    );
 }
 
 .ry-flipbook-btn {
@@ -513,7 +734,7 @@
 
   border-radius: 12px;
 
-  padding: 10px 16px;
+  padding: 10px 17px;
 
   font-size: 12px;
   font-weight: 900;
@@ -522,23 +743,39 @@
 
   cursor: pointer;
 
+  box-shadow:
+    0 2px 5px rgba(15, 23, 42, 0.04);
+
   transition:
     background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .ry-flipbook-btn:hover {
-  background: #f8fafc;
+  background: #f0fdfa;
+
+  border-color: #63d9c9;
+
+  color: #0f766e;
 
   transform: translateY(-1px);
 
   box-shadow:
-    0 5px 12px rgba(15, 23, 42, 0.08);
+    0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.ry-flipbook-btn:active {
+  transform: translateY(0);
+
+  box-shadow:
+    0 2px 5px rgba(15, 23, 42, 0.05);
 }
 
 .ry-flipbook-counter {
-  min-width: 150px;
+  min-width: 160px;
 
   text-align: center;
 
@@ -546,6 +783,14 @@
   font-weight: 900;
 
   color: #475569;
+
+  padding: 8px 12px;
+
+  border-radius: 999px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
 }
 
 
@@ -554,13 +799,18 @@
    ========================================================= */
 
 .ry-flipbook-empty {
-  padding: 50px 20px;
+  padding: 55px 20px;
 
   text-align: center;
 
   color: #94a3b8;
 
   font-size: 13px;
+
+  line-height: 1.6;
+
+  position: relative;
+  z-index: 3;
 }
 
 
@@ -570,15 +820,29 @@
 
 @media (max-width: 640px) {
 
+  .ry-flipbook-section {
+    border-radius: 0.9rem;
+  }
+
   .ry-flipbook-stage {
-    min-height: 400px;
+    min-height: 420px;
 
     padding:
-      22px 6px;
+      28px 6px
+      40px;
+  }
+
+  .ry-flipbook-stage::after {
+    width: 92%;
+    bottom: 7%;
   }
 
   .ry-flipbook-head {
     padding: 18px;
+  }
+
+  .ry-flipbook-title {
+    font-size: 1.15rem;
   }
 
   .ry-flipbook-btn {
@@ -588,10 +852,15 @@
 
   .ry-flipbook-counter {
     min-width: 110px;
+
+    padding:
+      8px 10px;
   }
 
   .ry-photo-slot {
     border-width: 1px;
+
+    border-radius: 5px;
 
     font-size: 7px;
   }
@@ -604,6 +873,41 @@
     font-size: 7px;
   }
 
+  .ry-cover-small {
+    font-size: 7px;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+  .ry-flipbook-stage {
+    min-height: 370px;
+  }
+
+  .ry-flipbook-controls {
+    gap: 8px;
+
+    padding:
+      12px 8px;
+  }
+
+  .ry-flipbook-btn {
+    font-size: 11px;
+
+    padding:
+      9px 11px;
+  }
+
+  .ry-flipbook-counter {
+    font-size: 10px;
+
+    min-width: 90px;
+  }
 }
 
 
