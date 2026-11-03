@@ -779,17 +779,366 @@
     // =====================================================
     // STORAGE
     // =====================================================
+// =====================================================
+// STORAGE
+// =====================================================
 
-    const STORAGE_KEY =
-      "ryLayoutJobsV2";
+const STORAGE_KEY_BASE = "ryLayoutJobsV2";
 
-    const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-    let currentUser = null;
-    let cloudSaveTimer = null;
-    let cloudSyncReady = false;
+let currentUser = null;
+let cloudSaveTimer = null;
+let cloudSyncReady = false;
+
+
+// =====================================================
+// PER-ACCOUNT LOCAL STORAGE
+// =====================================================
+
+function getUserStorageKey() {
+  if (!currentUser) {
+    return null;
+  }
+
+  return `${STORAGE_KEY_BASE}_${currentUser.id}`;
+}
+
+
+function getJobs() {
+  try {
+    const storageKey = getUserStorageKey();
+
+    if (!storageKey) {
+      return [];
+    }
+
+    return JSON.parse(
+      localStorage.getItem(storageKey)
+    ) || [];
+
+  } catch (error) {
+    console.error(
+      "Could not read local jobs:",
+      error
+    );
+
+    return [];
+  }
+}
+
+
+function saveJobs() {
+  const storageKey = getUserStorageKey();
+
+  // Save only inside the CURRENT account's local workspace.
+  if (storageKey) {
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(jobs)
+    );
+  }
+
+  // Sync only to the CURRENT account's Supabase workspace.
+  if (cloudSyncReady && currentUser) {
+    clearTimeout(cloudSaveTimer);
+
+    cloudSaveTimer = setTimeout(
+      syncJobsToCloud,
+      250
+    );
+  }
+}
+
+
+function jobToCloudRow(job) {
+  return {
+    id: String(job.id),
+    user_id: currentUser.id,
+    client_name: String(
+      job.clientName || "Unnamed Client"
+    ),
+    status: String(
+      job.status || "pending"
+    ),
+    month: job.month
+      ? String(job.month)
+      : null,
+    form_answers: job,
+    updated_at: new Date().toISOString()
+  };
+}
+
+
+function cloudRowToJob(row) {
+  const payload =
+    row &&
+    row.form_answers &&
+    typeof row.form_answers === "object" &&
+    !Array.isArray(row.form_answers)
+      ? row.form_answers
+      : {};
+
+  return {
+    ...payload,
+
+    id:
+      payload.id ??
+      row.id,
+
+    clientName:
+      payload.clientName ||
+      row.client_name ||
+      "Unnamed Client",
+
+    status:
+      payload.status ||
+      row.status ||
+      "pending",
+
+    month:
+      payload.month ||
+      row.month ||
+      ""
+  };
+}
+
+
+async function syncJobsToCloud() {
+  if (!currentUser) {
+    return;
+  }
+
+  try {
+    const { data: existingRows, error: readError } =
+      await supabaseClient
+        .from("jobs")
+        .select("id")
+        .eq(
+          "user_id",
+          currentUser.id
+        );
+
+    if (readError) {
+      throw readError;
+    }
+
+
+    const localIds =
+      new Set(
+        jobs.map(
+          job => String(job.id)
+        )
+      );
+
+
+    const cloudIds =
+      (existingRows || []).map(
+        row => String(row.id)
+      );
+
+
+    const idsToDelete =
+      cloudIds.filter(
+        id => !localIds.has(id)
+      );
+
+
+    if (idsToDelete.length) {
+      const { error: deleteError } =
+        await supabaseClient
+          .from("jobs")
+          .delete()
+          .eq(
+            "user_id",
+            currentUser.id
+          )
+          .in(
+            "id",
+            idsToDelete
+          );
+
+      if (deleteError) {
+        throw deleteError;
+      }
+    }
+
+
+    if (jobs.length) {
+      const rows =
+        jobs.map(
+          jobToCloudRow
+        );
+
+      const { error: upsertError } =
+        await supabaseClient
+          .from("jobs")
+          .upsert(
+            rows,
+            {
+              onConflict: "id"
+            }
+          );
+
+      if (upsertError) {
+        throw upsertError;
+      }
+    }
+
+
+    console.log(
+      "R&Y cloud sync complete for current account."
+    );
+
+  } catch (error) {
+    console.error(
+      "R&Y cloud sync failed:",
+      error
+    );
+
+    showToast(
+      "Cloud sync failed — local copy is still safe"
+    );
+  }
+}
+
+
+async function initializeCloudSync() {
+  const { data: sessionData, error: sessionError } =
+    await supabaseClient.auth.getSession();
+
+
+  if (
+    sessionError ||
+    !sessionData.session
+  ) {
+    window.location.replace(
+      "login.html"
+    );
+
+    return;
+  }
+
+
+  // IMPORTANT:
+  // Set current user BEFORE reading localStorage.
+  currentUser =
+    sessionData.session.user;
+
+
+  try {
+    const { data: cloudRows, error } =
+      await supabaseClient
+        .from("jobs")
+        .select("*")
+        .eq(
+          "user_id",
+          currentUser.id
+        );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const cloudJobs =
+      (cloudRows || []).map(
+        cloudRowToJob
+      );
+
+
+    // This now reads ONLY this account's local backup.
+    const localJobs =
+      getJobs();
+
+
+    const merged =
+      new Map();
+
+
+    cloudJobs.forEach(
+      job =>
+        merged.set(
+          String(job.id),
+          job
+        )
+    );
+
+
+    localJobs.forEach(
+      job =>
+        merged.set(
+          String(job.id),
+          job
+        )
+    );
+
+
+    jobs =
+      [...merged.values()];
+
+
+    const storageKey =
+      getUserStorageKey();
+
+
+    if (storageKey) {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(jobs)
+      );
+    }
+
+
+    cloudSyncReady = true;
+
+
+    updateMonthOptions();
+    renderJobs();
+    renderImportedFiles();
+
+
+    await syncJobsToCloud();
+
+
+    showToast(
+      cloudJobs.length ||
+      localJobs.length
+        ? "R&Y jobs synced"
+        : "Cloud sync ready"
+    );
+
+  } catch (error) {
+    console.error(
+      "Initial cloud sync failed:",
+      error
+    );
+
+
+    // Even offline backup is now account-specific.
+    jobs =
+      getJobs();
+
+
+    cloudSyncReady = false;
+
+
+    updateMonthOptions();
+    renderJobs();
+    renderImportedFiles();
+
+
+    showToast(
+      "Using local backup — cloud sync unavailable"
+    );
+  }
+}
 
 
     function getJobs() {
@@ -957,8 +1306,7 @@
     }
 
 
-    let jobs =
-      getJobs();
+    let jobs = [];
 
 
     let currentFilter =
