@@ -359,13 +359,14 @@
 
       const { error: insertError } =
         await supabaseClient
-          .from("client_flipbooks")
-          .insert({
-            share_code: shareCode,
-            project_name: projectName,
-            pdf_url: pdfUrl,
-            book_size: bookSize
-          });
+  .from("client_flipbooks")
+  .insert({
+    share_code: shareCode,
+    project_name: projectName,
+    pdf_url: pdfUrl,
+    book_size: bookSize,
+    user_id: user.id
+  });
 
       if (insertError) {
         throw insertError;
@@ -3046,14 +3047,18 @@ await loadSavedClientFlipbooks();
         data,
         error
       } =
-        await supabaseClient
-          .from(
-            "client_flipbooks"
-          )
-          .select(
-            "share_code, project_name, book_size, status, client_name, client_message, revision_page, responded_at, created_at"
-          )
-          .order(
+       await supabaseClient
+  .from(
+    "client_flipbooks"
+  )
+  .select(
+    "share_code, project_name, book_size, status, client_name, client_message, revision_page, responded_at, created_at"
+  )
+  .eq(
+    "user_id",
+    user.id
+  )
+  .order(
             "created_at",
             {
               ascending:
