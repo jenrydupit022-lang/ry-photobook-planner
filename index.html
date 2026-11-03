@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,14 +76,20 @@
 </head>
 
 <body class="min-h-screen">
-  
+
 
   <!-- HEADER -->
   <header class="bg-white/90 backdrop-blur border-b border-slate-200">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-      <div id="authLoading" class="fixed inset-0 z-[9999] bg-[#f6faf8] flex items-center justify-center">
-        <p class="font-black text-slate-700">Checking account...</p>
+
+      <div
+        id="authLoading"
+        class="fixed inset-0 z-[9999] bg-[#f6faf8] flex items-center justify-center"
+      >
+        <p class="font-black text-slate-700">
+          Checking account...
+        </p>
       </div>
 
       <img
@@ -102,6 +99,7 @@
       >
 
       <div>
+
         <h1 class="font-black text-base sm:text-xl">
           R&Y Photobook Planner
         </h1>
@@ -109,13 +107,23 @@
         <p class="text-[10px] sm:text-xs text-slate-500">
           Smart Photo Planning by R&Y Printing Lab
         </p>
+
       </div>
 
       <div class="ml-auto flex items-center gap-2">
-        <span id="userEmail" class="hidden sm:block text-xs font-bold text-slate-500 max-w-[220px] truncate"></span>
-        <button id="logoutBtn" class="px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-black hover:bg-slate-800">
+
+        <span
+          id="userEmail"
+          class="hidden sm:block text-xs font-bold text-slate-500 max-w-[220px] truncate"
+        ></span>
+
+        <button
+          id="logoutBtn"
+          class="px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-black hover:bg-slate-800"
+        >
           Logout
         </button>
+
       </div>
 
     </div>
@@ -125,6 +133,7 @@
 
   <!-- MAIN -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+
 
     <!-- INTRO -->
     <section class="text-center max-w-3xl mx-auto">
@@ -161,6 +170,7 @@
     </section>
 
 
+
     <!-- ================================================= -->
     <!-- PHOTOBOOK PLANNERS -->
     <!-- ================================================= -->
@@ -184,9 +194,14 @@
       </div>
 
 
+      <!-- NORMAL + PERSONALIZED -->
       <div class="grid md:grid-cols-2 gap-6">
 
-        <!-- NORMAL -->
+
+        <!-- ============================================= -->
+        <!-- NORMAL PHOTOBOOK -->
+        <!-- ============================================= -->
+
         <a
           href="normal.html"
           class="planner-card block bg-white border-2 border-slate-200 hover:border-teal-300 rounded-3xl overflow-hidden"
@@ -263,7 +278,11 @@
         </a>
 
 
-        <!-- PERSONALIZED -->
+
+        <!-- ============================================= -->
+        <!-- PERSONALIZED PHOTOBOOK -->
+        <!-- ============================================= -->
+
         <a
           href="personalized.html"
           class="planner-card block bg-white border-2 border-slate-200 hover:border-green-300 rounded-3xl overflow-hidden"
@@ -308,85 +327,6 @@
                 </p>
 
                 <h3 class="text-2xl font-black mt-1">
-                <!-- CLIENT FLIPBOOK -->
-<a
-  href="client-flipbook.html"
-  class="planner-card block bg-white border-2 border-slate-200 hover:border-teal-300 rounded-3xl overflow-hidden"
->
-
-  <div class="h-44 sm:h-52 bg-gradient-to-br from-[#e6faf6] via-[#f2fbf5] to-[#e5f6df] flex items-center justify-center relative overflow-hidden">
-
-    <div class="relative w-44 h-28">
-
-      <div class="absolute left-0 top-2 w-[48%] h-24 bg-white rounded-l-xl shadow-lg border border-slate-100 p-2 rotate-[-4deg]">
-        <div class="w-full h-full brand-gradient rounded-lg opacity-80"></div>
-      </div>
-
-      <div class="absolute right-0 top-2 w-[48%] h-24 bg-white rounded-r-xl shadow-lg border border-slate-100 p-2 rotate-[4deg]">
-        <div class="grid grid-cols-2 gap-1 w-full h-full">
-          <div class="brand-gradient rounded opacity-70"></div>
-          <div class="brand-gradient rounded opacity-50"></div>
-          <div class="brand-gradient rounded opacity-50"></div>
-          <div class="brand-gradient rounded opacity-70"></div>
-        </div>
-      </div>
-
-      <div class="absolute left-1/2 top-3 bottom-3 w-[2px] bg-slate-300 -translate-x-1/2"></div>
-
-    </div>
-
-  </div>
-
-
-  <div class="p-6 sm:p-7">
-
-    <div class="flex items-start justify-between gap-3">
-
-      <div>
-
-        <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">
-          Finished Design Preview
-        </p>
-
-        <h3 class="text-2xl font-black mt-1">
-          Client Flipbook
-        </h3>
-
-      </div>
-
-      <div class="brand-gradient w-10 h-10 rounded-full flex items-center justify-center font-black">
-        →
-      </div>
-
-    </div>
-
-
-    <p class="text-sm text-slate-500 mt-3 leading-relaxed">
-      Upload finished Canva layouts and preview the actual
-      photobook with animated page turning before sending
-      it to the client.
-    </p>
-
-
-    <div class="flex flex-wrap gap-2 mt-5">
-
-      <span class="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
-        Canva Upload
-      </span>
-
-      <span class="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
-        Actual Cover
-      </span>
-
-      <span class="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
-        Animated Preview
-      </span>
-
-    </div>
-
-  </div>
-
-</a>
                   Personalized Photobook
                 </h3>
 
@@ -430,7 +370,118 @@
 
       </div>
 
+
+
+      <!-- ============================================= -->
+      <!-- CLIENT FLIPBOOK -->
+      <!-- ============================================= -->
+
+      <a
+        href="client-flipbook.html"
+        class="planner-card block mt-6 bg-white border-2 border-slate-200 hover:border-teal-300 rounded-3xl overflow-hidden"
+      >
+
+        <div class="grid lg:grid-cols-[.9fr_1.1fr]">
+
+
+          <!-- VISUAL -->
+          <div class="min-h-[230px] bg-gradient-to-br from-[#e6faf6] via-[#f2fbf5] to-[#e5f6df] flex items-center justify-center relative overflow-hidden">
+
+            <div class="relative w-52 h-32">
+
+              <div class="absolute left-0 top-2 w-[48%] h-28 bg-white rounded-l-xl shadow-lg border border-slate-100 p-2 rotate-[-4deg]">
+
+                <div class="w-full h-full brand-gradient rounded-lg opacity-80"></div>
+
+              </div>
+
+
+              <div class="absolute right-0 top-2 w-[48%] h-28 bg-white rounded-r-xl shadow-lg border border-slate-100 p-2 rotate-[4deg]">
+
+                <div class="grid grid-cols-2 gap-1 w-full h-full">
+
+                  <div class="brand-gradient rounded opacity-70"></div>
+
+                  <div class="brand-gradient rounded opacity-50"></div>
+
+                  <div class="brand-gradient rounded opacity-50"></div>
+
+                  <div class="brand-gradient rounded opacity-70"></div>
+
+                </div>
+
+              </div>
+
+
+              <div class="absolute left-1/2 top-3 bottom-3 w-[2px] bg-slate-300 -translate-x-1/2"></div>
+
+            </div>
+
+          </div>
+
+
+          <!-- CONTENT -->
+          <div class="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
+
+            <div class="flex items-start justify-between gap-4">
+
+              <div>
+
+                <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">
+                  Finished Design Preview
+                </p>
+
+                <h3 class="text-2xl sm:text-3xl font-black mt-1">
+                  Client Flipbook
+                </h3>
+
+              </div>
+
+
+              <div class="brand-gradient w-11 h-11 rounded-full flex items-center justify-center font-black text-lg">
+                →
+              </div>
+
+            </div>
+
+
+            <p class="text-sm text-slate-500 mt-4 leading-relaxed max-w-xl">
+
+              Upload finished Canva layouts and preview the actual
+              photobook with animated page turning before sending
+              it to the client.
+
+            </p>
+
+
+            <div class="flex flex-wrap gap-2 mt-6">
+
+              <span class="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Canva Upload
+              </span>
+
+              <span class="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Actual Cover
+              </span>
+
+              <span class="bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Animated Preview
+              </span>
+
+              <span class="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Client Approval
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </a>
+
     </section>
+
 
 
     <!-- ================================================= -->
@@ -464,10 +515,12 @@
 
         <div class="grid lg:grid-cols-[.9fr_1.1fr]">
 
+
           <!-- VISUAL -->
           <div class="min-h-[230px] bg-gradient-to-br from-[#e5faf6] via-[#eefaf2] to-[#e8f6e3] p-7 sm:p-9 flex items-center justify-center">
 
             <div class="w-full max-w-sm bg-white/90 border border-white rounded-2xl shadow-lg p-5 rotate-[-1deg]">
+
 
               <!-- MINI HEADER -->
               <div class="flex items-center justify-between gap-3 mb-4">
@@ -634,6 +687,7 @@
   </main>
 
 
+
   <!-- FOOTER -->
   <footer class="max-w-6xl mx-auto px-4 pb-10 text-center">
 
@@ -654,38 +708,78 @@
   </footer>
 
 
-<script>
-const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
-const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function protectDashboard() {
-  const { data } = await supabaseClient.auth.getSession();
+  <!-- AUTH -->
+  <script>
+    const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
 
-  if (!data.session) {
-    window.location.replace("login.html");
-    return;
-  }
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
 
-  document.getElementById("userEmail").textContent = data.session.user.email || "R&Y Account";
-  document.getElementById("authLoading").remove();
-}
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  window.location.replace("login.html");
-});
+    async function protectDashboard() {
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_OUT" || !session) {
-    window.location.replace("login.html");
-  }
-});
+      const { data } =
+        await supabaseClient.auth.getSession();
 
-protectDashboard();
-</script>
+      if (!data.session) {
+
+        window.location.replace(
+          "login.html"
+        );
+
+        return;
+      }
+
+      document.getElementById(
+        "userEmail"
+      ).textContent =
+        data.session.user.email ||
+        "R&Y Account";
+
+      document.getElementById(
+        "authLoading"
+      ).remove();
+    }
+
+
+    document.getElementById(
+      "logoutBtn"
+    ).addEventListener(
+      "click",
+      async () => {
+
+        await supabaseClient.auth.signOut();
+
+        window.location.replace(
+          "login.html"
+        );
+      }
+    );
+
+
+    supabaseClient.auth.onAuthStateChange(
+      (event, session) => {
+
+        if (
+          event === "SIGNED_OUT" ||
+          !session
+        ) {
+
+          window.location.replace(
+            "login.html"
+          );
+        }
+      }
+    );
+
+
+    protectDashboard();
+  </script>
 
 </body>
 </html>
-
-
