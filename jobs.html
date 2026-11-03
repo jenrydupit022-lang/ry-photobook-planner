@@ -4,6 +4,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -269,6 +270,20 @@
 
       </div>
 
+    </section>
+
+
+    <!-- IMPORT MANAGEMENT -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-black text-green-600 uppercase tracking-wider">Import Management</p>
+          <h3 class="font-black text-lg mt-1">Imported Files</h3>
+          <p class="text-xs text-slate-500 mt-1">Delete a wrong import before importing the corrected file.</p>
+        </div>
+        <span id="importCountBadge" class="self-start sm:self-auto bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full text-[10px] font-black">0 imports</span>
+      </div>
+      <div id="importedFilesList" class="mt-4 grid md:grid-cols-2 gap-3"></div>
     </section>
 
 
@@ -862,6 +877,12 @@
 
     const importInfoText =
       document.getElementById("importInfoText");
+
+    const importedFilesList =
+      document.getElementById("importedFilesList");
+
+    const importCountBadge =
+      document.getElementById("importCountBadge");
 
     const toast =
       document.getElementById("toast");
@@ -1723,6 +1744,7 @@
 
 
           renderJobs();
+          renderImportedFiles();
 
 
           importInfo.classList.remove(
@@ -1976,6 +1998,7 @@
 
           saveJobs();
           renderJobs();
+          renderImportedFiles();
 
           importInfo.classList.remove("hidden");
           importInfoText.textContent =
@@ -1996,6 +2019,111 @@
         }
       }
     );
+
+    // =====================================================
+    // IMPORT MANAGEMENT
+    // =====================================================
+
+    function getImportedFiles() {
+      const map = new Map();
+
+      jobs.forEach(job => {
+        if (job.importedFrom) {
+          const key = `layout|${job.importedFrom}`;
+          if (!map.has(key)) {
+            map.set(key, {
+              key,
+              type: "layout",
+              file: job.importedFrom,
+              count: 0
+            });
+          }
+          map.get(key).count++;
+        }
+
+        if (job.formResponseFile) {
+          const key = `form|${job.formResponseFile}`;
+          if (!map.has(key)) {
+            map.set(key, {
+              key,
+              type: "form",
+              file: job.formResponseFile,
+              count: 0
+            });
+          }
+          map.get(key).count++;
+        }
+      });
+
+      return [...map.values()].sort((a,b) => a.file.localeCompare(b.file));
+    }
+
+    function renderImportedFiles() {
+      if (!importedFilesList || !importCountBadge) return;
+
+      const imports = getImportedFiles();
+      importCountBadge.textContent = `${imports.length} ${imports.length === 1 ? "import" : "imports"}`;
+
+      if (!imports.length) {
+        importedFilesList.innerHTML = `
+          <div class="md:col-span-2 border border-dashed border-slate-300 rounded-xl p-5 text-center text-sm text-slate-400">
+            No imported files yet.
+          </div>
+        `;
+        return;
+      }
+
+      importedFilesList.innerHTML = imports.map(item => `
+        <div class="border border-slate-200 rounded-xl p-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <span class="inline-flex px-2.5 py-1 rounded-full text-[9px] font-black ${item.type === "form" ? "bg-green-50 text-green-700" : "bg-teal-50 text-teal-700"}">
+              ${item.type === "form" ? "FORM RESPONSES" : "LAYOUT EXCEL"}
+            </span>
+            <p class="font-black text-sm mt-2 break-words">${escapeHTML(item.file)}</p>
+            <p class="text-[11px] text-slate-500 mt-1">${item.count} ${item.type === "form" ? "matched job(s)" : "job(s) imported"}</p>
+          </div>
+          <button type="button" onclick="deleteImport('${encodeURIComponent(item.type)}','${encodeURIComponent(item.file)}')" class="flex-shrink-0 border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-[10px] font-black">
+            Delete Import
+          </button>
+        </div>
+      `).join("");
+    }
+
+    function deleteImport(encodedType, encodedFile) {
+      const type = decodeURIComponent(encodedType);
+      const file = decodeURIComponent(encodedFile);
+      const isForm = type === "form";
+
+      const message = isForm
+        ? `Delete Form Responses import "${file}"?\n\nThis removes only the attached form answers from matched jobs. The layout jobs will stay.`
+        : `Delete Layout Excel import "${file}"?\n\nThis removes jobs imported from this file. Manual jobs will stay.`;
+
+      if (!confirm(message)) return;
+
+      if (isForm) {
+        jobs = jobs.map(job => {
+          if (job.formResponseFile !== file) return job;
+          const cleaned = { ...job };
+          [
+            "formResponses", "formResponseMonth", "formResponseSheet",
+            "formResponseRow", "formResponseFile", "formResponseImportedAt",
+            "formMatchScore", "formMatchedBy", "formImportedQuantity",
+            "formImportedSize"
+          ].forEach(key => delete cleaned[key]);
+          cleaned.updatedAt = Date.now();
+          return cleaned;
+        });
+        showToast("Form Responses import deleted");
+      } else {
+        jobs = jobs.filter(job => job.importedFrom !== file);
+        showToast("Layout Excel import deleted");
+      }
+
+      saveJobs();
+      updateMonthOptions();
+      renderJobs();
+      renderImportedFiles();
+    }
 
     // =====================================================
     // MONTH SORTING
@@ -2344,7 +2472,7 @@
       fullJobActions.innerHTML = `
         <button type="button" onclick="openPlanner('${job.id}')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-xl text-xs font-black">Plan Layout</button>
         ${job.status === "pending" ? `<button type="button" onclick="changeStatus('${job.id}','ongoing'); openFullJob('${job.id}')" class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-xs font-black">Start Layout</button>` : ""}
-        ${job.status === "ongoing" ? `<button type="button" onclick="changeStatus('${job.id}','done'); openFullJob('${job.id}')" class="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-xs font-black">✓ Done Layout</button>` : ""}
+        ${job.status === "ongoing" ? `<button type="button" onclick="changeStatus('${job.id}','pending'); openFullJob('${job.id}')" class="bg-amber-50 text-amber-700 px-4 py-3 rounded-xl text-xs font-black">← Back to Pending</button><button type="button" onclick="changeStatus('${job.id}','done'); openFullJob('${job.id}')" class="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-xs font-black">✓ Done Layout</button>` : ""}
         ${job.status === "done" ? `<button type="button" onclick="changeStatus('${job.id}','ongoing'); openFullJob('${job.id}')" class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-xs font-black">Reopen</button>` : ""}
         <button type="button" onclick="closeFullJob(); editJob('${job.id}')" class="border border-slate-300 bg-white px-4 py-3 rounded-xl text-xs font-black">Edit</button>
         <button type="button" onclick="closeFullJob()" class="ml-auto border border-slate-300 bg-white px-4 py-3 rounded-xl text-xs font-black">Close</button>
@@ -2789,6 +2917,14 @@
 
                     <button
                       type="button"
+                      onclick="changeStatus('${job.id}','pending')"
+                      class="bg-amber-50 hover:bg-amber-100 text-amber-700 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+                    >
+                      ← Pending
+                    </button>
+
+                    <button
+                      type="button"
                       onclick="changeStatus('${job.id}','done')"
                       class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
                     >
@@ -3182,7 +3318,9 @@
           ? "Layout marked as done"
           : newStatus === "ongoing"
             ? "Layout marked as ongoing"
-            : "Status updated"
+            : newStatus === "pending"
+              ? "Layout moved back to pending"
+              : "Status updated"
       );
     }
 
@@ -3388,6 +3526,7 @@
     updateMonthOptions();
 
     renderJobs();
+    renderImportedFiles();
 
   </script>
 
