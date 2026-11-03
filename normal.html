@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -282,25 +292,14 @@
 
       </div>
 
-      <div class="no-print flex items-center gap-2">
-
-  <a
-    href="index.html"
-    class="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap"
-  >
-    ← Dashboard
-  </a>
-
-  <button
-    type="button"
-    onclick="window.print()"
-    class="bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap"
-  >
-    Print
-    <span class="hidden sm:inline">Plan</span>
-  </button>
-
-</div>
+      <button
+        type="button"
+        onclick="window.print()"
+        class="no-print bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap"
+      >
+        Print
+        <span class="hidden sm:inline">Plan</span>
+      </button>
 
     </div>
 
@@ -336,6 +335,26 @@
         Balance every photobook page, choose cleaner layouts and find design inspiration in one simple workspace.
       </p>
 
+    </section>
+
+
+    <!-- ACTIVE JOB QUEUE -->
+    <section class="no-print bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">Layout Jobs</p>
+          <h3 class="font-black text-lg mt-1">Basic Layout Queue</h3>
+          <p class="text-xs text-slate-500 mt-1">Pending and ongoing Basic Layout jobs from Layout Jobs.</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" id="queuePendingBtn" class="queue-filter border border-slate-200 px-3 py-2 rounded-xl text-xs font-black">Pending</button>
+          <button type="button" id="queueOngoingBtn" class="queue-filter border border-slate-200 px-3 py-2 rounded-xl text-xs font-black">Ongoing</button>
+          <button type="button" id="queueAllBtn" class="queue-filter border border-slate-200 px-3 py-2 rounded-xl text-xs font-black">All</button>
+        </div>
+      </div>
+      <div id="activeJobBanner" class="hidden mt-4 bg-[#f7faf9] border border-slate-200 rounded-xl p-3"></div>
+      <div id="plannerJobQueue" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4"></div>
+      <p id="queueEmpty" class="hidden text-sm text-slate-400 text-center py-6">No active jobs for this planner.</p>
     </section>
 
 
@@ -1917,6 +1936,137 @@
 
 
     // INITIAL LOAD
+    // =====================================================
+    // ACTIVE LAYOUT JOB QUEUE
+    // =====================================================
+
+    const JOBS_STORAGE_KEY = "ryLayoutJobsV2";
+    const PLANNER_LAYOUT_TYPE = "normal";
+    const plannerJobQueue = document.getElementById("plannerJobQueue");
+    const queueEmpty = document.getElementById("queueEmpty");
+    const activeJobBanner = document.getElementById("activeJobBanner");
+    const queuePendingBtn = document.getElementById("queuePendingBtn");
+    const queueOngoingBtn = document.getElementById("queueOngoingBtn");
+    const queueAllBtn = document.getElementById("queueAllBtn");
+    let plannerQueueFilter = "all";
+    let selectedPlannerJobId = null;
+
+    function getPlannerJobs() {
+      try {
+        return JSON.parse(localStorage.getItem(JOBS_STORAGE_KEY)) || [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function plannerEscape(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function cleanPlannerPages(value) {
+      const text = String(value ?? "").trim();
+      if (!/^\d+$/.test(text)) return null;
+      const totalPages = Number(text);
+      if (!Number.isFinite(totalPages) || totalPages < 1) return null;
+      return { total: totalPages, usable: Math.max(1, totalPages - 4) };
+    }
+
+    function setQueueFilter(filter) {
+      plannerQueueFilter = filter;
+      renderPlannerQueue();
+    }
+
+    function renderPlannerQueue() {
+      const allJobs = getPlannerJobs().filter(job =>
+        job.layoutType === PLANNER_LAYOUT_TYPE &&
+        (job.status === "pending" || job.status === "ongoing")
+      );
+
+      const visibleJobs = allJobs.filter(job =>
+        plannerQueueFilter === "all" || job.status === plannerQueueFilter
+      );
+
+      [queuePendingBtn, queueOngoingBtn, queueAllBtn].forEach(button => {
+        button.classList.remove("bg-slate-900", "text-white", "border-slate-900");
+      });
+      const activeButton = plannerQueueFilter === "pending"
+        ? queuePendingBtn
+        : plannerQueueFilter === "ongoing"
+          ? queueOngoingBtn
+          : queueAllBtn;
+      activeButton.classList.add("bg-slate-900", "text-white", "border-slate-900");
+
+      plannerJobQueue.innerHTML = "";
+      queueEmpty.classList.toggle("hidden", visibleJobs.length !== 0);
+
+      visibleJobs.forEach(job => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "text-left border border-slate-200 hover:border-teal-300 rounded-xl p-3 bg-white transition";
+        const statusClass = job.status === "ongoing" ? "text-blue-600" : "text-amber-600";
+        const pagesInfo = cleanPlannerPages(job.pages);
+        const pagesLabel = pagesInfo ? `${pagesInfo.total} pages → ${pagesInfo.usable} usable` : (job.pages || "Pages not set");
+        button.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="font-black text-sm break-words">${plannerEscape(job.clientName)}</p>
+              <p class="text-[11px] text-slate-500 mt-1">${plannerEscape(job.month || "No month")}</p>
+            </div>
+            <span class="text-[10px] font-black uppercase ${statusClass}">${plannerEscape(job.status)}</span>
+          </div>
+          <p class="text-xs text-slate-600 mt-2">${plannerEscape(job.quantity || 1)} pc • ${plannerEscape(job.bookSize || "No size")}</p>
+          <p class="text-[11px] text-slate-400 mt-1">${plannerEscape(pagesLabel)}${job.photoCount ? ` • ${plannerEscape(job.photoCount)} photos` : ""}</p>
+          <p class="text-[10px] font-black text-teal-600 mt-3">USE THIS JOB →</p>
+        `;
+        button.addEventListener("click", () => selectPlannerJob(job.id));
+        plannerJobQueue.appendChild(button);
+      });
+    }
+
+    function selectPlannerJob(id) {
+      const job = getPlannerJobs().find(item => item.id === id);
+      if (!job) return;
+      selectedPlannerJobId = id;
+
+      if (Number(job.photoCount) > 0) {
+        totalPicturesInput.value = Number(job.photoCount);
+      }
+
+      const pagesInfo = cleanPlannerPages(job.pages);
+      if (pagesInfo) {
+        usablePagesInput.value = pagesInfo.usable;
+      }
+
+      activeJobBanner.classList.remove("hidden");
+      activeJobBanner.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <p class="text-[10px] font-black text-teal-600 uppercase">Selected Job</p>
+            <p class="font-black mt-1">${plannerEscape(job.clientName)}</p>
+            <p class="text-xs text-slate-500 mt-1">${plannerEscape(job.quantity || 1)} pc • ${plannerEscape(job.bookSize || "")} • ${plannerEscape(job.month || "")}</p>
+          </div>
+          <a href="jobs.html" class="text-xs font-black border border-slate-300 rounded-lg px-3 py-2 bg-white">Open Layout Jobs</a>
+        </div>
+        ${!job.photoCount ? '<p class="text-[11px] text-amber-600 font-bold mt-2">Photo Count is not set yet. Enter the client photo count below.</p>' : ''}
+        ${pagesInfo ? `<p class="text-[11px] text-slate-400 mt-2">${pagesInfo.total} total photobook pages → ${pagesInfo.usable} usable layout pages (minus front, back and 2 blank pages).</p>` : '<p class="text-[11px] text-amber-600 font-bold mt-2">Pages/details is not one clean number, so usable pages were not changed.</p>'}
+      `;
+
+      calculate();
+      document.getElementById("totalPictures").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    queuePendingBtn.addEventListener("click", () => setQueueFilter("pending"));
+    queueOngoingBtn.addEventListener("click", () => setQueueFilter("ongoing"));
+    queueAllBtn.addEventListener("click", () => setQueueFilter("all"));
+    window.addEventListener("storage", renderPlannerQueue);
+
+    renderPlannerQueue();
+
     calculate();
     generateInspiration();
 
@@ -1924,3 +2074,5 @@
 
 </body>
 </html>
+
+

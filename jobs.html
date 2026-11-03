@@ -4,9 +4,6 @@
 
 
 
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -736,6 +733,24 @@
   </div>
 
 
+  <!-- FULL JOB VIEW MODAL -->
+  <div id="fullJobModal" class="hidden fixed inset-0 z-[60] modal-backdrop p-3 sm:p-5 overflow-y-auto">
+    <div class="min-h-full flex items-start sm:items-center justify-center py-3 sm:py-8">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden">
+        <div class="px-5 sm:px-7 py-5 border-b border-slate-200 flex items-start justify-between gap-4 sticky top-0 bg-white z-10">
+          <div class="min-w-0">
+            <p class="text-xs font-black text-green-600 uppercase tracking-wider">Full Job Details</p>
+            <h3 id="fullJobTitle" class="text-xl sm:text-2xl font-black mt-1 break-words">Client</h3>
+            <p id="fullJobSubtitle" class="text-xs text-slate-500 mt-1"></p>
+          </div>
+          <button type="button" onclick="closeFullJob()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 font-black flex-shrink-0">×</button>
+        </div>
+        <div id="fullJobContent" class="p-5 sm:p-7"></div>
+        <div id="fullJobActions" class="border-t border-slate-200 bg-[#fafcfb] p-4 sm:p-5 flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div
     id="toast"
@@ -853,6 +868,21 @@
 
     const jobModal =
       document.getElementById("jobModal");
+
+    const fullJobModal =
+      document.getElementById("fullJobModal");
+
+    const fullJobTitle =
+      document.getElementById("fullJobTitle");
+
+    const fullJobSubtitle =
+      document.getElementById("fullJobSubtitle");
+
+    const fullJobContent =
+      document.getElementById("fullJobContent");
+
+    const fullJobActions =
+      document.getElementById("fullJobActions");
 
     const modalTitle =
       document.getElementById("modalTitle");
@@ -1777,24 +1807,75 @@
       return answers;
     }
 
-    function findMatchingJob(fullName, month) {
-      const targetName = normalizePersonName(fullName);
-      if (!targetName) return null;
+    function findAnswerValue(headers, row, patterns) {
+      const index = headers.findIndex(header => {
+        const text = normalizeText(header);
+        return patterns.some(pattern => text.includes(pattern));
+      });
+      return index === -1 ? "" : cleanText(row[index]);
+    }
 
-      const exactMonthMatch = jobs.find(job =>
+    function normalizeComparableSize(value) {
+      return normalizeText(value)
+        .replace(/inches?/g, "")
+        .replace(/portrait|landscape/g, "")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    function findMatchingJob(fullName, month, formQuantity, formSize) {
+      const targetName = normalizePersonName(fullName);
+      if (!targetName) return { job: null, reason: "Missing full name" };
+
+      const sameNameMonth = jobs.filter(job =>
         normalizePersonName(job.clientName) === targetName &&
         normalizeText(job.month) === normalizeText(month)
       );
 
-      if (exactMonthMatch) return exactMonthMatch;
+      if (sameNameMonth.length === 0) {
+        return { job: null, reason: "No job with the same full name and month" };
+      }
 
-      const sameNameJobs = jobs.filter(job =>
-        normalizePersonName(job.clientName) === targetName
-      );
+      const q = numberValue(formQuantity);
+      const size = normalizeComparableSize(formSize);
 
-      return sameNameJobs.length === 1
-        ? sameNameJobs[0]
-        : null;
+      const scored = sameNameMonth.map(job => {
+        let score = 100; // exact name + exact month
+        const reasons = ["name", "month"];
+
+        if (q > 0 && Number(job.quantity) === q) {
+          score += 40;
+          reasons.push("quantity");
+        } else if (q > 0) {
+          score -= 60;
+        }
+
+        const jobSize = normalizeComparableSize(job.bookSize);
+        if (size && jobSize && (size === jobSize || size.includes(jobSize) || jobSize.includes(size))) {
+          score += 40;
+          reasons.push("size");
+        } else if (size && jobSize) {
+          score -= 60;
+        }
+
+        return { job, score, reasons };
+      }).sort((a, b) => b.score - a.score);
+
+      const best = scored[0];
+      const second = scored[1];
+
+      if (!best || best.score < 100) {
+        return { job: null, reason: "Name matched, but quantity/size conflicts with the job" };
+      }
+
+      if (second && second.score === best.score) {
+        return { job: null, reason: "Multiple jobs have the same match score" };
+      }
+
+      return {
+        job: best.job,
+        score: best.score,
+        matchedBy: best.reasons.join(" + ")
+      };
     }
 
     formResponsesInput.addEventListener(
@@ -1848,19 +1929,41 @@
 
               responseCount++;
 
-              const job = findMatchingJob(fullName, month);
+              const formQuantity = findAnswerValue(
+                headers,
+                row,
+                ["number of photobook", "number of photobooks", "quantity"]
+              );
 
-              if (!job) {
-                unmatched.push(`${fullName} (${month})`);
+              const formSize = findAnswerValue(
+                headers,
+                row,
+                ["size", "photbook size", "photobook size"]
+              );
+
+              const match = findMatchingJob(
+                fullName,
+                month,
+                formQuantity,
+                formSize
+              );
+
+              if (!match.job) {
+                unmatched.push(`${fullName} (${month}) — ${match.reason}`);
                 return;
               }
 
+              const job = match.job;
               job.formResponses = answers;
               job.formResponseMonth = month;
               job.formResponseSheet = sheetName;
               job.formResponseRow = rowOffset + 2;
               job.formResponseFile = file.name;
               job.formResponseImportedAt = Date.now();
+              job.formMatchScore = match.score;
+              job.formMatchedBy = match.matchedBy;
+              job.formImportedQuantity = formQuantity;
+              job.formImportedSize = formSize;
               job.updatedAt = Date.now();
               matchedCount++;
             });
@@ -2120,33 +2223,140 @@
 
     function getFormResponsesHTML(job) {
       if (!Array.isArray(job.formResponses) || job.formResponses.length === 0) {
-        return "";
+        return `
+          <div class="mt-4 border border-dashed border-slate-200 rounded-xl p-3 text-xs text-slate-400 font-bold">
+            No Google Form response matched yet.
+          </div>
+        `;
       }
 
-      const items = job.formResponses.map(item => `
-        <div class="border-b border-slate-100 last:border-b-0 py-3">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-wide leading-relaxed">
-            ${escapeHTML(item.question)}
-          </p>
-          <p class="text-sm text-slate-700 font-semibold mt-1 whitespace-pre-wrap break-words">
-            ${escapeHTML(item.answer)}
-          </p>
-        </div>
-      `).join("");
-
       return `
-        <details class="mt-4 border border-green-200 bg-green-50/50 rounded-xl overflow-hidden">
-          <summary class="cursor-pointer select-none px-4 py-3 font-black text-xs text-green-700 flex items-center justify-between gap-3">
-            <span>📋 View Form Answers</span>
-            <span class="bg-white border border-green-200 px-2 py-1 rounded-full text-[10px]">
-              ${job.formResponses.length} answers
-            </span>
-          </summary>
-          <div class="bg-white border-t border-green-100 px-4 py-1 max-h-[520px] overflow-y-auto">
-            ${items}
-          </div>
-        </details>
+        <button
+          type="button"
+          onclick="openFullJob('${job.id}')"
+          class="mt-4 w-full border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 px-4 py-3 rounded-xl text-xs font-black flex items-center justify-between gap-3"
+        >
+          <span>📋 Form Response Ready</span>
+          <span class="bg-white border border-green-200 px-2 py-1 rounded-full text-[10px]">
+            ${job.formResponses.length} answers
+          </span>
+        </button>
       `;
+    }
+
+    function getFormAnswer(job, patterns) {
+      if (!Array.isArray(job.formResponses)) return "";
+      const found = job.formResponses.find(item => {
+        const question = normalizeText(item.question);
+        return patterns.some(pattern => question.includes(pattern));
+      });
+      return found ? cleanText(found.answer) : "";
+    }
+
+    function openFullJob(id) {
+      const job = jobs.find(item => item.id === id);
+      if (!job) return;
+
+      const statusInfo = getStatusInfo(job.status);
+      const binding = getFormAnswer(job, ["photobook binding type", "binding type"]);
+      const formQuantity = getFormAnswer(job, ["number of photobook", "number of photobooks", "quantity"]);
+      const formSize = getFormAnswer(job, ["size"]);
+      const formPages = getFormAnswer(job, ["number of pages"]);
+      const orderType = getFormAnswer(job, ["order type"]);
+      const notesRequest = getFormAnswer(job, ["notes/request", "notes / request"]);
+      const pagesLayout = getFormAnswer(job, ["pages layout"]);
+      const coverLayout = getFormAnswer(job, ["cover layout"]);
+
+      fullJobTitle.textContent = job.clientName;
+      fullJobSubtitle.textContent = `${job.month || "No month"} • ${statusInfo.label}`;
+
+      const important = [
+        ["Binding Type", binding],
+        ["Form Quantity", formQuantity],
+        ["Form Size", formSize],
+        ["Form Pages", formPages],
+        ["Order Type", orderType],
+        ["Pages Layout", pagesLayout],
+        ["Cover Layout", coverLayout],
+        ["Notes / Request", notesRequest]
+      ].filter(item => item[1]);
+
+      const importantHTML = important.length
+        ? important.map(([label, value]) => `
+            <div class="bg-[#f7faf9] rounded-xl p-3 min-w-0">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wide">${escapeHTML(label)}</p>
+              <p class="text-sm font-black text-slate-800 mt-1 whitespace-pre-wrap break-words">${escapeHTML(value)}</p>
+            </div>
+          `).join("")
+        : `<p class="text-sm text-slate-400">No Form response imported.</p>`;
+
+      const allAnswersHTML = Array.isArray(job.formResponses) && job.formResponses.length
+        ? job.formResponses.map(item => `
+            <div class="py-4 border-b border-slate-100 last:border-b-0">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wide leading-relaxed">${escapeHTML(item.question)}</p>
+              <p class="text-sm text-slate-700 font-semibold mt-2 whitespace-pre-wrap break-words">${escapeHTML(item.answer)}</p>
+            </div>
+          `).join("")
+        : `<div class="py-6 text-center text-sm text-slate-400">Import the Google Form Responses Excel to see answers here.</div>`;
+
+      const sourceHTML = job.formResponseFile
+        ? `
+          <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-800 leading-relaxed">
+            <strong>Form source:</strong> ${escapeHTML(job.formResponseFile)}<br>
+            <strong>Sheet:</strong> ${escapeHTML(job.formResponseSheet || "—")} • <strong>Row:</strong> ${escapeHTML(job.formResponseRow || "—")}<br>
+            <strong>Matched by:</strong> ${escapeHTML(job.formMatchedBy || "legacy name/month match")}
+          </div>
+        `
+        : "";
+
+      fullJobContent.innerHTML = `
+        <section>
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <h4 class="font-black text-base">Job Information</h4>
+            <span class="border ${statusInfo.badge} px-3 py-1.5 rounded-full text-[10px] font-black">${statusInfo.label}</span>
+          </div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-slate-50 rounded-xl p-3"><p class="text-[10px] font-black text-slate-400 uppercase">Quantity</p><p class="font-black mt-1">${escapeHTML(job.quantity)} pc${Number(job.quantity) === 1 ? "" : "s"}</p></div>
+            <div class="bg-slate-50 rounded-xl p-3"><p class="text-[10px] font-black text-slate-400 uppercase">Size</p><p class="font-black mt-1 break-words">${escapeHTML(job.bookSize)}</p></div>
+            <div class="bg-slate-50 rounded-xl p-3"><p class="text-[10px] font-black text-slate-400 uppercase">Pages / Details</p><p class="font-black mt-1 break-words">${escapeHTML(job.pages || "—")}</p></div>
+            <div class="bg-slate-50 rounded-xl p-3"><p class="text-[10px] font-black text-slate-400 uppercase">Photo Count</p><p class="font-black mt-1">${job.photoCount ? escapeHTML(job.photoCount) : "Not set"}</p></div>
+          </div>
+        </section>
+
+        <section class="mt-7">
+          <h4 class="font-black text-base">Important Form Details</h4>
+          <p class="text-xs text-slate-500 mt-1">Values below are shown exactly from the imported Form Responses spreadsheet.</p>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">${importantHTML}</div>
+          ${sourceHTML}
+        </section>
+
+        <section class="mt-7">
+          <div class="flex items-center justify-between gap-3">
+            <h4 class="font-black text-base">All Form Questions & Answers</h4>
+            <span class="text-[10px] font-black text-green-700 bg-green-50 px-3 py-1.5 rounded-full">${Array.isArray(job.formResponses) ? job.formResponses.length : 0} answers</span>
+          </div>
+          <div class="mt-3 border border-slate-200 rounded-2xl px-4 sm:px-5">${allAnswersHTML}</div>
+        </section>
+
+        ${job.notes ? `<section class="mt-7"><h4 class="font-black text-base">Work Notes</h4><div class="mt-3 bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm whitespace-pre-wrap break-words">${escapeHTML(job.notes)}</div></section>` : ""}
+      `;
+
+      fullJobActions.innerHTML = `
+        <button type="button" onclick="openPlanner('${job.id}')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-xl text-xs font-black">Plan Layout</button>
+        ${job.status === "pending" ? `<button type="button" onclick="changeStatus('${job.id}','ongoing'); openFullJob('${job.id}')" class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-xs font-black">Start Layout</button>` : ""}
+        ${job.status === "ongoing" ? `<button type="button" onclick="changeStatus('${job.id}','done'); openFullJob('${job.id}')" class="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-xs font-black">✓ Done Layout</button>` : ""}
+        ${job.status === "done" ? `<button type="button" onclick="changeStatus('${job.id}','ongoing'); openFullJob('${job.id}')" class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-xs font-black">Reopen</button>` : ""}
+        <button type="button" onclick="closeFullJob(); editJob('${job.id}')" class="border border-slate-300 bg-white px-4 py-3 rounded-xl text-xs font-black">Edit</button>
+        <button type="button" onclick="closeFullJob()" class="ml-auto border border-slate-300 bg-white px-4 py-3 rounded-xl text-xs font-black">Close</button>
+      `;
+
+      fullJobModal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeFullJob() {
+      fullJobModal.classList.add("hidden");
+      document.body.style.overflow = "";
     }
 
     // =====================================================
@@ -2536,6 +2746,14 @@
 
             <!-- ACTIONS -->
             <div class="border-t border-slate-200 bg-[#fafcfb] p-3 flex flex-wrap gap-2">
+
+              <button
+                type="button"
+                onclick="openFullJob('${job.id}')"
+                class="border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+              >
+                Open Full Job
+              </button>
 
               <button
                 type="button"
@@ -3124,6 +3342,15 @@
       }
     );
 
+    fullJobModal.addEventListener(
+      "click",
+      function(event) {
+        if (event.target === fullJobModal) {
+          closeFullJob();
+        }
+      }
+    );
+
 
     // =====================================================
     // ESCAPE KEY
@@ -3142,6 +3369,13 @@
         ) {
 
           closeModal();
+        }
+
+        if (
+          event.key === "Escape" &&
+          !fullJobModal.classList.contains("hidden")
+        ) {
+          closeFullJob();
         }
       }
     );
