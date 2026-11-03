@@ -230,7 +230,7 @@
 
     destroyFlipbook();
 
-    let host = getOrCreateFlipbookHost();
+    const host = $("ryFlipbook");
 
     if (host) {
       host.innerHTML = `
@@ -524,11 +524,7 @@
         );
       }
     }
-    host = getOrCreateFlipbookHost();
 
-if (!host) {
-  return;
-}
     /*
      * Clear old PageFlip generated DOM.
      */
