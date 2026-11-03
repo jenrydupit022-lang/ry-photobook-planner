@@ -7,38 +7,1641 @@
   <title>Personalized Photobook | R&Y Printing Lab</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --mint: #63d9c9;
+      --mint-dark: #35bfae;
+      --green: #8bcb78;
+      --green-dark: #64ad54;
+      --dark: #111827;
+      --soft: #f6faf8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(99,217,201,.16), transparent 30%),
+        radial-gradient(circle at top right, rgba(139,203,120,.14), transparent 25%),
+        var(--soft);
+
+      color: var(--dark);
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--mint-dark);
+      box-shadow: 0 0 0 3px rgba(99,217,201,.18);
+    }
+
+    .brand-gradient {
+      background: linear-gradient(
+        135deg,
+        var(--mint),
+        var(--green)
+      );
+    }
+
+    .brand-text {
+      background: linear-gradient(
+        90deg,
+        #23aa9b,
+        #63a953
+      );
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .mode-card {
+      transition:
+        .2s ease;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .mode-active {
+      border-color: #35bfae !important;
+      background: #effcf9 !important;
+      box-shadow: 0 0 0 3px rgba(99,217,201,.13);
+    }
+
+    .page-card {
+      transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+    }
+
+    .page-card:hover {
+      transform: translateY(-2px);
+      border-color: #9de4da;
+      box-shadow: 0 10px 25px rgba(17,24,39,.07);
+    }
+
+    .layout-preview {
+      width: 92px;
+      height: 70px;
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid #dbe7e2;
+      background: #f7fbf9;
+      display: grid;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .photo-box {
+      background: linear-gradient(
+        135deg,
+        rgba(99,217,201,.80),
+        rgba(139,203,120,.80)
+      );
+
+      border-radius: 3px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .layout-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .layout-2 {
+      grid-template-columns: repeat(2,1fr);
+    }
+
+    .layout-3 {
+      grid-template-columns: repeat(2,1fr);
+      grid-template-rows: 1.4fr 1fr;
+    }
+
+    .layout-3 .photo-box:first-child {
+      grid-column: 1 / 3;
+    }
+
+    .layout-4 {
+      grid-template-columns: repeat(2,1fr);
+      grid-template-rows: repeat(2,1fr);
+    }
+
+    .layout-5 {
+      grid-template-columns: repeat(3,1fr);
+      grid-template-rows: repeat(2,1fr);
+    }
+
+    .layout-5 .photo-box:first-child {
+      grid-row: 1 / 3;
+    }
+
+    .layout-6 {
+      grid-template-columns: repeat(3,1fr);
+      grid-template-rows: repeat(2,1fr);
+    }
+
+    .layout-dense {
+      grid-template-columns: repeat(4,1fr);
+      grid-auto-rows: 1fr;
+    }
+
+    @media (max-width: 640px) {
+      .mobile-logo {
+        width: 46px !important;
+        height: 46px !important;
+      }
+
+      .layout-preview {
+        width: 78px;
+        height: 62px;
+      }
+
+      button,
+      input,
+      select {
+        min-height: 44px;
+      }
+    }
+
+    @media print {
+      body {
+        background: white !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-area {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .page-card {
+        break-inside: avoid;
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-[#f6faf8] min-h-screen flex items-center justify-center p-5">
 
-  <div class="bg-white border border-slate-200 rounded-3xl p-8 max-w-lg w-full text-center shadow-sm">
+<body class="min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+
+      <div class="flex items-center gap-3 min-w-0">
+
+        <img
+          src="ryn.png"
+          alt="R&Y Printing Lab"
+          class="mobile-logo w-14 h-14 rounded-full object-cover flex-shrink-0"
+        >
+
+        <div class="min-w-0">
+
+          <h1 class="font-black text-sm sm:text-xl truncate">
+            Personalized Photobook
+          </h1>
+
+          <p class="text-[10px] sm:text-xs text-slate-500 truncate">
+            R&amp;Y Printing Lab
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="flex gap-2">
+
+        <a
+          href="index.html"
+          class="no-print border border-slate-300 bg-white hover:bg-slate-50 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap"
+        >
+          ← Dashboard
+        </a>
+
+        <button
+          type="button"
+          onclick="window.print()"
+          class="no-print hidden sm:block bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold"
+        >
+          Print Plan
+        </button>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10">
+
+    <!-- HERO -->
+    <section class="mb-8 sm:mb-10">
+
+      <div class="flex items-center gap-2 mb-3">
+
+        <span class="brand-gradient w-2.5 h-2.5 rounded-full"></span>
+
+        <span class="text-[11px] font-black tracking-[.18em] text-slate-500">
+          PERSONALIZED WORKFLOW
+        </span>
+
+      </div>
+
+
+      <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight max-w-4xl leading-[1.05]">
+
+        Give your design
+
+        <span class="brand-text">
+          room to breathe.
+        </span>
+
+      </h2>
+
+
+      <p class="text-sm sm:text-base text-slate-500 mt-4 max-w-2xl leading-relaxed">
+
+        Plan personalized photobooks with more room for backgrounds,
+        decorations, text and custom design elements.
+
+      </p>
+
+    </section>
+
+
+    <!-- WORKSPACE -->
+    <div class="grid lg:grid-cols-[400px_1fr] gap-5 sm:gap-6 items-start">
+
+      <!-- LEFT PANEL -->
+      <section class="no-print bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6 lg:sticky lg:top-24">
+
+        <div>
+
+          <p class="text-xs font-black text-green-600 uppercase tracking-wider">
+            Step 1
+          </p>
+
+          <h3 class="font-black text-xl mt-1">
+            Personalized Calculator
+          </h3>
+
+          <p class="text-sm text-slate-500 mt-1">
+            Enter the client's photos and available design pages.
+          </p>
+
+        </div>
+
+
+        <!-- INPUTS -->
+        <div class="space-y-5 mt-6">
+
+          <div>
+
+            <label class="block text-sm font-bold mb-2">
+              Total Pictures
+            </label>
+
+            <input
+              id="totalPictures"
+              type="number"
+              min="1"
+              inputmode="numeric"
+              value="104"
+              class="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg font-black bg-white"
+            >
+
+          </div>
+
+
+          <div>
+
+            <label class="block text-sm font-bold mb-2">
+              Usable Pages
+            </label>
+
+            <input
+              id="usablePages"
+              type="number"
+              min="1"
+              inputmode="numeric"
+              value="28"
+              class="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg font-black bg-white"
+            >
+
+            <p class="text-xs text-slate-400 mt-2">
+              Use the actual pages available for layouts.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- DESIGN DENSITY -->
+        <div class="mt-7">
+
+          <p class="text-sm font-bold">
+            Design Space
+          </p>
+
+          <p class="text-xs text-slate-400 mt-1">
+            How much room do you need for custom design?
+          </p>
+
+
+          <div class="space-y-2 mt-4">
+
+            <!-- DESIGN HEAVY -->
+            <button
+              type="button"
+              id="designHeavyButton"
+              onclick="setMode('design')"
+              class="mode-card w-full border-2 border-slate-200 rounded-xl p-4 text-left"
+            >
+
+              <div class="flex items-center justify-between gap-3">
+
+                <div>
+
+                  <p class="font-black text-sm">
+                    Design Heavy
+                  </p>
+
+                  <p class="text-xs text-slate-500 mt-1">
+                    Maximum space for decorations and custom elements.
+                  </p>
+
+                </div>
+
+                <span class="bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-[10px] font-black whitespace-nowrap">
+                  1–2
+                </span>
+
+              </div>
+
+            </button>
+
+
+            <!-- BALANCED -->
+            <button
+              type="button"
+              id="balancedButton"
+              onclick="setMode('balanced')"
+              class="mode-card mode-active w-full border-2 border-slate-200 rounded-xl p-4 text-left"
+            >
+
+              <div class="flex items-center justify-between gap-3">
+
+                <div>
+
+                  <p class="font-black text-sm">
+                    Balanced Personalized
+                  </p>
+
+                  <p class="text-xs text-slate-500 mt-1">
+                    Good balance between photos and design space.
+                  </p>
+
+                </div>
+
+                <span class="bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full text-[10px] font-black whitespace-nowrap">
+                  2–4
+                </span>
+
+              </div>
+
+            </button>
+
+
+            <!-- PHOTO HEAVY -->
+            <button
+              type="button"
+              id="photoHeavyButton"
+              onclick="setMode('photo')"
+              class="mode-card w-full border-2 border-slate-200 rounded-xl p-4 text-left"
+            >
+
+              <div class="flex items-center justify-between gap-3">
+
+                <div>
+
+                  <p class="font-black text-sm">
+                    Photo Heavy
+                  </p>
+
+                  <p class="text-xs text-slate-500 mt-1">
+                    Fit more photos while keeping personalized styling.
+                  </p>
+
+                </div>
+
+                <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-[10px] font-black whitespace-nowrap">
+                  4–6
+                </span>
+
+              </div>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- QUICK STATS -->
+        <div class="grid grid-cols-2 gap-3 mt-6">
+
+          <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-4">
+
+            <p class="text-xs text-slate-500">
+              Average
+            </p>
+
+            <p
+              id="averageStat"
+              class="text-xl font-black mt-1"
+            >
+              3.71
+            </p>
+
+            <p class="text-[11px] text-slate-400">
+              photos / page
+            </p>
+
+          </div>
+
+
+          <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-4">
+
+            <p class="text-xs text-slate-500">
+              Design Space
+            </p>
+
+            <p
+              id="spaceStat"
+              class="text-xl font-black mt-1"
+            >
+              Good
+            </p>
+
+            <p class="text-[11px] text-slate-400">
+              overall room
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- RESULTS -->
+      <section class="print-area bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+        <div class="p-5 sm:p-6 border-b border-slate-200">
+
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+
+            <div>
+
+              <p class="text-xs font-black text-green-600 uppercase tracking-wider">
+                Personalized Plan
+              </p>
+
+              <h3
+                id="resultTitle"
+                class="text-xl sm:text-2xl font-black mt-1"
+              >
+                104 Photos • 28 Pages
+              </h3>
+
+            </div>
+
+
+            <span
+              id="modeBadge"
+              class="self-start bg-[#eafaf6] text-teal-700 text-[11px] font-black px-3 py-1.5 rounded-full"
+            >
+              Balanced Personalized
+            </span>
+
+          </div>
+
+
+          <!-- SUMMARY -->
+          <div class="mt-5 bg-[#eafaf6] border border-[#bceade] rounded-xl p-4">
+
+            <p class="text-[11px] font-black text-teal-700 uppercase tracking-wide">
+              Recommended Distribution
+            </p>
+
+            <p
+              id="summaryText"
+              class="text-sm sm:text-base text-slate-700 leading-relaxed mt-1"
+            ></p>
+
+          </div>
+
+
+          <!-- DESIGN NOTE -->
+          <div
+            id="designNote"
+            class="mt-4 rounded-xl p-4 text-sm leading-relaxed"
+          ></div>
+
+
+          <!-- WARNING -->
+          <div
+            id="warningBox"
+            class="hidden mt-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm leading-relaxed"
+          ></div>
+
+        </div>
+
+
+        <!-- PAGE HEADER -->
+        <div class="px-5 sm:px-6 py-4 bg-[#f8fbfa] border-b border-slate-200 flex items-center justify-between gap-3">
+
+          <div>
+
+            <h4 class="font-black text-sm sm:text-base">
+              Page-by-Page Plan
+            </h4>
+
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
+              Photo count + suggested design role
+            </p>
+
+          </div>
+
+
+          <span
+            id="verification"
+            class="text-[11px] sm:text-xs font-black text-emerald-600 whitespace-nowrap"
+          ></span>
+
+        </div>
+
+
+        <!-- PAGE LIST -->
+        <div
+          id="pageList"
+          class="p-3 sm:p-6 grid md:grid-cols-2 gap-3"
+        ></div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-10 text-center">
 
     <img
       src="ryn.png"
       alt="R&Y Printing Lab"
-      class="w-20 h-20 rounded-full mx-auto object-cover"
+      class="w-16 h-16 mx-auto rounded-full mb-3"
     >
 
-    <p class="text-xs font-black text-green-600 uppercase tracking-wider mt-5">
-      R&Y Printing Lab
+    <p class="font-black text-sm">
+      R&amp;Y Printing Lab
     </p>
 
-    <h1 class="text-3xl font-black mt-2">
-      Personalized Photobook
-    </h1>
-
-    <p class="text-slate-500 mt-3">
-      Personalized Layout Calculator coming next.
+    <p class="text-xs text-slate-400 mt-1">
+      Personalized Photobook Planner
     </p>
 
-    <a
-      href="index.html"
-      class="inline-block bg-slate-900 text-white px-5 py-3 rounded-xl font-bold mt-7"
-    >
-      ← Back to Dashboard
-    </a>
+  </footer>
 
-  </div>
+
+  <script>
+
+    // =====================================================
+    // ELEMENTS
+    // =====================================================
+
+    const totalPicturesInput =
+      document.getElementById("totalPictures");
+
+    const usablePagesInput =
+      document.getElementById("usablePages");
+
+    const pageList =
+      document.getElementById("pageList");
+
+    const resultTitle =
+      document.getElementById("resultTitle");
+
+    const summaryText =
+      document.getElementById("summaryText");
+
+    const warningBox =
+      document.getElementById("warningBox");
+
+    const designNote =
+      document.getElementById("designNote");
+
+    const verification =
+      document.getElementById("verification");
+
+    const averageStat =
+      document.getElementById("averageStat");
+
+    const spaceStat =
+      document.getElementById("spaceStat");
+
+    const modeBadge =
+      document.getElementById("modeBadge");
+
+    const designHeavyButton =
+      document.getElementById("designHeavyButton");
+
+    const balancedButton =
+      document.getElementById("balancedButton");
+
+    const photoHeavyButton =
+      document.getElementById("photoHeavyButton");
+
+
+    let currentMode =
+      "balanced";
+
+
+    // =====================================================
+    // MODE
+    // =====================================================
+
+    function setMode(mode) {
+
+      currentMode =
+        mode;
+
+
+      designHeavyButton.classList.remove(
+        "mode-active"
+      );
+
+      balancedButton.classList.remove(
+        "mode-active"
+      );
+
+      photoHeavyButton.classList.remove(
+        "mode-active"
+      );
+
+
+      if (mode === "design") {
+
+        designHeavyButton.classList.add(
+          "mode-active"
+        );
+
+        modeBadge.textContent =
+          "Design Heavy";
+      }
+
+
+      if (mode === "balanced") {
+
+        balancedButton.classList.add(
+          "mode-active"
+        );
+
+        modeBadge.textContent =
+          "Balanced Personalized";
+      }
+
+
+      if (mode === "photo") {
+
+        photoHeavyButton.classList.add(
+          "mode-active"
+        );
+
+        modeBadge.textContent =
+          "Photo Heavy";
+      }
+
+
+      calculate();
+    }
+
+
+    // =====================================================
+    // BALANCED FALLBACK
+    // =====================================================
+
+    function getBalancedDistribution(
+      total,
+      pages
+    ) {
+
+      const base =
+        Math.floor(total / pages);
+
+      const remainder =
+        total % pages;
+
+      const result = [];
+
+
+      for (
+        let i = 0;
+        i < pages;
+        i++
+      ) {
+
+        result.push(
+          i < remainder
+            ? base + 1
+            : base
+        );
+      }
+
+
+      return result;
+    }
+
+
+    // =====================================================
+    // PERSONALIZED DISTRIBUTION
+    // =====================================================
+
+    function getPersonalizedDistribution(
+      total,
+      pages,
+      mode
+    ) {
+
+      if (
+        total < pages
+      ) {
+
+        return getBalancedDistribution(
+          total,
+          pages
+        );
+      }
+
+
+      /*
+        We prefer:
+        1, 2, 4, 6
+
+        but each mode gives different
+        penalties to each photo count.
+      */
+
+      const allowed =
+        [1,2,4,6];
+
+
+      const average =
+        total / pages;
+
+
+      const penalties = {
+
+        design: {
+          1: 0,
+          2: 0,
+          4: 7,
+          6: 18
+        },
+
+        balanced: {
+          1: 7,
+          2: 1,
+          4: 0,
+          6: 7
+        },
+
+        photo: {
+          1: 18,
+          2: 7,
+          4: 0,
+          6: 0
+        }
+
+      };
+
+
+      let best =
+        null;
+
+      let bestScore =
+        Infinity;
+
+
+      function search(
+        index,
+        pagesLeft,
+        photosLeft,
+        counts
+      ) {
+
+        if (
+          index === allowed.length
+        ) {
+
+          if (
+            pagesLeft !== 0 ||
+            photosLeft !== 0
+          ) {
+
+            return;
+          }
+
+
+          const distribution =
+            [];
+
+
+          counts.forEach(
+            (count,index) => {
+
+              for (
+                let i = 0;
+                i < count;
+                i++
+              ) {
+
+                distribution.push(
+                  allowed[index]
+                );
+              }
+
+            }
+          );
+
+
+          let score =
+            0;
+
+
+          distribution.forEach(
+            value => {
+
+              /*
+                Small balance penalty.
+                Prevents extremely strange
+                distributions.
+              */
+
+              score +=
+                Math.pow(
+                  value - average,
+                  2
+                ) * 0.35;
+
+
+              /*
+                Main design preference.
+              */
+
+              score +=
+                penalties[mode][value];
+
+            }
+          );
+
+
+          /*
+            Avoid having too many
+            different page densities.
+          */
+
+          const uniqueCounts =
+            new Set(
+              distribution
+            ).size;
+
+
+          score +=
+            uniqueCounts * 0.8;
+
+
+          if (
+            score < bestScore
+          ) {
+
+            bestScore =
+              score;
+
+            best =
+              distribution;
+          }
+
+
+          return;
+        }
+
+
+        const value =
+          allowed[index];
+
+
+        for (
+          let count = 0;
+          count <= pagesLeft;
+          count++
+        ) {
+
+          const used =
+            count * value;
+
+
+          if (
+            used > photosLeft
+          ) {
+            break;
+          }
+
+
+          counts[index] =
+            count;
+
+
+          search(
+            index + 1,
+            pagesLeft - count,
+            photosLeft - used,
+            counts
+          );
+        }
+      }
+
+
+      search(
+        0,
+        pages,
+        total,
+        [0,0,0,0]
+      );
+
+
+      /*
+        If exact 1/2/4/6 combination
+        isn't possible, use mathematically
+        balanced fallback.
+      */
+
+      if (!best) {
+
+        return getBalancedDistribution(
+          total,
+          pages
+        );
+      }
+
+
+      /*
+        Arrange photo-heavy pages first,
+        then lighter pages.
+
+        You can rearrange manually
+        during actual design.
+      */
+
+      best.sort(
+        (a,b) => b-a
+      );
+
+
+      return best;
+    }
+
+
+    // =====================================================
+    // PAGE INFORMATION
+    // =====================================================
+
+    function getPageInfo(count) {
+
+      if (count === 0) {
+
+        return {
+          layout: "Empty Page",
+          role: "Design / Writing Space",
+          space: "Maximum",
+          className: "layout-1"
+        };
+      }
+
+
+      if (count === 1) {
+
+        return {
+          layout: "Feature Photo",
+          role: "Hero / Feature Page",
+          space: "Maximum",
+          className: "layout-1"
+        };
+      }
+
+
+      if (count === 2) {
+
+        return {
+          layout: "Side-by-Side",
+          role: "Designed Page",
+          space: "High",
+          className: "layout-2"
+        };
+      }
+
+
+      if (count === 3) {
+
+        return {
+          layout: "Hero + 2 Small",
+          role: "Flexible Page",
+          space: "Good",
+          className: "layout-3"
+        };
+      }
+
+
+      if (count === 4) {
+
+        return {
+          layout: "2×2 Grid",
+          role: "Balanced Design Page",
+          space: "Good",
+          className: "layout-4"
+        };
+      }
+
+
+      if (count === 5) {
+
+        return {
+          layout: "Center Focus",
+          role: "Photo-Focused Page",
+          space: "Limited",
+          className: "layout-5"
+        };
+      }
+
+
+      if (count === 6) {
+
+        return {
+          layout: "3×2 Grid",
+          role: "Photo-Heavy Page",
+          space: "Limited",
+          className: "layout-6"
+        };
+      }
+
+
+      return {
+        layout: "Mosaic Collage",
+        role: "Crowded Page",
+        space: "Very Limited",
+        className: "layout-dense"
+      };
+    }
+
+
+    // =====================================================
+    // MINI PREVIEW
+    // =====================================================
+
+    function createPreview(
+      count,
+      layoutClass
+    ) {
+
+      const preview =
+        document.createElement(
+          "div"
+        );
+
+
+      preview.className =
+        "layout-preview " +
+        layoutClass;
+
+
+      const boxCount =
+        count >= 7
+          ? Math.min(count,12)
+          : Math.max(count,1);
+
+
+      for (
+        let i = 0;
+        i < boxCount;
+        i++
+      ) {
+
+        const box =
+          document.createElement(
+            "div"
+          );
+
+
+        box.className =
+          "photo-box";
+
+
+        if (
+          count === 0
+        ) {
+
+          box.style.background =
+            "#edf3f0";
+        }
+
+
+        preview.appendChild(
+          box
+        );
+      }
+
+
+      return preview;
+    }
+
+
+    // =====================================================
+    // SUMMARY
+    // =====================================================
+
+    function buildSummary(
+      distribution,
+      total,
+      pages
+    ) {
+
+      const counts =
+        {};
+
+
+      distribution.forEach(
+        count => {
+
+          counts[count] =
+            (counts[count] || 0) + 1;
+        }
+      );
+
+
+      const parts =
+        Object.keys(counts)
+
+          .map(Number)
+
+          .sort(
+            (a,b) => a-b
+          )
+
+          .map(
+            photoCount => {
+
+              const pageCount =
+                counts[photoCount];
+
+
+              return (
+                `${pageCount} ` +
+                `${pageCount === 1 ? "page" : "pages"} × ` +
+                `${photoCount} ` +
+                `${photoCount === 1 ? "photo" : "photos"}`
+              );
+            }
+          );
+
+
+      return (
+        `${total} photos across ${pages} pages: ` +
+        parts.join(" + ") +
+        "."
+      );
+    }
+
+
+    // =====================================================
+    // DESIGN SPACE
+    // =====================================================
+
+    function getOverallSpace(
+      average
+    ) {
+
+      if (
+        average <= 2
+      ) {
+
+        return {
+          label: "Excellent",
+          text:
+            "Plenty of room for backgrounds, decorations, text and custom elements.",
+          classes:
+            "bg-emerald-50 border border-emerald-200 text-emerald-800"
+        };
+      }
+
+
+      if (
+        average <= 4
+      ) {
+
+        return {
+          label: "Good",
+          text:
+            "Good balance between photo content and personalized design space.",
+          classes:
+            "bg-teal-50 border border-teal-200 text-teal-800"
+        };
+      }
+
+
+      if (
+        average <= 6
+      ) {
+
+        return {
+          label: "Limited",
+          text:
+            "There is less room for decorations. Keep backgrounds and design elements cleaner.",
+          classes:
+            "bg-amber-50 border border-amber-200 text-amber-800"
+        };
+      }
+
+
+      return {
+        label: "Crowded",
+        text:
+          "The average photo count is high for a personalized layout. Consider adding pages or reducing photos.",
+        classes:
+          "bg-red-50 border border-red-200 text-red-800"
+      };
+    }
+
+
+    // =====================================================
+    // RENDER PAGES
+    // =====================================================
+
+    function renderPages(
+      distribution
+    ) {
+
+      pageList.innerHTML =
+        "";
+
+
+      distribution.forEach(
+        (count,index) => {
+
+          const info =
+            getPageInfo(
+              count
+            );
+
+
+          const card =
+            document.createElement(
+              "div"
+            );
+
+
+          card.className =
+            "page-card border border-slate-200 rounded-xl p-4 bg-white";
+
+
+          const top =
+            document.createElement(
+              "div"
+            );
+
+
+          top.className =
+            "flex items-center justify-between gap-3";
+
+
+          const text =
+            document.createElement(
+              "div"
+            );
+
+
+          text.className =
+            "min-w-0";
+
+
+          text.innerHTML = `
+
+            <p class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">
+              Page ${index + 1}
+            </p>
+
+            <p class="text-base sm:text-lg font-black mt-1">
+              ${count}
+              ${count === 1 ? "Photo" : "Photos"}
+            </p>
+
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
+              ${info.layout}
+            </p>
+          `;
+
+
+          top.appendChild(
+            text
+          );
+
+
+          top.appendChild(
+            createPreview(
+              count,
+              info.className
+            )
+          );
+
+
+          const bottom =
+            document.createElement(
+              "div"
+            );
+
+
+          bottom.className =
+            "border-t border-slate-100 mt-3 pt-3 flex flex-wrap gap-2";
+
+
+          bottom.innerHTML = `
+
+            <span class="bg-[#eef9f6] text-teal-700 px-2.5 py-1 rounded-full text-[10px] font-black">
+              ${info.role}
+            </span>
+
+            <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-[10px] font-bold">
+              ${info.space} Space
+            </span>
+          `;
+
+
+          card.appendChild(
+            top
+          );
+
+
+          card.appendChild(
+            bottom
+          );
+
+
+          pageList.appendChild(
+            card
+          );
+        }
+      );
+    }
+
+
+    // =====================================================
+    // CALCULATE
+    // =====================================================
+
+    function calculate() {
+
+      const total =
+        parseInt(
+          totalPicturesInput.value
+        );
+
+
+      const pages =
+        parseInt(
+          usablePagesInput.value
+        );
+
+
+      if (
+        !total ||
+        !pages ||
+        total < 1 ||
+        pages < 1
+      ) {
+
+        pageList.innerHTML = `
+
+          <div class="md:col-span-2 text-center py-12 text-slate-400">
+            Enter valid numbers.
+          </div>
+        `;
+
+
+        summaryText.textContent =
+          "Enter the number of photos and usable pages.";
+
+
+        verification.textContent =
+          "";
+
+
+        return;
+      }
+
+
+      const average =
+        total / pages;
+
+
+      averageStat.textContent =
+        average.toFixed(2);
+
+
+      resultTitle.textContent =
+        `${total} Photos • ${pages} Pages`;
+
+
+      const space =
+        getOverallSpace(
+          average
+        );
+
+
+      spaceStat.textContent =
+        space.label;
+
+
+      designNote.className =
+        "mt-4 rounded-xl p-4 text-sm leading-relaxed " +
+        space.classes;
+
+
+      designNote.innerHTML =
+        `<strong>Design Space: ${space.label}</strong><br>${space.text}`;
+
+
+      const distribution =
+        getPersonalizedDistribution(
+          total,
+          pages,
+          currentMode
+        );
+
+
+      summaryText.textContent =
+        buildSummary(
+          distribution,
+          total,
+          pages
+        );
+
+
+      const distributed =
+        distribution.reduce(
+          (sum,value) => sum + value,
+          0
+        );
+
+
+      verification.textContent =
+        `✓ ${distributed} / ${total}`;
+
+
+      // WARNING LOGIC
+
+      warningBox.classList.add(
+        "hidden"
+      );
+
+
+      if (
+        total < pages
+      ) {
+
+        warningBox.classList.remove(
+          "hidden"
+        );
+
+
+        warningBox.innerHTML = `
+
+          <strong>
+            More pages than photos.
+          </strong>
+
+          <br>
+
+          ${pages-total} page(s) can remain empty or be used for text, decorations, guest messages or design-only pages.
+        `;
+
+      } else if (
+        average > 6
+      ) {
+
+        warningBox.classList.remove(
+          "hidden"
+        );
+
+
+        warningBox.innerHTML = `
+
+          <strong>
+            Crowded for a personalized photobook.
+          </strong>
+
+          <br>
+
+          You're averaging ${average.toFixed(1)} photos per page.
+          Consider adding more usable pages or reducing the number of photos if you need more design space.
+        `;
+
+      } else if (
+        currentMode === "design" &&
+        average > 2
+      ) {
+
+        warningBox.classList.remove(
+          "hidden"
+        );
+
+
+        warningBox.innerHTML = `
+
+          <strong>
+            Design Heavy target exceeded.
+          </strong>
+
+          <br>
+
+          With ${total} photos and ${pages} pages, it isn't possible to keep every page at only 1–2 photos.
+          The planner will use some higher-photo pages so all photos still fit.
+        `;
+
+      } else if (
+        currentMode === "balanced" &&
+        average > 4
+      ) {
+
+        warningBox.classList.remove(
+          "hidden"
+        );
+
+
+        warningBox.innerHTML = `
+
+          <strong>
+            Limited design space.
+          </strong>
+
+          <br>
+
+          Balanced Personalized works best around 2–4 photos per page.
+          Some pages need more photos to fit the client's full set.
+        `;
+
+      }
+
+
+      renderPages(
+        distribution
+      );
+    }
+
+
+    // =====================================================
+    // EVENTS
+    // =====================================================
+
+    totalPicturesInput.addEventListener(
+      "input",
+      calculate
+    );
+
+
+    usablePagesInput.addEventListener(
+      "input",
+      calculate
+    );
+
+
+    // INITIAL
+    calculate();
+
+  </script>
 
 </body>
 </html>
