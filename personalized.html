@@ -1793,6 +1793,103 @@
     // CALCULATE
     // =====================================================
 
+    function getPersonalizedCapacity() {
+      const size = getPhotobookSizeInfo();
+      const orientation = size.orientation;
+
+      const table = {
+        design: {
+          Portrait: {comfortable:2,max:4},
+          Square: {comfortable:2,max:4},
+          Landscape: {comfortable:2,max:4},
+          Custom: {comfortable:2,max:4}
+        },
+        balanced: {
+          Portrait: {comfortable:4,max:4},
+          Square: {comfortable:4,max:6},
+          Landscape: {comfortable:4,max:6},
+          Custom: {comfortable:4,max:4}
+        },
+        photo: {
+          Portrait: {comfortable:4,max:6},
+          Square: {comfortable:6,max:6},
+          Landscape: {comfortable:6,max:6},
+          Custom: {comfortable:4,max:6}
+        }
+      };
+
+      const chosen = table[currentMode][orientation] || table[currentMode].Custom;
+      return {...chosen, label:orientation};
+    }
+
+    function evaluatePersonalizedFit(total,pages,capacity) {
+      const comfortableTotal=pages*capacity.comfortable;
+      const maximumTotal=pages*capacity.max;
+      const minimumPages=Math.ceil(total/capacity.max);
+      return {
+        fits:total<=maximumTotal,
+        comfortable:total<=comfortableTotal,
+        maximumTotal,
+        minimumPages,
+        extraPages:Math.max(0,minimumPages-pages),
+        excessPhotos:Math.max(0,total-maximumTotal)
+      };
+    }
+
+    function buildPersonalizedRealisticDistribution(total,pages,maxPerPage) {
+      const allowed=[1,2,4,6].filter(x=>x<=maxPerPage);
+      const memo=new Map();
+
+      function solve(page,remaining) {
+        if(page===pages) return remaining===0 ? {score:0,values:[]} : null;
+        const left=pages-page;
+        if(remaining<left || remaining>left*maxPerPage) return null;
+        const key=`${page}|${remaining}`;
+        if(memo.has(key)) return memo.get(key);
+        const avg=remaining/left;
+        let best=null;
+        for(const value of allowed) {
+          if(value>remaining) continue;
+          const next=solve(page+1,remaining-value);
+          if(!next) continue;
+          let penalty=Math.pow(value-avg,2);
+          if(currentMode==="design" && value>2) penalty+=4;
+          if(currentMode==="balanced" && value===6) penalty+=2;
+          if(value===1) penalty+=.5;
+          const candidate={score:penalty+next.score,values:[value,...next.values]};
+          if(!best || candidate.score<best.score) best=candidate;
+        }
+        memo.set(key,best);
+        return best;
+      }
+
+      const result=solve(0,total);
+      return result ? result.values.sort((a,b)=>b-a) : null;
+    }
+
+    function renderPersonalizedDoesNotFit(total,pages,capacity,fit) {
+      const size=getPhotobookSizeInfo();
+      resultTitle.textContent=`${total} Photos • ${pages} Pages • ${size.label}`;
+      summaryText.innerHTML =
+        `<strong>Does not fit cleanly for this personalized setup.</strong> ` +
+        `${capacity.label} + ${modeBadge.textContent} is capped at about <strong>${capacity.max} photos per usable page</strong>.`;
+      designNote.className="mt-4 rounded-xl p-4 text-sm leading-relaxed bg-red-50 border border-red-200 text-red-800";
+      designNote.innerHTML =
+        `<strong>✕ Layout capacity exceeded.</strong><br>` +
+        `${pages} usable pages can hold about ${fit.maximumTotal} photos cleanly with this setting.`;
+      warningBox.classList.remove("hidden");
+      warningBox.innerHTML =
+        `<strong>Add ${fit.extraPages} usable page${fit.extraPages===1?"":"s"} or remove about ${fit.excessPhotos} photo${fit.excessPhotos===1?"":"s"}.</strong><br>` +
+        `Minimum recommended usable pages: <strong>${fit.minimumPages}</strong>.`;
+      verification.textContent="✕ Does not fit cleanly";
+      pageList.innerHTML =
+        `<div class="md:col-span-2 border border-red-200 bg-red-50 rounded-xl p-5 text-sm text-red-800">` +
+        `<strong>No forced layout generated.</strong><br>The planner will not squeeze photos into an unrealistic personalized page.` +
+        `</div>`;
+      renderLayoutSuggestions();
+    }
+
+
     function calculate() {
 
       const total =
@@ -1867,13 +1964,16 @@
         `<strong>Design Space: ${space.label}</strong><br>${space.text}`;
 
 
-      const distribution =
-        getPersonalizedDistribution(
-          total,
-          pages,
-          currentMode
-        );
+      const capacity = getPersonalizedCapacity();
+      const fit = evaluatePersonalizedFit(total,pages,capacity);
 
+      if (!fit.fits) {
+        renderPersonalizedDoesNotFit(total,pages,capacity,fit);
+        return;
+      }
+
+      const distribution =
+        buildPersonalizedRealisticDistribution(total,pages,capacity.max);
 
       summaryText.textContent =
         buildSummary(
@@ -1988,6 +2088,14 @@
 
       }
 
+
+      if (fit.fits && !fit.comfortable && warningBox.classList.contains("hidden")) {
+        warningBox.classList.remove("hidden");
+        warningBox.innerHTML =
+          `<strong>△ Tight but workable.</strong><br>` +
+          `Some pages need more than the comfortable ${capacity.comfortable}-photo density, ` +
+          `but the plan remains within the ${capacity.max}-photo personalized maximum.`;
+      }
 
       renderPages(
         distribution

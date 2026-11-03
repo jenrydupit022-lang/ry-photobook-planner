@@ -1526,6 +1526,92 @@
     }
 
 
+    function getNormalCapacity() {
+      const size = getPhotobookSizeInfo();
+      const orientation = size.orientation;
+
+      // "Comfortable" means a clean everyday layout.
+      // "max" is the highest density this planner will recommend as still workable.
+      if (orientation === "Portrait") return { comfortable: 4, max: 6, label: "Portrait" };
+      if (orientation === "Landscape") return { comfortable: 6, max: 8, label: "Landscape" };
+      return { comfortable: 6, max: 6, label: orientation === "Custom" ? "Custom" : "Square" };
+    }
+
+    function evaluatePhotobookFit(total, pages, capacity) {
+      const comfortableTotal = pages * capacity.comfortable;
+      const maximumTotal = pages * capacity.max;
+      const minimumPages = Math.ceil(total / capacity.max);
+      return {
+        fits: total <= maximumTotal,
+        comfortable: total <= comfortableTotal,
+        maximumTotal,
+        comfortableTotal,
+        minimumPages,
+        extraPages: Math.max(0, minimumPages - pages),
+        excessPhotos: Math.max(0, total - maximumTotal)
+      };
+    }
+
+    function buildRealisticDistribution(total, pages, maxPerPage) {
+      // Prefer the layout counts R&Y actually uses. 3 and 5 are avoided.
+      const allowed = [1,2,4,6,8].filter(x => x <= maxPerPage);
+      const memo = new Map();
+
+      function solve(page, remaining) {
+        if (page === pages) return remaining === 0 ? {score:0, values:[]} : null;
+        const pagesLeft = pages - page;
+        if (remaining < 0 || remaining > pagesLeft * maxPerPage) return null;
+        if (remaining < pagesLeft) return null;
+
+        const key = `${page}|${remaining}`;
+        if (memo.has(key)) return memo.get(key);
+
+        const avg = remaining / pagesLeft;
+        let best = null;
+
+        for (const value of allowed) {
+          if (value > remaining) continue;
+          const next = solve(page + 1, remaining - value);
+          if (!next) continue;
+
+          // Keep pages balanced, prefer 2/4/6, and only use 8 when necessary.
+          let penalty = Math.pow(value - avg, 2);
+          if (value === 1) penalty += 1.5;
+          if (value === 8) penalty += 2.5;
+          const candidate = {score: penalty + next.score, values:[value, ...next.values]};
+          if (!best || candidate.score < best.score) best = candidate;
+        }
+
+        memo.set(key, best);
+        return best;
+      }
+
+      const result = solve(0,total);
+      return result ? result.values.sort((a,b)=>b-a) : getBalancedDistribution(total,pages);
+    }
+
+    function renderDoesNotFit(total, pages, capacity, fit) {
+      const size = getPhotobookSizeInfo();
+      resultTitle.textContent = `${total} Photos • ${pages} Pages • ${size.label}`;
+      summaryText.innerHTML =
+        `<strong>Does not fit cleanly.</strong> A ${capacity.label.toLowerCase()} ${size.label} layout is limited to about ` +
+        `<strong>${capacity.max} photos per usable page</strong> in this planner. ` +
+        `With ${pages} usable pages, the clean maximum is about <strong>${fit.maximumTotal} photos</strong>.`;
+
+      warningBox.classList.remove("hidden");
+      warningBox.innerHTML =
+        `<strong>✕ Add ${fit.extraPages} usable page${fit.extraPages === 1 ? "" : "s"} or remove about ${fit.excessPhotos} photo${fit.excessPhotos === 1 ? "" : "s"}.</strong><br>` +
+        `Minimum recommended usable pages for ${total} photos: <strong>${fit.minimumPages}</strong>.`;
+
+      verification.textContent = "✕ Does not fit cleanly";
+      pageList.innerHTML =
+        `<div class="md:col-span-2 border border-red-200 bg-red-50 rounded-xl p-5 text-sm text-red-800">` +
+        `<strong>No fake layout plan generated.</strong><br>` +
+        `The calculator stopped instead of forcing too many photos into each page.` +
+        `</div>`;
+    }
+
+
     function calculate() {
 
       const total =
@@ -1576,19 +1662,16 @@
         `${total} Photos • ${pages} Pages • ${sizeInfo.label}`;
 
 
+      const capacity = getNormalCapacity();
+      const fit = evaluatePhotobookFit(total, pages, capacity);
+
+      if (!fit.fits) {
+        renderDoesNotFit(total, pages, capacity, fit);
+        return;
+      }
+
       const distribution =
-        currentMode === "balanced"
-
-          ? getBalancedDistribution(
-              total,
-              pages
-            )
-
-          : getPreferredDistribution(
-              total,
-              pages
-            );
-
+        buildRealisticDistribution(total, pages, capacity.max);
 
       summaryText.textContent =
         buildSummary(
@@ -1635,6 +1718,14 @@
         );
       }
 
+
+      if (fit.fits && !fit.comfortable && warningBox.classList.contains("hidden")) {
+        warningBox.classList.remove("hidden");
+        warningBox.innerHTML =
+          `<strong>△ Tight but workable.</strong><br>` +
+          `This ${capacity.label.toLowerCase()} book needs some pages above the comfortable ${capacity.comfortable}-photo density, ` +
+          `but it stays within the ${capacity.max}-photo recommended maximum.`;
+      }
 
       renderPages(
         distribution
