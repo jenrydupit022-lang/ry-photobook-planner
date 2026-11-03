@@ -404,8 +404,9 @@
       showShareStatus(
         "Saved successfully. Your client link is ready!",
         "success"
+        
       );
-
+await loadSavedClientFlipbooks();
     } catch (error) {
       console.error(
         "Save/share error:",
@@ -2199,8 +2200,990 @@
   // INITIAL
   // =====================================================
 
+    // =====================================================
+  // ADMIN — SAVED CLIENT FLIPBOOKS
+  // =====================================================
+
+  function showClientFlipbooksStatus(
+    message,
+    type = "info"
+  ) {
+    const status =
+      $("clientFlipbooksStatus");
+
+    if (!status) return;
+
+    status.className =
+      "mb-4 rounded-xl px-4 py-3 text-xs font-bold border";
+
+    if (type === "error") {
+      status.classList.add(
+        "bg-red-50",
+        "text-red-700",
+        "border-red-200"
+      );
+
+    } else if (type === "success") {
+      status.classList.add(
+        "bg-emerald-50",
+        "text-emerald-700",
+        "border-emerald-200"
+      );
+
+    } else {
+      status.classList.add(
+        "bg-blue-50",
+        "text-blue-700",
+        "border-blue-200"
+      );
+    }
+
+    status.textContent =
+      message;
+  }
+
+
+  function hideClientFlipbooksStatus() {
+    const status =
+      $("clientFlipbooksStatus");
+
+    if (status) {
+      status.classList.add(
+        "hidden"
+      );
+    }
+  }
+
+
+  function formatClientResponseDate(
+    value
+  ) {
+    if (!value) {
+      return "";
+    }
+
+    try {
+      return new Intl.DateTimeFormat(
+        "en-PH",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        }
+      ).format(
+        new Date(value)
+      );
+
+    } catch (error) {
+      return "";
+    }
+  }
+
+
+  function getClientStatusInfo(
+    status
+  ) {
+    if (status === "approved") {
+      return {
+        label:
+          "APPROVED FOR PRINTING",
+
+        badge:
+          "bg-emerald-50 text-emerald-700 border-emerald-200",
+
+        card:
+          "border-emerald-200"
+      };
+    }
+
+
+    if (status === "revision") {
+      return {
+        label:
+          "REVISION REQUESTED",
+
+        badge:
+          "bg-orange-50 text-orange-700 border-orange-200",
+
+        card:
+          "border-orange-200"
+      };
+    }
+
+
+    return {
+      label:
+        "PENDING REVIEW",
+
+      badge:
+        "bg-amber-50 text-amber-700 border-amber-200",
+
+      card:
+        "border-slate-200"
+    };
+  }
+
+
+  function updateClientSummary(
+    flipbooks
+  ) {
+    let pending = 0;
+    let approved = 0;
+    let revision = 0;
+
+    flipbooks.forEach(
+      function (item) {
+        if (
+          item.status ===
+          "approved"
+        ) {
+          approved++;
+
+        } else if (
+          item.status ===
+          "revision"
+        ) {
+          revision++;
+
+        } else {
+          pending++;
+        }
+      }
+    );
+
+
+    const pendingElement =
+      $("pendingClientCount");
+
+    const approvedElement =
+      $("approvedClientCount");
+
+    const revisionElement =
+      $("revisionClientCount");
+
+
+    if (pendingElement) {
+      pendingElement.textContent =
+        String(pending);
+    }
+
+
+    if (approvedElement) {
+      approvedElement.textContent =
+        String(approved);
+    }
+
+
+    if (revisionElement) {
+      revisionElement.textContent =
+        String(revision);
+    }
+  }
+
+
+  function renderSavedClientFlipbooks(
+    flipbooks
+  ) {
+    const container =
+      $("savedClientFlipbooks");
+
+    if (!container) return;
+
+
+    if (!flipbooks.length) {
+      container.innerHTML = `
+        <div
+          class="
+            bg-white
+            border
+            border-slate-200
+            rounded-3xl
+            p-8
+            text-center
+          "
+        >
+
+          <div class="text-3xl">
+            📚
+          </div>
+
+          <p
+            class="
+              font-black
+              text-slate-700
+              mt-3
+            "
+          >
+            No saved client flipbooks yet
+          </p>
+
+          <p
+            class="
+              text-xs
+              text-slate-400
+              mt-1
+            "
+          >
+            Saved client previews will appear here.
+          </p>
+
+        </div>
+      `;
+
+      return;
+    }
+
+
+    container.innerHTML =
+      flipbooks
+        .map(
+          function (item) {
+
+            const status =
+              item.status ||
+              "pending";
+
+            const statusInfo =
+              getClientStatusInfo(
+                status
+              );
+
+            const projectName =
+              escapeHtml(
+                item.project_name ||
+                "Untitled Photobook"
+              );
+
+            const bookSize =
+              escapeHtml(
+                item.book_size ||
+                "—"
+              );
+
+            const clientName =
+              escapeHtml(
+                item.client_name ||
+                ""
+              );
+
+            const revisionPage =
+              escapeHtml(
+                item.revision_page ||
+                ""
+              );
+
+            const message =
+              escapeHtml(
+                item.client_message ||
+                ""
+              );
+
+            const respondedAt =
+              formatClientResponseDate(
+                item.responded_at
+              );
+
+            const createdAt =
+              formatClientResponseDate(
+                item.created_at
+              );
+
+            const shareUrl =
+              `${window.location.origin}/preview.html?id=${encodeURIComponent(
+                item.share_code
+              )}`;
+
+
+            let responseDetails = "";
+
+
+            if (
+              status ===
+              "approved"
+            ) {
+              responseDetails = `
+                <div
+                  class="
+                    mt-4
+                    bg-emerald-50
+                    border
+                    border-emerald-100
+                    rounded-2xl
+                    p-4
+                  "
+                >
+
+                  <p
+                    class="
+                      text-[10px]
+                      font-black
+                      text-emerald-600
+                      uppercase
+                      tracking-wider
+                    "
+                  >
+                    Client Approval
+                  </p>
+
+                  <p
+                    class="
+                      text-sm
+                      font-black
+                      text-slate-800
+                      mt-2
+                    "
+                  >
+                    ${
+                      clientName
+                        ? `Approved by ${clientName}`
+                        : "Approved by client"
+                    }
+                  </p>
+
+                  ${
+                    respondedAt
+                      ? `
+                        <p
+                          class="
+                            text-[11px]
+                            text-slate-500
+                            mt-1
+                          "
+                        >
+                          ${escapeHtml(
+                            respondedAt
+                          )}
+                        </p>
+                      `
+                      : ""
+                  }
+
+                </div>
+              `;
+            }
+
+
+            if (
+              status ===
+              "revision"
+            ) {
+              responseDetails = `
+                <div
+                  class="
+                    mt-4
+                    bg-orange-50
+                    border
+                    border-orange-100
+                    rounded-2xl
+                    p-4
+                  "
+                >
+
+                  <p
+                    class="
+                      text-[10px]
+                      font-black
+                      text-orange-600
+                      uppercase
+                      tracking-wider
+                    "
+                  >
+                    Revision Details
+                  </p>
+
+                  <div
+                    class="
+                      flex
+                      flex-wrap
+                      gap-x-5
+                      gap-y-2
+                      mt-2
+                    "
+                  >
+
+                    ${
+                      clientName
+                        ? `
+                          <p
+                            class="
+                              text-xs
+                              text-slate-600
+                            "
+                          >
+                            <strong>
+                              Client:
+                            </strong>
+
+                            ${clientName}
+                          </p>
+                        `
+                        : ""
+                    }
+
+
+                    ${
+                      revisionPage
+                        ? `
+                          <p
+                            class="
+                              text-xs
+                              text-slate-600
+                            "
+                          >
+                            <strong>
+                              Page:
+                            </strong>
+
+                            ${revisionPage}
+                          </p>
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+
+                  ${
+                    message
+                      ? `
+                        <div
+                          class="
+                            mt-3
+                            bg-white
+                            border
+                            border-orange-100
+                            rounded-xl
+                            px-4
+                            py-3
+                          "
+                        >
+
+                          <p
+                            class="
+                              text-xs
+                              text-slate-700
+                              leading-relaxed
+                            "
+                          >
+                            “${message}”
+                          </p>
+
+                        </div>
+                      `
+                      : ""
+                  }
+
+
+                  ${
+                    respondedAt
+                      ? `
+                        <p
+                          class="
+                            text-[10px]
+                            text-slate-400
+                            mt-3
+                          "
+                        >
+                          Submitted ${escapeHtml(
+                            respondedAt
+                          )}
+                        </p>
+                      `
+                      : ""
+                  }
+
+                </div>
+              `;
+            }
+
+
+            if (
+              status ===
+              "pending"
+            ) {
+              responseDetails = `
+                <div
+                  class="
+                    mt-4
+                    bg-amber-50
+                    border
+                    border-amber-100
+                    rounded-2xl
+                    p-4
+                  "
+                >
+
+                  <p
+                    class="
+                      text-xs
+                      font-bold
+                      text-amber-700
+                    "
+                  >
+                    Waiting for the client to approve
+                    the photobook or request a revision.
+                  </p>
+
+                </div>
+              `;
+            }
+
+
+            return `
+              <article
+                class="
+                  bg-white
+                  border
+                  ${statusInfo.card}
+                  rounded-3xl
+                  p-5
+                  sm:p-6
+                  shadow-sm
+                "
+              >
+
+                <div
+                  class="
+                    flex
+                    flex-col
+                    lg:flex-row
+                    lg:items-start
+                    lg:justify-between
+                    gap-4
+                  "
+                >
+
+                  <div
+                    class="
+                      min-w-0
+                      flex-1
+                    "
+                  >
+
+                    <div
+                      class="
+                        flex
+                        flex-wrap
+                        items-center
+                        gap-2
+                      "
+                    >
+
+                      <span
+                        class="
+                          inline-flex
+                          items-center
+                          rounded-full
+                          border
+                          px-3
+                          py-1
+                          text-[9px]
+                          font-black
+                          ${statusInfo.badge}
+                        "
+                      >
+                        ${statusInfo.label}
+                      </span>
+
+
+                      <span
+                        class="
+                          bg-slate-100
+                          text-slate-600
+                          rounded-full
+                          px-3
+                          py-1
+                          text-[9px]
+                          font-black
+                        "
+                      >
+                        ${bookSize}
+                      </span>
+
+                    </div>
+
+
+                    <h3
+                      class="
+                        text-lg
+                        sm:text-xl
+                        font-black
+                        text-slate-900
+                        mt-3
+                        break-words
+                      "
+                    >
+                      ${projectName}
+                    </h3>
+
+
+                    ${
+                      createdAt
+                        ? `
+                          <p
+                            class="
+                              text-[10px]
+                              text-slate-400
+                              mt-1
+                            "
+                          >
+                            Created ${escapeHtml(
+                              createdAt
+                            )}
+                          </p>
+                        `
+                        : ""
+                    }
+
+
+                    ${responseDetails}
+
+                  </div>
+
+
+                  <div
+                    class="
+                      flex
+                      flex-col
+                      sm:flex-row
+                      lg:flex-col
+                      gap-2
+                      lg:w-44
+                      flex-shrink-0
+                    "
+                  >
+
+                    <a
+                      href="${shareUrl}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="
+                        text-center
+                        bg-slate-900
+                        text-white
+                        rounded-xl
+                        px-4
+                        py-3
+                        text-xs
+                        font-black
+                        hover:bg-slate-800
+                        transition
+                      "
+                    >
+                      Open Preview ↗
+                    </a>
+
+
+                    <button
+                      type="button"
+                      data-copy-client-link="${escapeHtml(
+                        shareUrl
+                      )}"
+                      class="
+                        copy-client-preview-btn
+                        text-center
+                        bg-white
+                        border
+                        border-slate-200
+                        text-slate-600
+                        rounded-xl
+                        px-4
+                        py-3
+                        text-xs
+                        font-black
+                        hover:bg-slate-50
+                        transition
+                      "
+                    >
+                      Copy Link
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </article>
+            `;
+          }
+        )
+        .join("");
+
+
+    container
+      .querySelectorAll(
+        ".copy-client-preview-btn"
+      )
+      .forEach(
+        function (button) {
+
+          button.addEventListener(
+            "click",
+            async function () {
+
+              const url =
+                this.dataset
+                  .copyClientLink;
+
+              if (!url) return;
+
+              try {
+                await navigator.clipboard
+                  .writeText(url);
+
+                const oldText =
+                  this.textContent;
+
+                this.textContent =
+                  "Copied ✓";
+
+                setTimeout(
+                  () => {
+                    this.textContent =
+                      oldText;
+                  },
+                  1500
+                );
+
+              } catch (error) {
+                window.prompt(
+                  "Copy this client link:",
+                  url
+                );
+              }
+            }
+          );
+        }
+      );
+  }
+
+
+  async function loadSavedClientFlipbooks() {
+    const container =
+      $("savedClientFlipbooks");
+
+    if (!container) {
+      return;
+    }
+
+
+    if (!supabaseClient) {
+      showClientFlipbooksStatus(
+        "Supabase could not be loaded.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    hideClientFlipbooksStatus();
+
+
+    container.innerHTML = `
+      <div
+        class="
+          bg-white
+          border
+          border-slate-200
+          rounded-3xl
+          p-8
+          text-center
+        "
+      >
+
+        <div
+          class="
+            w-8
+            h-8
+            mx-auto
+            rounded-full
+            border-4
+            border-slate-200
+            border-t-teal-500
+            animate-spin
+          "
+        ></div>
+
+        <p
+          class="
+            font-black
+            text-slate-700
+            mt-4
+          "
+        >
+          Loading client responses...
+        </p>
+
+      </div>
+    `;
+
+
+    try {
+      const {
+        data: { user },
+        error: userError
+      } =
+        await supabaseClient
+          .auth
+          .getUser();
+
+
+      if (userError) {
+        throw userError;
+      }
+
+
+      if (!user) {
+        throw new Error(
+          "Your login session expired. Please return to the dashboard and log in again."
+        );
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(
+            "client_flipbooks"
+          )
+          .select(
+            "share_code, project_name, book_size, status, client_name, client_message, revision_page, responded_at, created_at"
+          )
+          .order(
+            "created_at",
+            {
+              ascending:
+                false
+            }
+          );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      const flipbooks =
+        Array.isArray(data)
+          ? data
+          : [];
+
+
+      updateClientSummary(
+        flipbooks
+      );
+
+
+      renderSavedClientFlipbooks(
+        flipbooks
+      );
+
+
+    } catch (error) {
+      console.error(
+        "Load saved client flipbooks error:",
+        error
+      );
+
+
+      updateClientSummary(
+        []
+      );
+
+
+      container.innerHTML = `
+        <div
+          class="
+            bg-white
+            border
+            border-red-200
+            rounded-3xl
+            p-8
+            text-center
+          "
+        >
+
+          <div class="text-3xl">
+            ⚠️
+          </div>
+
+          <p
+            class="
+              font-black
+              text-red-700
+              mt-3
+            "
+          >
+            Could not load client flipbooks
+          </p>
+
+          <p
+            class="
+              text-xs
+              text-slate-500
+              mt-1
+            "
+          >
+            ${escapeHtml(
+              error?.message ||
+              "Please refresh and try again."
+            )}
+          </p>
+
+        </div>
+      `;
+
+
+      showClientFlipbooksStatus(
+        error?.message ||
+          "Unable to load saved client flipbooks.",
+        "error"
+      );
+    }
+  }
+
+
+  // =====================================================
+  // ADMIN REFRESH BUTTON
+  // =====================================================
+
+  $("refreshClientFlipbooksBtn")
+    ?.addEventListener(
+      "click",
+      async function () {
+
+        const oldText =
+          this.textContent;
+
+        this.disabled =
+          true;
+
+        this.textContent =
+          "Refreshing...";
+
+        await loadSavedClientFlipbooks();
+
+        this.disabled =
+          false;
+
+        this.textContent =
+          oldText;
+      }
+    );
+
+
+  // =====================================================
+  // INITIAL
+  // =====================================================
+
   updateZoomLabel();
   updateFullscreenButton();
   updateSaveShareButton();
+
+  loadSavedClientFlipbooks();
 
 })();

@@ -716,6 +716,133 @@
 
     </section>
 
+     <!-- ================================================= -->
+    <!-- SAVED CLIENT FLIPBOOKS -->
+    <!-- ================================================= -->
+
+    <section class="mt-10 sm:mt-12">
+
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+
+        <div>
+
+          <p class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]">
+            Client Responses
+          </p>
+
+          <h2 class="text-xl sm:text-2xl font-black mt-1">
+            Saved Client Flipbooks
+          </h2>
+
+          <p class="text-sm text-slate-500 mt-1">
+            Track which clients are still reviewing, approved for printing,
+            or requesting revisions.
+          </p>
+
+        </div>
+
+
+        <button
+          id="refreshClientFlipbooksBtn"
+          type="button"
+          class="w-fit px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-50 transition"
+        >
+          ↻ Refresh
+        </button>
+
+      </div>
+
+
+      <!-- SUMMARY -->
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+
+        <div class="bg-white border border-amber-200 rounded-2xl p-4">
+
+          <p class="text-[10px] font-black text-amber-600 uppercase tracking-wider">
+            Pending Review
+          </p>
+
+          <p
+            id="pendingClientCount"
+            class="text-3xl font-black text-slate-900 mt-1"
+          >
+            0
+          </p>
+
+        </div>
+
+
+        <div class="bg-white border border-emerald-200 rounded-2xl p-4">
+
+          <p class="text-[10px] font-black text-emerald-600 uppercase tracking-wider">
+            Approved
+          </p>
+
+          <p
+            id="approvedClientCount"
+            class="text-3xl font-black text-slate-900 mt-1"
+          >
+            0
+          </p>
+
+        </div>
+
+
+        <div class="bg-white border border-orange-200 rounded-2xl p-4">
+
+          <p class="text-[10px] font-black text-orange-600 uppercase tracking-wider">
+            Revision Requested
+          </p>
+
+          <p
+            id="revisionClientCount"
+            class="text-3xl font-black text-slate-900 mt-1"
+          >
+            0
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- RESPONSE STATUS -->
+
+      <div
+        id="clientFlipbooksStatus"
+        class="hidden mb-4 rounded-xl px-4 py-3 text-xs font-bold"
+      ></div>
+
+
+      <!-- CLIENT LIST -->
+
+      <div
+        id="savedClientFlipbooks"
+        class="space-y-4"
+      >
+
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 text-center">
+
+          <div class="text-3xl">
+            📚
+          </div>
+
+          <p class="font-black text-slate-700 mt-3">
+            Loading client flipbooks...
+          </p>
+
+          <p class="text-xs text-slate-400 mt-1">
+            Your saved client previews will appear here.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
   </main>
 
 
