@@ -14,6 +14,7 @@
   <title>Layout Jobs | R&Y Printing Lab</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- EXCEL READER -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -120,6 +121,14 @@
 </head>
 
 <body class="min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-5">
+  <a
+    href="index.html"
+    class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition"
+  >
+    ← Back to Dashboard
+  </a>
+</div>
 
   <!-- HEADER -->
   <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
@@ -782,6 +791,14 @@
     const STORAGE_KEY =
       "ryLayoutJobsV2";
 
+    const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let cloudSaveTimer = null;
+    let cloudSyncReady = false;
+
 
     function getJobs() {
 
@@ -800,10 +817,151 @@
 
     function saveJobs() {
 
+      // Keep a local copy as backup/offline cache.
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(jobs)
       );
+
+      // Also sync the complete workspace to Supabase.
+      if (cloudSyncReady && currentUser) {
+        clearTimeout(cloudSaveTimer);
+        cloudSaveTimer = setTimeout(syncJobsToCloud, 250);
+      }
+    }
+
+
+    function jobToCloudRow(job) {
+      return {
+        id: String(job.id),
+        user_id: currentUser.id,
+        client_name: String(job.clientName || "Unnamed Client"),
+        status: String(job.status || "pending"),
+        month: job.month ? String(job.month) : null,
+        form_answers: job,
+        updated_at: new Date().toISOString()
+      };
+    }
+
+
+    function cloudRowToJob(row) {
+      const payload =
+        row && row.form_answers &&
+        typeof row.form_answers === "object" &&
+        !Array.isArray(row.form_answers)
+          ? row.form_answers
+          : {};
+
+      return {
+        ...payload,
+        id: payload.id ?? row.id,
+        clientName: payload.clientName || row.client_name || "Unnamed Client",
+        status: payload.status || row.status || "pending",
+        month: payload.month || row.month || ""
+      };
+    }
+
+
+    async function syncJobsToCloud() {
+      if (!currentUser) return;
+
+      try {
+        const { data: existingRows, error: readError } = await supabaseClient
+          .from("jobs")
+          .select("id")
+          .eq("user_id", currentUser.id);
+
+        if (readError) throw readError;
+
+        const localIds = new Set(jobs.map(job => String(job.id)));
+        const cloudIds = (existingRows || []).map(row => String(row.id));
+        const idsToDelete = cloudIds.filter(id => !localIds.has(id));
+
+        if (idsToDelete.length) {
+          const { error: deleteError } = await supabaseClient
+            .from("jobs")
+            .delete()
+            .eq("user_id", currentUser.id)
+            .in("id", idsToDelete);
+
+          if (deleteError) throw deleteError;
+        }
+
+        if (jobs.length) {
+          const rows = jobs.map(jobToCloudRow);
+
+          const { error: upsertError } = await supabaseClient
+            .from("jobs")
+            .upsert(rows, { onConflict: "id" });
+
+          if (upsertError) throw upsertError;
+        }
+
+        console.log("R&Y cloud sync complete.");
+      } catch (error) {
+        console.error("R&Y cloud sync failed:", error);
+        showToast("Cloud sync failed — local copy is still safe");
+      }
+    }
+
+
+    async function initializeCloudSync() {
+      const { data: sessionData, error: sessionError } =
+        await supabaseClient.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        window.location.replace("login.html");
+        return;
+      }
+
+      currentUser = sessionData.session.user;
+
+      try {
+        const { data: cloudRows, error } = await supabaseClient
+          .from("jobs")
+          .select("*")
+          .eq("user_id", currentUser.id);
+
+        if (error) throw error;
+
+        const cloudJobs = (cloudRows || []).map(cloudRowToJob);
+        const localJobs = getJobs();
+
+        // First sync: preserve the laptop's existing local jobs and merge
+        // any jobs already stored online. Same job ID = local version wins.
+        const merged = new Map();
+
+        cloudJobs.forEach(job => merged.set(String(job.id), job));
+        localJobs.forEach(job => merged.set(String(job.id), job));
+
+        jobs = [...merged.values()];
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+
+        cloudSyncReady = true;
+
+        updateMonthOptions();
+        renderJobs();
+        renderImportedFiles();
+
+        await syncJobsToCloud();
+
+        showToast(
+          cloudJobs.length || localJobs.length
+            ? "R&Y jobs synced"
+            : "Cloud sync ready"
+        );
+      } catch (error) {
+        console.error("Initial cloud sync failed:", error);
+
+        // Do not destroy laptop data if internet/database has a problem.
+        jobs = getJobs();
+        cloudSyncReady = false;
+        updateMonthOptions();
+        renderJobs();
+        renderImportedFiles();
+        showToast("Using local backup — cloud sync unavailable");
+      }
     }
 
 
@@ -3523,10 +3681,11 @@
     // INITIAL LOAD
     // =====================================================
 
+    // Render the local cache immediately, then merge/sync with Supabase.
     updateMonthOptions();
-
     renderJobs();
     renderImportedFiles();
+    initializeCloudSync();
 
   </script>
 
