@@ -592,7 +592,269 @@
 
     </section>
 
+<!-- =========================================
+     CLIENT APPROVAL / REVISION
+     ========================================= -->
 
+<section
+  id="clientResponseSection"
+  class="mt-6 bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm"
+>
+
+  <div class="text-center max-w-2xl mx-auto">
+
+    <p
+      class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]"
+    >
+      Client Confirmation
+    </p>
+
+    <h3
+      class="text-xl sm:text-2xl font-black mt-2"
+    >
+      Finished reviewing your photobook?
+    </h3>
+
+    <p
+      class="text-xs sm:text-sm text-slate-500 mt-2"
+    >
+      Approve the layout for printing or send a revision request.
+    </p>
+
+  </div>
+
+
+  <!-- CURRENT STATUS -->
+
+  <div
+    id="clientResponseStatus"
+    class="hidden mt-5 max-w-2xl mx-auto rounded-2xl px-4 py-4 text-sm font-bold border"
+  ></div>
+
+
+  <!-- MAIN BUTTONS -->
+
+  <div
+    id="clientResponseButtons"
+    class="flex flex-col sm:flex-row justify-center gap-3 mt-6"
+  >
+
+    <button
+      id="approvePhotobookBtn"
+      type="button"
+      class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black transition"
+    >
+      ✓ Approve Photobook
+    </button>
+
+
+    <button
+      id="requestRevisionBtn"
+      type="button"
+      class="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-black transition"
+    >
+      ✎ Request Revision
+    </button>
+
+  </div>
+
+
+  <!-- =====================================
+       APPROVAL FORM
+       ===================================== -->
+
+  <div
+    id="approvalForm"
+    class="hidden max-w-xl mx-auto mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-5"
+  >
+
+    <h4
+      class="font-black text-emerald-900 text-lg"
+    >
+      Approve for Printing
+    </h4>
+
+    <p
+      class="text-xs text-emerald-700 mt-1"
+    >
+      Please enter your name to confirm that the photobook layout is approved.
+    </p>
+
+
+    <div class="mt-4">
+
+      <label
+        for="approvalClientName"
+        class="block text-xs font-black text-slate-700 mb-2"
+      >
+        Your Name
+      </label>
+
+      <input
+        id="approvalClientName"
+        type="text"
+        maxlength="100"
+        placeholder="Enter your name"
+        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-300"
+      >
+
+    </div>
+
+
+    <label
+      class="flex items-start gap-3 mt-4 cursor-pointer"
+    >
+
+      <input
+        id="approvalConfirmation"
+        type="checkbox"
+        class="mt-1 w-4 h-4"
+      >
+
+      <span
+        class="text-xs text-slate-600 leading-relaxed"
+      >
+        I confirm that I have reviewed this photobook layout
+        and approve it for printing.
+      </span>
+
+    </label>
+
+
+    <div
+      class="flex flex-col sm:flex-row gap-2 mt-5"
+    >
+
+      <button
+        id="confirmApprovalBtn"
+        type="button"
+        class="flex-1 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition"
+      >
+        Confirm Approval
+      </button>
+
+
+      <button
+        id="cancelApprovalBtn"
+        type="button"
+        class="px-5 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-black"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================
+       REVISION FORM
+       ===================================== -->
+
+  <div
+    id="revisionForm"
+    class="hidden max-w-xl mx-auto mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-5"
+  >
+
+    <h4
+      class="font-black text-amber-900 text-lg"
+    >
+      Request a Revision
+    </h4>
+
+    <p
+      class="text-xs text-amber-700 mt-1"
+    >
+      Tell R&Y Printing Lab what you would like changed.
+    </p>
+
+
+    <div class="mt-4">
+
+      <label
+        for="revisionClientName"
+        class="block text-xs font-black text-slate-700 mb-2"
+      >
+        Your Name
+      </label>
+
+      <input
+        id="revisionClientName"
+        type="text"
+        maxlength="100"
+        placeholder="Enter your name"
+        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-300"
+      >
+
+    </div>
+
+
+    <div class="mt-4">
+
+      <label
+        for="revisionPage"
+        class="block text-xs font-black text-slate-700 mb-2"
+      >
+        Page Number
+      </label>
+
+      <input
+        id="revisionPage"
+        type="text"
+        maxlength="50"
+        placeholder="Example: Page 8"
+        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-300"
+      >
+
+    </div>
+
+
+    <div class="mt-4">
+
+      <label
+        for="revisionMessage"
+        class="block text-xs font-black text-slate-700 mb-2"
+      >
+        What would you like changed?
+      </label>
+
+      <textarea
+        id="revisionMessage"
+        rows="4"
+        maxlength="1000"
+        placeholder="Example: Please replace the photo on the upper-right side."
+        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none resize-y focus:ring-2 focus:ring-amber-300"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="flex flex-col sm:flex-row gap-2 mt-5"
+    >
+
+      <button
+        id="submitRevisionBtn"
+        type="button"
+        class="flex-1 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black transition"
+      >
+        Submit Revision Request
+      </button>
+
+
+      <button
+        id="cancelRevisionBtn"
+        type="button"
+        class="px-5 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-black"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
     <!-- FOOTER MESSAGE -->
 
     <section

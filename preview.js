@@ -1345,6 +1345,580 @@
   updateZoomLabel();
   updateFullscreenButton();
 
+   // =====================================================
+  // CLIENT APPROVAL / REVISION
+  // =====================================================
+
+  let currentShareCode =
+    getShareCode();
+
+  let currentClientStatus =
+    "pending";
+
+
+  function showClientResponseStatus(
+    message,
+    type = "info"
+  ) {
+    const box =
+      $("clientResponseStatus");
+
+    if (!box) return;
+
+    box.className =
+      "mt-5 max-w-2xl mx-auto rounded-2xl px-4 py-4 text-sm font-bold border";
+
+    if (type === "approved") {
+      box.classList.add(
+        "bg-emerald-50",
+        "border-emerald-200",
+        "text-emerald-800"
+      );
+
+    } else if (type === "revision") {
+      box.classList.add(
+        "bg-amber-50",
+        "border-amber-200",
+        "text-amber-800"
+      );
+
+    } else if (type === "error") {
+      box.classList.add(
+        "bg-red-50",
+        "border-red-200",
+        "text-red-700"
+      );
+
+    } else {
+      box.classList.add(
+        "bg-blue-50",
+        "border-blue-200",
+        "text-blue-700"
+      );
+    }
+
+    box.textContent =
+      message;
+  }
+
+
+  function hideClientResponseStatus() {
+    const box =
+      $("clientResponseStatus");
+
+    if (box) {
+      box.classList.add(
+        "hidden"
+      );
+    }
+  }
+
+
+  function hideResponseForms() {
+    $("approvalForm")
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("revisionForm")
+      ?.classList.add(
+        "hidden"
+      );
+  }
+
+
+  function showResponseButtons() {
+    $("clientResponseButtons")
+      ?.classList.remove(
+        "hidden"
+      );
+  }
+
+
+  function hideResponseButtons() {
+    $("clientResponseButtons")
+      ?.classList.add(
+        "hidden"
+      );
+  }
+
+
+  function showApprovalForm() {
+    hideClientResponseStatus();
+
+    $("revisionForm")
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("approvalForm")
+      ?.classList.remove(
+        "hidden"
+      );
+  }
+
+
+  function showRevisionForm() {
+    hideClientResponseStatus();
+
+    $("approvalForm")
+      ?.classList.add(
+        "hidden"
+      );
+
+    $("revisionForm")
+      ?.classList.remove(
+        "hidden"
+      );
+  }
+
+
+  // =====================================================
+  // LOAD CURRENT CLIENT RESPONSE
+  // =====================================================
+
+  async function loadClientResponse() {
+    if (
+      !supabaseClient ||
+      !currentShareCode
+    ) {
+      return;
+    }
+
+    try {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(
+            "client_flipbooks"
+          )
+          .select(
+            "status, client_name, client_message, revision_page, responded_at"
+          )
+          .eq(
+            "share_code",
+            currentShareCode
+          )
+          .single();
+
+      if (error) {
+        console.warn(
+          "Client response load warning:",
+          error
+        );
+
+        return;
+      }
+
+      currentClientStatus =
+        data?.status ||
+        "pending";
+
+      if (
+        currentClientStatus ===
+        "approved"
+      ) {
+        hideResponseForms();
+        hideResponseButtons();
+
+        const name =
+          data.client_name
+            ? ` by ${data.client_name}`
+            : "";
+
+        showClientResponseStatus(
+          `✓ Photobook approved${name}. This layout is approved for printing.`,
+          "approved"
+        );
+
+        return;
+      }
+
+
+      if (
+        currentClientStatus ===
+        "revision"
+      ) {
+        hideResponseForms();
+        hideResponseButtons();
+
+        const page =
+          data.revision_page
+            ? ` — ${data.revision_page}`
+            : "";
+
+        showClientResponseStatus(
+          `✎ Revision request submitted${page}. R&Y Printing Lab will review your request.`,
+          "revision"
+        );
+
+        return;
+      }
+
+
+      hideResponseForms();
+      showResponseButtons();
+
+    } catch (error) {
+      console.warn(
+        "Client response check error:",
+        error
+      );
+    }
+  }
+
+
+  // =====================================================
+  // APPROVE PHOTOBOOK
+  // =====================================================
+
+  async function confirmApproval() {
+    const name =
+      $("approvalClientName")
+        ?.value
+        .trim() || "";
+
+    const confirmed =
+      $("approvalConfirmation")
+        ?.checked || false;
+
+    if (!name) {
+      showClientResponseStatus(
+        "Please enter your name before approving.",
+        "error"
+      );
+
+      $("approvalClientName")
+        ?.focus();
+
+      return;
+    }
+
+
+    if (!confirmed) {
+      showClientResponseStatus(
+        "Please check the confirmation box before approving.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (
+      !supabaseClient ||
+      !currentShareCode
+    ) {
+      showClientResponseStatus(
+        "Unable to submit approval. Please refresh the page.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const button =
+      $("confirmApprovalBtn");
+
+    if (button) {
+      button.disabled =
+        true;
+
+      button.textContent =
+        "Saving Approval...";
+    }
+
+
+    try {
+      const {
+        error
+      } =
+        await supabaseClient
+          .from(
+            "client_flipbooks"
+          )
+          .update({
+            status:
+              "approved",
+
+            client_name:
+              name,
+
+            client_message:
+              null,
+
+            revision_page:
+              null,
+
+            responded_at:
+              new Date()
+                .toISOString()
+          })
+          .eq(
+            "share_code",
+            currentShareCode
+          );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      currentClientStatus =
+        "approved";
+
+      hideResponseForms();
+      hideResponseButtons();
+
+      showClientResponseStatus(
+        `✓ Thank you, ${name}! The photobook has been approved for printing.`,
+        "approved"
+      );
+
+    } catch (error) {
+      console.error(
+        "Approval error:",
+        error
+      );
+
+      showClientResponseStatus(
+        error?.message ||
+          "Unable to submit approval. Please try again.",
+        "error"
+      );
+
+    } finally {
+      if (button) {
+        button.disabled =
+          false;
+
+        button.textContent =
+          "Confirm Approval";
+      }
+    }
+  }
+
+
+  // =====================================================
+  // REQUEST REVISION
+  // =====================================================
+
+  async function submitRevision() {
+    const name =
+      $("revisionClientName")
+        ?.value
+        .trim() || "";
+
+    const page =
+      $("revisionPage")
+        ?.value
+        .trim() || "";
+
+    const message =
+      $("revisionMessage")
+        ?.value
+        .trim() || "";
+
+
+    if (!name) {
+      showClientResponseStatus(
+        "Please enter your name.",
+        "error"
+      );
+
+      $("revisionClientName")
+        ?.focus();
+
+      return;
+    }
+
+
+    if (!page) {
+      showClientResponseStatus(
+        "Please enter the page number that needs revision.",
+        "error"
+      );
+
+      $("revisionPage")
+        ?.focus();
+
+      return;
+    }
+
+
+    if (!message) {
+      showClientResponseStatus(
+        "Please describe what you would like changed.",
+        "error"
+      );
+
+      $("revisionMessage")
+        ?.focus();
+
+      return;
+    }
+
+
+    if (
+      !supabaseClient ||
+      !currentShareCode
+    ) {
+      showClientResponseStatus(
+        "Unable to submit revision. Please refresh the page.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const button =
+      $("submitRevisionBtn");
+
+    if (button) {
+      button.disabled =
+        true;
+
+      button.textContent =
+        "Submitting...";
+    }
+
+
+    try {
+      const {
+        error
+      } =
+        await supabaseClient
+          .from(
+            "client_flipbooks"
+          )
+          .update({
+            status:
+              "revision",
+
+            client_name:
+              name,
+
+            client_message:
+              message,
+
+            revision_page:
+              page,
+
+            responded_at:
+              new Date()
+                .toISOString()
+          })
+          .eq(
+            "share_code",
+            currentShareCode
+          );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      currentClientStatus =
+        "revision";
+
+      hideResponseForms();
+      hideResponseButtons();
+
+      showClientResponseStatus(
+        `✎ Thank you, ${name}. Your revision request for ${page} has been sent to R&Y Printing Lab.`,
+        "revision"
+      );
+
+    } catch (error) {
+      console.error(
+        "Revision error:",
+        error
+      );
+
+      showClientResponseStatus(
+        error?.message ||
+          "Unable to submit revision request. Please try again.",
+        "error"
+      );
+
+    } finally {
+      if (button) {
+        button.disabled =
+          false;
+
+        button.textContent =
+          "Submit Revision Request";
+      }
+    }
+  }
+
+
+  // =====================================================
+  // RESPONSE BUTTON EVENTS
+  // =====================================================
+
+  $("approvePhotobookBtn")
+    ?.addEventListener(
+      "click",
+      showApprovalForm
+    );
+
+
+  $("requestRevisionBtn")
+    ?.addEventListener(
+      "click",
+      showRevisionForm
+    );
+
+
+  $("cancelApprovalBtn")
+    ?.addEventListener(
+      "click",
+      function () {
+        hideResponseForms();
+        showResponseButtons();
+        hideClientResponseStatus();
+      }
+    );
+
+
+  $("cancelRevisionBtn")
+    ?.addEventListener(
+      "click",
+      function () {
+        hideResponseForms();
+        showResponseButtons();
+        hideClientResponseStatus();
+      }
+    );
+
+
+  $("confirmApprovalBtn")
+    ?.addEventListener(
+      "click",
+      confirmApproval
+    );
+
+
+  $("submitRevisionBtn")
+    ?.addEventListener(
+      "click",
+      submitRevision
+    );
+
+
+  // =====================================================
+  // START
+  // =====================================================
+
   loadPreview();
+
+  loadClientResponse();
 
 })();
