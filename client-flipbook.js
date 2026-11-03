@@ -8,9 +8,7 @@
   let pageFlip = null;
   let pdfFile = null;
   let pdfDocument = null;
-
   let renderedPageUrls = [];
-
   let zoomLevel = 1;
 
   const MIN_ZOOM = 0.6;
@@ -18,6 +16,28 @@
   const ZOOM_STEP = 0.1;
 
   const $ = (id) => document.getElementById(id);
+
+
+  // =====================================================
+  // SUPABASE
+  // =====================================================
+
+  const SUPABASE_URL =
+    "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
+
+  const supabaseClient =
+    window.supabase
+      ? window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        )
+      : null;
+
+  let isFlipbookReady = false;
+  let isSavingShare = false;
 
 
   // =====================================================
@@ -76,11 +96,410 @@
 
 
   // =====================================================
+  // SHARE STATUS / CONTROLS
+  // =====================================================
+
+  function showShareStatus(message, type = "info") {
+    const status = $("shareStatus");
+
+    if (!status) return;
+
+    status.className =
+      "mt-3 rounded-xl px-4 py-3 text-xs font-bold border";
+
+    if (type === "error") {
+      status.classList.add(
+        "bg-red-50",
+        "text-red-700",
+        "border-red-200"
+      );
+    } else if (type === "success") {
+      status.classList.add(
+        "bg-emerald-50",
+        "text-emerald-700",
+        "border-emerald-200"
+      );
+    } else {
+      status.classList.add(
+        "bg-blue-50",
+        "text-blue-700",
+        "border-blue-200"
+      );
+    }
+
+    status.textContent = message;
+  }
+
+
+  function hideShareStatus() {
+    const status = $("shareStatus");
+
+    if (!status) return;
+
+    status.classList.add("hidden");
+  }
+
+
+  function hideShareResult() {
+    const result = $("shareResult");
+
+    if (result) {
+      result.classList.add("hidden");
+    }
+
+    const input = $("shareLinkInput");
+
+    if (input) {
+      input.value = "";
+    }
+
+    const open = $("openShareLinkBtn");
+
+    if (open) {
+      open.href = "#";
+    }
+  }
+
+
+  function updateSaveShareButton() {
+    const button = $("saveShareBtn");
+
+    if (!button) return;
+
+    button.disabled =
+      !pdfFile ||
+      !isFlipbookReady ||
+      isSavingShare;
+  }
+
+
+  function resetShareState() {
+    isFlipbookReady = false;
+    isSavingShare = false;
+
+    hideShareStatus();
+    hideShareResult();
+    updateSaveShareButton();
+  }
+
+
+  function createShareCode() {
+    if (window.crypto?.randomUUID) {
+      return window.crypto
+        .randomUUID()
+        .replaceAll("-", "");
+    }
+
+    return (
+      Date.now().toString(36) +
+      Math.random().toString(36).slice(2) +
+      Math.random().toString(36).slice(2)
+    );
+  }
+
+
+  function createStorageFileName(file) {
+    const extension =
+      file.name.toLowerCase().endsWith(".pdf")
+        ? ".pdf"
+        : "";
+
+    return `${
+      window.crypto?.randomUUID?.() ||
+      createShareCode()
+    }${extension}`;
+  }
+
+
+  // =====================================================
+  // SAVE + CREATE SHARE LINK
+  // =====================================================
+
+  async function saveAndCreateShareLink() {
+    if (isSavingShare) return;
+
+    if (!supabaseClient) {
+      showShareStatus(
+        "Supabase could not be loaded. Refresh the page and try again.",
+        "error"
+      );
+
+      return;
+    }
+
+    const projectName =
+      $("projectName")?.value.trim() || "";
+
+    if (!projectName) {
+      showShareStatus(
+        "Please enter the Project / Client Name first.",
+        "error"
+      );
+
+      $("projectName")?.focus();
+
+      return;
+    }
+
+    if (!pdfFile) {
+      showShareStatus(
+        "Please upload a PDF first.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (!isFlipbookReady) {
+      showShareStatus(
+        "Generate the flipbook first before creating a share link.",
+        "error"
+      );
+
+      return;
+    }
+
+    isSavingShare = true;
+
+    updateSaveShareButton();
+    hideShareResult();
+
+    const button =
+      $("saveShareBtn");
+
+    const originalText =
+      button?.textContent ||
+      "Save & Create Share Link";
+
+    if (button) {
+      button.textContent =
+        "Saving PDF...";
+    }
+
+    let uploadedPath = null;
+
+    try {
+      const {
+        data: { user },
+        error: userError
+      } =
+        await supabaseClient.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
+        throw new Error(
+          "Your login session expired. Please return to the dashboard and log in again."
+        );
+      }
+
+      const fileName =
+        createStorageFileName(pdfFile);
+
+      uploadedPath =
+        `${user.id}/${fileName}`;
+
+      showShareStatus(
+        "Uploading PDF to R&Y storage...",
+        "info"
+      );
+
+      const { error: uploadError } =
+        await supabaseClient.storage
+          .from("client-flipbooks")
+          .upload(
+            uploadedPath,
+            pdfFile,
+            {
+              contentType:
+                "application/pdf",
+
+              upsert: false
+            }
+          );
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicUrlData } =
+        supabaseClient.storage
+          .from("client-flipbooks")
+          .getPublicUrl(
+            uploadedPath
+          );
+
+      const pdfUrl =
+        publicUrlData?.publicUrl;
+
+      if (!pdfUrl) {
+        throw new Error(
+          "PDF was uploaded but its public URL could not be created."
+        );
+      }
+
+      if (button) {
+        button.textContent =
+          "Creating Share Link...";
+      }
+
+      showShareStatus(
+        "PDF uploaded. Creating client link...",
+        "info"
+      );
+
+      const shareCode =
+        createShareCode();
+
+      const bookSize =
+        $("bookSize")?.value ||
+        "10x7";
+
+      const { error: insertError } =
+        await supabaseClient
+          .from("client_flipbooks")
+          .insert({
+            share_code: shareCode,
+            project_name: projectName,
+            pdf_url: pdfUrl,
+            book_size: bookSize
+          });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      const shareUrl =
+        `${window.location.origin}/preview.html?id=${encodeURIComponent(
+          shareCode
+        )}`;
+
+      const shareInput =
+        $("shareLinkInput");
+
+      const openButton =
+        $("openShareLinkBtn");
+
+      const result =
+        $("shareResult");
+
+      if (shareInput) {
+        shareInput.value =
+          shareUrl;
+      }
+
+      if (openButton) {
+        openButton.href =
+          shareUrl;
+      }
+
+      if (result) {
+        result.classList.remove(
+          "hidden"
+        );
+      }
+
+      showShareStatus(
+        "Saved successfully. Your client link is ready!",
+        "success"
+      );
+
+    } catch (error) {
+      console.error(
+        "Save/share error:",
+        error
+      );
+
+      if (
+        uploadedPath &&
+        supabaseClient
+      ) {
+        try {
+          await supabaseClient.storage
+            .from("client-flipbooks")
+            .remove([
+              uploadedPath
+            ]);
+        } catch (cleanupError) {
+          console.warn(
+            "Uploaded PDF cleanup warning:",
+            cleanupError
+          );
+        }
+      }
+
+      showShareStatus(
+        error?.message ||
+          "Unable to save the client flipbook.",
+        "error"
+      );
+
+    } finally {
+      isSavingShare = false;
+
+      if (button) {
+        button.textContent =
+          originalText;
+      }
+
+      updateSaveShareButton();
+    }
+  }
+
+
+  // =====================================================
+  // COPY SHARE LINK
+  // =====================================================
+
+  async function copyShareLink() {
+    const input =
+      $("shareLinkInput");
+
+    const button =
+      $("copyShareLinkBtn");
+
+    if (!input?.value) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        input.value
+      );
+
+      if (button) {
+        const oldText =
+          button.textContent;
+
+        button.textContent =
+          "Copied ✓";
+
+        setTimeout(() => {
+          button.textContent =
+            oldText;
+        }, 1500);
+      }
+
+    } catch (error) {
+      input.focus();
+      input.select();
+
+      showShareStatus(
+        "Copy was blocked by the browser. The link is selected — press Ctrl+C.",
+        "info"
+      );
+    }
+  }
+
+
+  // =====================================================
   // FILE SIZE
   // =====================================================
 
   function formatFileSize(bytes) {
-    if (!bytes) return "0 KB";
+    if (!bytes) {
+      return "0 KB";
+    }
 
     const mb =
       bytes / (1024 * 1024);
@@ -101,7 +520,8 @@
 
   function getBookSize() {
     const value =
-      $("bookSize")?.value || "10x7";
+      $("bookSize")?.value ||
+      "10x7";
 
     const sizes = {
       "6x6": {
@@ -125,8 +545,10 @@
       }
     };
 
-    return sizes[value] ||
-      sizes["10x7"];
+    return (
+      sizes[value] ||
+      sizes["10x7"]
+    );
   }
 
 
@@ -136,13 +558,19 @@
 
     const maxSide = 430;
 
-    if (size.width >= size.height) {
+    if (
+      size.width >=
+      size.height
+    ) {
       return {
         width: maxSide,
 
         height: Math.round(
           maxSide *
-          (size.height / size.width)
+          (
+            size.height /
+            size.width
+          )
         )
       };
     }
@@ -150,7 +578,10 @@
     return {
       width: Math.round(
         maxSide *
-        (size.width / size.height)
+        (
+          size.width /
+          size.height
+        )
       ),
 
       height: maxSide
@@ -183,7 +614,6 @@
 
   // =====================================================
   // FRESH HOST
-  // Same lifecycle strategy as our working calculator.
   // =====================================================
 
   function getStage() {
@@ -208,7 +638,9 @@
     stage.innerHTML = "";
 
     const host =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     host.id =
       "clientFlipbook";
@@ -216,7 +648,9 @@
     host.className =
       "client-flipbook-book";
 
-    stage.appendChild(host);
+    stage.appendChild(
+      host
+    );
 
     applyZoom();
 
@@ -237,7 +671,8 @@
 
     if (!badge) return;
 
-    badge.textContent = text;
+    badge.textContent =
+      text;
 
     if (ready) {
       badge.classList.add(
@@ -276,9 +711,11 @@
     );
 
     info.innerHTML = `
-      <strong>✓ ${escapeHtml(
-        pdfFile.name
-      )}</strong>
+      <strong>
+        ✓ ${escapeHtml(
+          pdfFile.name
+        )}
+      </strong>
 
       <div style="
         margin-top:4px;
@@ -317,8 +754,11 @@
         "hidden"
       );
 
-      total.textContent = "0";
-      inside.textContent = "0";
+      total.textContent =
+        "0";
+
+      inside.textContent =
+        "0";
 
       return;
     }
@@ -386,17 +826,13 @@
         pageNumber
       );
 
-    /*
-     * Render at higher resolution so Canva
-     * designs remain sharp while zooming.
-     */
-
     const baseViewport =
       page.getViewport({
         scale: 1
       });
 
-    const targetWidth = 1600;
+    const targetWidth =
+      1600;
 
     const scale =
       targetWidth /
@@ -445,12 +881,6 @@
       viewport
     }).promise;
 
-    /*
-     * WebP keeps preview quality high
-     * without making browser memory
-     * unnecessarily huge.
-     */
-
     return canvas.toDataURL(
       "image/webp",
       0.92
@@ -486,12 +916,9 @@
           pageNumber
         );
 
-      urls.push(imageUrl);
-
-      /*
-       * Give browser a tiny break between
-       * large Canva pages.
-       */
+      urls.push(
+        imageUrl
+      );
 
       await new Promise(
         (resolve) =>
@@ -550,11 +977,13 @@
         "aria-label",
         "Front Cover"
       );
+
     } else if (isBackCover) {
       page.setAttribute(
         "aria-label",
         "Back Cover"
       );
+
     } else {
       page.setAttribute(
         "aria-label",
@@ -581,9 +1010,11 @@
     if (isFrontCover) {
       image.alt =
         "Front Cover";
+
     } else if (isBackCover) {
       image.alt =
         "Back Cover";
+
     } else {
       image.alt =
         `Photobook Page ${
@@ -612,7 +1043,6 @@
 
     pageUrls.forEach(
       (imageUrl, index) => {
-
         host.appendChild(
           createPageElement(
             imageUrl,
@@ -620,7 +1050,6 @@
             totalPages
           )
         );
-
       }
     );
   }
@@ -677,7 +1106,6 @@
 
             }
           );
-
         }
       )
     );
@@ -760,9 +1188,7 @@
       return;
     }
 
-    if (
-      !window.pdfjsLib
-    ) {
+    if (!window.pdfjsLib) {
       showStatus(
         "PDF reader could not be loaded.",
         "error"
@@ -787,13 +1213,21 @@
       $("generateFlipbookBtn");
 
     if (button) {
-      button.disabled = true;
+      button.disabled =
+        true;
 
       button.textContent =
         "Reading PDF...";
     }
 
     hideStatus();
+
+    isFlipbookReady =
+      false;
+
+    hideShareResult();
+    hideShareStatus();
+    updateSaveShareButton();
 
     destroyFlipbook();
 
@@ -812,7 +1246,9 @@
       );
 
       if (button) {
-        button.disabled = false;
+        button.disabled =
+          false;
+
         button.textContent =
           "Generate Flipbook";
       }
@@ -839,8 +1275,6 @@
     `;
 
     try {
-      // LOAD PDF
-
       pdfDocument =
         await loadPdf(
           pdfFile
@@ -858,9 +1292,6 @@
       updatePdfStats(
         totalPages
       );
-
-
-      // RENDER PDF PAGES
 
       if (button) {
         button.textContent =
@@ -887,13 +1318,8 @@
               button.textContent =
                 `Rendering ${current} / ${total}`;
             }
-
           }
         );
-
-
-      // DESTROY ANY OLD PAGEFLIP AGAIN
-      // then rebuild a totally fresh host.
 
       destroyFlipbook();
 
@@ -906,17 +1332,14 @@
         );
       }
 
-
       buildFlipbookPages(
         freshHost,
         renderedPageUrls
       );
 
-
       await waitForImages(
         freshHost
       );
-
 
       const pageElements =
         freshHost.querySelectorAll(
@@ -928,9 +1351,6 @@
           "No PDF pages were generated."
         );
       }
-
-
-      // CREATE PAGEFLIP
 
       const dimensions =
         getPageDimensions();
@@ -998,11 +1418,9 @@
           }
         );
 
-
       pageFlip.loadFromHTML(
         pageElements
       );
-
 
       pageFlip.on(
         "flip",
@@ -1011,14 +1429,12 @@
         }
       );
 
-
       pageFlip.on(
         "changeOrientation",
         function () {
           updateCounter();
         }
       );
-
 
       pageFlip.on(
         "init",
@@ -1027,10 +1443,8 @@
         }
       );
 
-
       requestAnimationFrame(
         function () {
-
           requestAnimationFrame(
             function () {
 
@@ -1041,16 +1455,18 @@
 
             }
           );
-
         }
       );
-
 
       setPreviewBadge(
         "PDF READY",
         true
       );
 
+      isFlipbookReady =
+        true;
+
+      updateSaveShareButton();
 
       showStatus(
         `${totalPages} PDF pages loaded successfully. Front cover and back cover included.`,
@@ -1062,6 +1478,11 @@
         "PDF flipbook error:",
         error
       );
+
+      isFlipbookReady =
+        false;
+
+      updateSaveShareButton();
 
       destroyFlipbook();
 
@@ -1104,16 +1525,15 @@
 
     } finally {
       if (button) {
-        button.disabled = false;
+        button.disabled =
+          false;
 
         button.textContent =
           "Generate Flipbook";
       }
     }
   }
-
-
-  // =====================================================
+    // =====================================================
   // NEXT / PREVIOUS
   // =====================================================
 
@@ -1256,6 +1676,7 @@
         document.exitFullscreen
       ) {
         document.exitFullscreen();
+
       } else if (
         document.webkitExitFullscreen
       ) {
@@ -1278,6 +1699,7 @@
             );
           }
         );
+
     } else if (
       section.webkitRequestFullscreen
     ) {
@@ -1300,7 +1722,7 @@
 
 
   // =====================================================
-  // CLEAR
+  // CLEAR PDF
   // =====================================================
 
   function clearPdf() {
@@ -1309,6 +1731,8 @@
     pdfFile = null;
     pdfDocument = null;
     renderedPageUrls = [];
+
+    resetShareState();
 
     const input =
       $("photobookPdfInput");
@@ -1386,6 +1810,7 @@
         if (!file) {
           pdfFile = null;
 
+          resetShareState();
           updatePdfInfo();
 
           return;
@@ -1403,6 +1828,7 @@
 
           pdfFile = null;
 
+          resetShareState();
           updatePdfInfo();
 
           showStatus(
@@ -1419,8 +1845,9 @@
         pdfDocument = null;
         renderedPageUrls = [];
 
-        updatePdfInfo();
+        resetShareState();
 
+        updatePdfInfo();
         updatePdfStats(0);
 
         setPreviewBadge(
@@ -1440,14 +1867,13 @@
           "PDF selected. Click Generate Flipbook.",
           "info"
         );
-
       }
     );
   }
 
 
   // =====================================================
-  // BUTTONS
+  // MAIN BUTTONS
   // =====================================================
 
   $("generateFlipbookBtn")
@@ -1507,14 +1933,49 @@
 
 
   // =====================================================
+  // SHARE BUTTONS
+  // =====================================================
+
+  $("saveShareBtn")
+    ?.addEventListener(
+      "click",
+      saveAndCreateShareLink
+    );
+
+
+  $("copyShareLinkBtn")
+    ?.addEventListener(
+      "click",
+      copyShareLink
+    );
+
+
+  // =====================================================
+  // PROJECT NAME CHANGE
+  // =====================================================
+
+  $("projectName")
+    ?.addEventListener(
+      "input",
+      function () {
+        hideShareResult();
+        hideShareStatus();
+      }
+    );
+
+
+  // =====================================================
   // BOOK SIZE CHANGE
-  // Rebuild PageFlip without rerendering PDF canvases.
+  // Rebuild PageFlip without rerendering the PDF.
   // =====================================================
 
   $("bookSize")
     ?.addEventListener(
       "change",
       async function () {
+
+        hideShareResult();
+        hideShareStatus();
 
         if (
           !renderedPageUrls.length
@@ -1620,14 +2081,23 @@
           );
 
           pageFlip.on(
+            "changeOrientation",
+            updateCounter
+          );
+
+          pageFlip.on(
             "init",
             updateCounter
           );
 
           requestAnimationFrame(
             function () {
-              updateCounter();
-              applyZoom();
+              requestAnimationFrame(
+                function () {
+                  updateCounter();
+                  applyZoom();
+                }
+              );
             }
           );
 
@@ -1637,7 +2107,6 @@
             error
           );
         }
-
       }
     );
 
@@ -1709,7 +2178,8 @@
         return;
       }
 
-      lastWheelTime = now;
+      lastWheelTime =
+        now;
 
       if (
         event.deltaY < 0
@@ -1718,7 +2188,6 @@
       } else {
         zoomOut();
       }
-
     },
     {
       passive: false
@@ -1732,5 +2201,6 @@
 
   updateZoomLabel();
   updateFullscreenButton();
+  updateSaveShareButton();
 
 })();

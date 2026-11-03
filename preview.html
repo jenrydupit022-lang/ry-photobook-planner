@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Photobook Preview | R&Y Printing Lab</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+    rel="stylesheet"
+    href="client-flipbook.css"
+  >
+
+  <style>
+    :root {
+      --mint: #63d9c9;
+      --green: #8bcb78;
+      --dark: #111827;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(99, 217, 201, 0.18),
+          transparent 30%
+        ),
+        radial-gradient(
+          circle at bottom right,
+          rgba(139, 203, 120, 0.15),
+          transparent 30%
+        ),
+        #f6faf8;
+
+      color: var(--dark);
+    }
+
+    .brand-gradient {
+      background: linear-gradient(
+        135deg,
+        var(--mint),
+        var(--green)
+      );
+    }
+
+    .brand-text {
+      background: linear-gradient(
+        90deg,
+        #23aa9b,
+        #63a953
+      );
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .buyer-shell {
+      width: min(1400px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .buyer-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #e2e8f0;
+      border-radius: 28px;
+      box-shadow:
+        0 20px 60px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+    }
+
+    .buyer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .buyer-stage {
+      position: relative;
+      min-height: 600px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      overflow: hidden;
+
+      padding: 40px 20px;
+
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(99, 217, 201, 0.12),
+          transparent 42%
+        ),
+        linear-gradient(
+          180deg,
+          #f8fafc,
+          #eef5f3
+        );
+    }
+
+    .buyer-stage::after {
+      content: "";
+      position: absolute;
+
+      left: 50%;
+      bottom: 45px;
+
+      width: min(650px, 70%);
+      height: 35px;
+
+      transform: translateX(-50%);
+
+      border-radius: 50%;
+
+      background: rgba(15, 23, 42, 0.13);
+      filter: blur(18px);
+
+      pointer-events: none;
+    }
+
+    #buyerFlipbook {
+      position: relative;
+      z-index: 2;
+
+      transition: transform 0.2s ease;
+    }
+
+    .buyer-loading {
+      position: relative;
+      z-index: 5;
+
+      width: min(420px, 90%);
+      text-align: center;
+
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+
+      padding: 30px;
+
+      box-shadow:
+        0 15px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .buyer-spinner {
+      width: 42px;
+      height: 42px;
+
+      margin: 0 auto 18px;
+
+      border: 4px solid #dbeafe;
+      border-top-color: #23aa9b;
+      border-radius: 50%;
+
+      animation: buyerSpin 0.8s linear infinite;
+    }
+
+    @keyframes buyerSpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .buyer-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      gap: 8px;
+
+      padding: 16px 20px 20px;
+
+      border-top: 1px solid #e2e8f0;
+      background: white;
+    }
+
+    .buyer-btn {
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: #334155;
+
+      border-radius: 12px;
+
+      padding: 10px 14px;
+
+      font-size: 12px;
+      font-weight: 900;
+
+      cursor: pointer;
+
+      transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .buyer-btn:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow:
+        0 5px 15px rgba(15, 23, 42, 0.06);
+    }
+
+    .buyer-counter {
+      min-width: 120px;
+
+      padding: 9px 14px;
+
+      text-align: center;
+
+      border-radius: 12px;
+
+      background: #f1f5f9;
+
+      color: #475569;
+
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .buyer-zoom {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .buyer-zoom-value {
+      min-width: 55px;
+      text-align: center;
+
+      color: #64748b;
+
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .buyer-book-page {
+      overflow: hidden;
+      background: white;
+    }
+
+    .buyer-book-page img {
+      display: block;
+
+      width: 100%;
+      height: 100%;
+
+      object-fit: contain;
+
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .buyer-cover-page {
+      background: #0f172a;
+    }
+
+    .buyer-error {
+      color: #b91c1c;
+    }
+
+    #buyerPreviewSection:fullscreen {
+      background: #eef5f3;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
+    #buyerPreviewSection:fullscreen .buyer-card {
+      min-height: 100vh;
+      border: 0;
+      border-radius: 0;
+    }
+
+    #buyerPreviewSection:fullscreen .buyer-stage {
+      min-height: calc(100vh - 170px);
+    }
+
+    @media (max-width: 700px) {
+      .buyer-shell {
+        width: min(100% - 16px, 1400px);
+      }
+
+      .buyer-card {
+        border-radius: 20px;
+      }
+
+      .buyer-header {
+        padding: 16px;
+      }
+
+      .buyer-stage {
+        min-height: 500px;
+        padding: 25px 10px;
+      }
+
+      .buyer-controls {
+        padding: 12px;
+      }
+
+      .buyer-counter {
+        order: -1;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <!-- =========================================
+       TOP BRAND
+       ========================================= -->
+
+  <header
+    class="bg-white/90 backdrop-blur border-b border-slate-200"
+  >
+
+    <div
+      class="buyer-shell py-4 flex items-center justify-center gap-3"
+    >
+
+      <img
+        src="ryn.png"
+        alt="R&Y Printing Lab"
+        class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover"
+      >
+
+      <div>
+
+        <h1
+          class="font-black text-base sm:text-xl"
+        >
+          R&Y Printing Lab
+        </h1>
+
+        <p
+          class="text-[10px] sm:text-xs text-slate-500"
+        >
+          Digital Photobook Preview
+        </p>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================================
+       MAIN
+       ========================================= -->
+
+  <main
+    class="buyer-shell py-6 sm:py-10"
+  >
+
+
+    <!-- INTRO -->
+
+    <section
+      class="text-center max-w-3xl mx-auto mb-6"
+    >
+
+      <div
+        class="brand-gradient inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+      >
+
+        <span
+          class="w-2 h-2 bg-slate-900 rounded-full"
+        ></span>
+
+        <span
+          class="text-[10px] font-black tracking-wider"
+        >
+          CLIENT PREVIEW
+        </span>
+
+      </div>
+
+
+      <h2
+        id="buyerProjectName"
+        class="text-2xl sm:text-4xl font-black tracking-tight mt-4"
+      >
+        Loading Photobook...
+      </h2>
+
+
+      <p
+        id="buyerBookInfo"
+        class="text-xs sm:text-sm text-slate-500 mt-2"
+      >
+        Preparing your digital photobook preview.
+      </p>
+
+    </section>
+
+
+    <!-- =========================================
+         FLIPBOOK
+         ========================================= -->
+
+    <section
+      id="buyerPreviewSection"
+    >
+
+      <div
+        class="buyer-card"
+      >
+
+
+        <!-- HEADER -->
+
+        <div
+          class="buyer-header"
+        >
+
+          <div>
+
+            <p
+              class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]"
+            >
+              R&Y Printing Lab
+            </p>
+
+            <h3
+              class="font-black text-base sm:text-xl mt-1"
+            >
+              Photobook Preview
+            </h3>
+
+          </div>
+
+
+          <span
+            id="buyerStatusBadge"
+            class="text-[9px] sm:text-[10px] font-black px-3 py-2 rounded-full bg-slate-100 text-slate-500"
+          >
+            LOADING
+          </span>
+
+        </div>
+
+
+        <!-- STAGE -->
+
+        <div
+          class="buyer-stage"
+        >
+
+          <div
+            id="buyerFlipbook"
+          >
+
+            <div
+              class="buyer-loading"
+            >
+
+              <div
+                class="buyer-spinner"
+              ></div>
+
+              <h4
+                class="font-black text-lg"
+              >
+                Loading Photobook
+              </h4>
+
+              <p
+                id="buyerLoadingText"
+                class="text-xs text-slate-500 mt-2"
+              >
+                Finding your client preview...
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CONTROLS -->
+
+        <div
+          class="buyer-controls"
+        >
+
+
+          <button
+            id="buyerPrevBtn"
+            type="button"
+            class="buyer-btn"
+          >
+            ← Previous
+          </button>
+
+
+          <div
+            class="buyer-zoom"
+          >
+
+            <button
+              id="buyerZoomOutBtn"
+              type="button"
+              class="buyer-btn"
+              title="Zoom out"
+            >
+              −
+            </button>
+
+
+            <span
+              id="buyerZoomValue"
+              class="buyer-zoom-value"
+            >
+              100%
+            </span>
+
+
+            <button
+              id="buyerZoomInBtn"
+              type="button"
+              class="buyer-btn"
+              title="Zoom in"
+            >
+              +
+            </button>
+
+
+            <button
+              id="buyerResetZoomBtn"
+              type="button"
+              class="buyer-btn"
+            >
+              Reset
+            </button>
+
+          </div>
+
+
+          <span
+            id="buyerPageCounter"
+            class="buyer-counter"
+          >
+            Loading...
+          </span>
+
+
+          <button
+            id="buyerFullscreenBtn"
+            type="button"
+            class="buyer-btn"
+          >
+            ⛶ Fullscreen
+          </button>
+
+
+          <button
+            id="buyerNextBtn"
+            type="button"
+            class="buyer-btn"
+          >
+            Next →
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FOOTER MESSAGE -->
+
+    <section
+      class="text-center mt-6"
+    >
+
+      <p
+        class="text-xs text-slate-400"
+      >
+        Preview prepared by
+        <strong class="text-slate-600">
+          R&Y Printing Lab
+        </strong>
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================================
+       FOOTER
+       ========================================= -->
+
+  <footer
+    class="buyer-shell pb-10 text-center"
+  >
+
+    <img
+      src="ryn.png"
+      alt="R&Y Printing Lab"
+      class="w-12 h-12 mx-auto rounded-full"
+    >
+
+    <p
+      class="font-black text-xs mt-2"
+    >
+      R&Y Printing Lab
+    </p>
+
+    <p
+      class="text-[10px] text-slate-400 mt-1"
+    >
+      Digital Photobook Client Preview
+    </p>
+
+  </footer>
+
+
+  <!-- =========================================
+       SUPABASE
+       ========================================= -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
+  <!-- =========================================
+       PDF.JS
+       ========================================= -->
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+  ></script>
+
+
+  <!-- =========================================
+       PAGE FLIP
+       ========================================= -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"
+  ></script>
+
+
+  <!-- =========================================
+       BUYER PREVIEW
+       ========================================= -->
+
+  <script
+    src="preview.js"
+  ></script>
+
+
+</body>
+</html>

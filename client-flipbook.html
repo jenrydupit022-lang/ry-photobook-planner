@@ -73,9 +73,7 @@
 <body class="min-h-screen">
 
 
-  <!-- =========================================
-       HEADER
-       ========================================= -->
+  <!-- HEADER -->
 
   <header
     class="bg-white/90 backdrop-blur border-b border-slate-200"
@@ -123,9 +121,7 @@
   </header>
 
 
-  <!-- =========================================
-       MAIN
-       ========================================= -->
+  <!-- MAIN -->
 
   <main
     class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12"
@@ -175,18 +171,14 @@
     </section>
 
 
-    <!-- =========================================
-         WORKSPACE
-         ========================================= -->
+    <!-- WORKSPACE -->
 
     <section
       class="grid xl:grid-cols-[380px_1fr] gap-6 mt-8"
     >
 
 
-      <!-- =====================================
-           LEFT PANEL
-           ===================================== -->
+      <!-- LEFT PANEL -->
 
       <aside
         class="bg-white border border-slate-200 rounded-3xl shadow-sm p-5 sm:p-6 h-fit"
@@ -213,11 +205,35 @@
         </div>
 
 
-        <!-- =====================================
-             BOOK SIZE
-             ===================================== -->
+        <!-- PROJECT NAME -->
 
         <div class="mt-6">
+
+          <label
+            for="projectName"
+            class="block text-xs font-black text-slate-700 mb-2"
+          >
+            Project / Client Name
+          </label>
+
+          <input
+            id="projectName"
+            type="text"
+            maxlength="100"
+            placeholder="Example: Dela Cruz Wedding"
+            class="w-full border border-slate-200 rounded-xl px-3 py-3 text-sm font-bold outline-none focus:border-teal-400 bg-white"
+          >
+
+          <p class="text-[10px] text-slate-400 mt-2">
+            This name will identify the saved client flipbook.
+          </p>
+
+        </div>
+
+
+        <!-- BOOK SIZE -->
+
+        <div class="mt-5">
 
           <label
             for="bookSize"
@@ -252,9 +268,7 @@
         </div>
 
 
-        <!-- =====================================
-             PDF UPLOAD
-             ===================================== -->
+        <!-- PDF UPLOAD -->
 
         <div class="mt-6">
 
@@ -305,9 +319,7 @@
         </div>
 
 
-        <!-- =====================================
-             PAGE ORDER INFO
-             ===================================== -->
+        <!-- PAGE ORDER -->
 
         <div
           class="mt-5 bg-slate-50 border border-slate-200 rounded-2xl p-4"
@@ -343,9 +355,7 @@
         </div>
 
 
-        <!-- =====================================
-             PDF STATS
-             ===================================== -->
+        <!-- PDF STATS -->
 
         <div
           id="pdfStats"
@@ -394,9 +404,7 @@
         </div>
 
 
-        <!-- =====================================
-             GENERATE
-             ===================================== -->
+        <!-- GENERATE -->
 
         <button
           id="generateFlipbookBtn"
@@ -426,9 +434,7 @@
       </aside>
 
 
-      <!-- =====================================
-           FLIPBOOK PREVIEW
-           ===================================== -->
+      <!-- FLIPBOOK PREVIEW -->
 
       <section
         id="clientFlipbookSection"
@@ -436,7 +442,7 @@
       >
 
 
-        <!-- HEADER -->
+        <!-- PREVIEW HEADER -->
 
         <div class="client-preview-head">
 
@@ -473,9 +479,7 @@
         </div>
 
 
-        <!-- =====================================
-             STAGE
-             ===================================== -->
+        <!-- STAGE -->
 
         <div class="client-flipbook-stage">
 
@@ -506,9 +510,7 @@
         </div>
 
 
-        <!-- =====================================
-             CONTROLS
-             ===================================== -->
+        <!-- CONTROLS -->
 
         <div class="client-flipbook-controls">
 
@@ -591,13 +593,14 @@
         </div>
 
 
-        <!-- =====================================
-             FUTURE CLIENT SHARING
-             ===================================== -->
+        <!-- CLIENT SHARING -->
 
-        <div class="future-share-box">
+        <div
+          class="future-share-box"
+          style="align-items: stretch;"
+        >
 
-          <div>
+          <div class="w-full">
 
             <p
               class="text-xs font-black text-slate-700"
@@ -608,20 +611,104 @@
             <p
               class="text-[11px] text-slate-500 mt-1"
             >
-              After PDF preview is stable, we'll add
-              saved projects and buyer preview links.
+              Save this PDF to R&Y and create a private
+              preview link you can send to your client.
             </p>
 
+
+            <!-- SAVE BUTTON -->
+
+            <button
+              id="saveShareBtn"
+              type="button"
+              disabled
+              class="brand-gradient w-full mt-4 rounded-xl py-3 px-4 text-xs font-black text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-md transition"
+            >
+              Save & Create Share Link
+            </button>
+
+
+            <!-- SAVE STATUS -->
+
+            <div
+              id="shareStatus"
+              class="hidden mt-3 rounded-xl px-4 py-3 text-xs font-bold"
+            ></div>
+
+
+            <!-- GENERATED LINK -->
+
+            <div
+              id="shareResult"
+              class="hidden mt-4 bg-white border border-teal-200 rounded-2xl p-4"
+            >
+
+              <div
+                class="flex items-center justify-between gap-3"
+              >
+
+                <div>
+
+                  <p
+                    class="text-[10px] font-black text-teal-600 uppercase tracking-wider"
+                  >
+                    Client Preview Ready
+                  </p>
+
+                  <p
+                    class="text-xs font-black text-slate-800 mt-1"
+                  >
+                    Share this link with your buyer
+                  </p>
+
+                </div>
+
+
+                <span
+                  class="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full px-3 py-1 text-[9px] font-black"
+                >
+                  SAVED
+                </span>
+
+              </div>
+
+
+              <div
+                class="flex flex-col sm:flex-row gap-2 mt-4"
+              >
+
+                <input
+                  id="shareLinkInput"
+                  type="text"
+                  readonly
+                  class="flex-1 min-w-0 border border-slate-200 bg-slate-50 rounded-xl px-3 py-2.5 text-[11px] font-bold text-slate-600 outline-none"
+                >
+
+
+                <button
+                  id="copyShareLinkBtn"
+                  type="button"
+                  class="bg-slate-900 text-white rounded-xl px-4 py-2.5 text-xs font-black hover:bg-slate-800 transition"
+                >
+                  Copy Link
+                </button>
+
+              </div>
+
+
+              <a
+                id="openShareLinkBtn"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block text-center mt-2 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black text-slate-600 hover:bg-slate-50 transition"
+              >
+                Open Client Preview ↗
+              </a>
+
+            </div>
+
           </div>
-
-
-          <button
-            type="button"
-            disabled
-            class="future-share-btn"
-          >
-            Share Link — Soon
-          </button>
 
         </div>
 
@@ -632,9 +719,7 @@
   </main>
 
 
-  <!-- =========================================
-       FOOTER
-       ========================================= -->
+  <!-- FOOTER -->
 
   <footer
     class="max-w-7xl mx-auto px-4 pb-10 text-center"
@@ -657,28 +742,28 @@
   </footer>
 
 
-  <!-- =========================================
-       PDF.JS
-       Reads and renders uploaded PDF pages
-       ========================================= -->
+  <!-- SUPABASE -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
+  <!-- PDF.JS -->
 
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
   ></script>
 
 
-  <!-- =========================================
-       PAGE FLIP
-       ========================================= -->
+  <!-- PAGE FLIP -->
 
   <script
     src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"
   ></script>
 
 
-  <!-- =========================================
-       CLIENT FLIPBOOK
-       ========================================= -->
+  <!-- CLIENT FLIPBOOK -->
 
   <script src="client-flipbook.js"></script>
 
