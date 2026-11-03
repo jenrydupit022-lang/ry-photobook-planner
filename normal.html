@@ -354,6 +354,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="flipbook.css">
 </head>
 
 <body class="min-h-screen">
@@ -965,6 +966,28 @@
 
     </section>
 
+  <!-- ANIMATED FLIPBOOK PREVIEW -->
+    <section class="ry-flipbook-section no-print" id="flipbookPreviewSection">
+      <div class="ry-flipbook-head">
+        <div>
+          <p class="ry-flipbook-kicker">Animated Photobook</p>
+          <h3 class="ry-flipbook-title">Flipbook Preview</h3>
+          <p class="ry-flipbook-sub">This preview uses the calculator's exact page distribution. Drag/click the page or use Previous / Next.</p>
+        </div>
+        <span class="text-[10px] font-black text-teal-700 bg-teal-50 border border-teal-100 rounded-full px-3 py-2">CALCULATOR SYNC</span>
+      </div>
+      <div class="ry-flipbook-stage">
+        <div id="ryFlipbook" class="ry-flipbook-book">
+          <div class="ry-flipbook-empty">Compute a valid layout to generate the flipbook preview.</div>
+        </div>
+      </div>
+      <div class="ry-flipbook-controls">
+        <button type="button" class="ry-flipbook-btn" onclick="RYFlipbook.prev()">← Previous</button>
+        <span id="ryFlipbookCounter" class="ry-flipbook-counter">No preview</span>
+        <button type="button" class="ry-flipbook-btn" onclick="RYFlipbook.next()">Next →</button>
+      </div>
+    </section>
+
   </main>
 
 
@@ -988,6 +1011,8 @@
   </footer>
 
 
+  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+  <script src="flipbook.js"></script>
   <script>
     // =====================================================
     // PHOTO CALCULATOR
@@ -1609,6 +1634,7 @@
         `<strong>No fake layout plan generated.</strong><br>` +
         `The calculator stopped instead of forcing too many photos into each page.` +
         `</div>`;
+      if (window.RYFlipbook) RYFlipbook.clear("This calculation does not fit cleanly, so no misleading flipbook was generated.");
     }
 
 
@@ -1644,6 +1670,7 @@
 
         verification.textContent =
           "";
+        if (window.RYFlipbook) RYFlipbook.clear();
 
         return;
       }
@@ -1730,6 +1757,10 @@
       renderPages(
         distribution
       );
+
+      if (window.RYFlipbook) {
+        RYFlipbook.render(distribution, getPhotobookSizeInfo());
+      }
     }
 
 
