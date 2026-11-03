@@ -1,5 +1,7 @@
 (function () {
   let pageFlip = null;
+  let renderTimer = null;
+  let renderVersion = 0;
 
   const $ = (id) => document.getElementById(id);
 
@@ -31,7 +33,10 @@
   }
 
   function makePhotoSlots(count, orientation) {
-    const safeCount = Math.max(0, Math.min(8, Number(count) || 0));
+    const safeCount = Math.max(
+      0,
+      Math.min(8, Number(count) || 0)
+    );
 
     if (safeCount === 0) {
       return `
@@ -83,10 +88,19 @@
 
     if (isBack) {
       return `
-        <div class="ry-book-page ry-cover-page ${orientation}" data-density="hard">
+        <div
+          class="ry-book-page ry-cover-page ${orientation}"
+          data-density="hard"
+        >
           <div class="ry-cover-content">
-            <div class="ry-cover-small">R&Y PRINTING LAB</div>
-            <div class="ry-cover-title">Back Cover</div>
+            <div class="ry-cover-small">
+              R&Y PRINTING LAB
+            </div>
+
+            <div class="ry-cover-title">
+              Back Cover
+            </div>
+
             <div class="ry-cover-subtitle">
               Photobook Preview
             </div>
@@ -96,10 +110,19 @@
     }
 
     return `
-      <div class="ry-book-page ry-cover-page ${orientation}" data-density="hard">
+      <div
+        class="ry-book-page ry-cover-page ${orientation}"
+        data-density="hard"
+      >
         <div class="ry-cover-content">
-          <div class="ry-cover-small">R&Y PRINTING LAB</div>
-          <div class="ry-cover-title">Photobook Preview</div>
+          <div class="ry-cover-small">
+            R&Y PRINTING LAB
+          </div>
+
+          <div class="ry-cover-title">
+            Photobook Preview
+          </div>
+
           <div class="ry-cover-subtitle">
             Calculator Layout Preview
           </div>
@@ -108,15 +131,29 @@
     `;
   }
 
+  function cancelPendingRender() {
+    if (renderTimer) {
+      clearTimeout(renderTimer);
+      renderTimer = null;
+    }
+  }
+
   function destroyFlipbook() {
+    cancelPendingRender();
+
     if (pageFlip) {
-      try {
-        pageFlip.destroy();
-      } catch (error) {
-        console.warn("Flipbook destroy warning:", error);
-      }
+      const oldPageFlip = pageFlip;
 
       pageFlip = null;
+
+      try {
+        oldPageFlip.destroy();
+      } catch (error) {
+        console.warn(
+          "Flipbook destroy warning:",
+          error
+        );
+      }
     }
   }
 
@@ -125,23 +162,48 @@
 
     if (!counter || !pageFlip) return;
 
-    const current = pageFlip.getCurrentPageIndex();
-    const total = pageFlip.getPageCount();
+    try {
+      const current =
+        pageFlip.getCurrentPageIndex();
 
-    if (current === 0) {
-      counter.textContent = `Front Cover • ${total} total pages`;
-      return;
+      const total =
+        pageFlip.getPageCount();
+
+      if (!total) {
+        counter.textContent = "No preview";
+        return;
+      }
+
+      if (current === 0) {
+        counter.textContent =
+          `Front Cover • ${total} total pages`;
+
+        return;
+      }
+
+      if (current >= total - 1) {
+        counter.textContent =
+          `Back Cover • ${total} total pages`;
+
+        return;
+      }
+
+      counter.textContent =
+        `Page ${current} of ${total - 2}`;
+    } catch (error) {
+      console.warn(
+        "Flipbook counter warning:",
+        error
+      );
     }
-
-    if (current >= total - 1) {
-      counter.textContent = `Back Cover • ${total} total pages`;
-      return;
-    }
-
-    counter.textContent = `Page ${current} of ${total - 2}`;
   }
 
-  function clear(message = "Calculate a layout to generate the flipbook preview.") {
+  function clear(
+    message =
+      "Calculate a layout to generate the flipbook preview."
+  ) {
+    renderVersion++;
+
     destroyFlipbook();
 
     const host = $("ryFlipbook");
@@ -154,118 +216,335 @@
       `;
     }
 
-    const counter = $("ryFlipbookCounter");
+    const counter =
+      $("ryFlipbookCounter");
 
     if (counter) {
-      counter.textContent = "No preview";
+      counter.textContent =
+        "No preview";
     }
   }
 
-  function render(distribution, size = {}) {
-    const host = $("ryFlipbook");
+  function buildPages(
+    host,
+    distribution,
+    size
+  ) {
+    const fragment =
+      document.createDocumentFragment();
 
-    if (!host) {
-      console.warn('Flipbook container "#ryFlipbook" was not found.');
+    const temporaryContainer =
+      document.createElement("div");
+
+    temporaryContainer.innerHTML =
+      makeCover(size, false);
+
+    distribution.forEach(
+      (photoCount, index) => {
+        temporaryContainer.insertAdjacentHTML(
+          "beforeend",
+          makeInsidePage(
+            photoCount,
+            index + 1,
+            size
+          )
+        );
+      }
+    );
+
+    temporaryContainer.insertAdjacentHTML(
+      "beforeend",
+      makeCover(size, true)
+    );
+
+    const pages =
+      Array.from(
+        temporaryContainer.children
+      );
+
+    pages.forEach((page) => {
+      fragment.appendChild(page);
+    });
+
+    host.appendChild(fragment);
+  }
+
+  function startPageFlip(
+    host,
+    distribution,
+    size,
+    version
+  ) {
+    if (version !== renderVersion) {
       return;
     }
 
-    if (!Array.isArray(distribution) || distribution.length === 0) {
+    if (!host || !host.isConnected) {
+      return;
+    }
+
+    if (
+      !window.St ||
+      !window.St.PageFlip
+    ) {
+      clear(
+        "Flipbook animation library could not be loaded."
+      );
+
+      console.error(
+        "StPageFlip library not found. Make sure page-flip.browser.js loads before flipbook.js."
+      );
+
+      return;
+    }
+
+    const dimensions =
+      getDimensions(size);
+
+    host.innerHTML = "";
+
+    buildPages(
+      host,
+      distribution,
+      size
+    );
+
+    const pageElements =
+      host.querySelectorAll(
+        ".ry-book-page"
+      );
+
+    if (!pageElements.length) {
+      clear(
+        "No photobook pages were generated."
+      );
+
+      return;
+    }
+
+    try {
+      const newPageFlip =
+        new window.St.PageFlip(
+          host,
+          {
+            width:
+              dimensions.width,
+
+            height:
+              dimensions.height,
+
+            size: "stretch",
+
+            minWidth: 220,
+            maxWidth: 620,
+
+            minHeight: 220,
+            maxHeight: 620,
+
+            maxShadowOpacity:
+              0.45,
+
+            showCover: true,
+
+            mobileScrollSupport:
+              false,
+
+            usePortrait: true,
+
+            autoSize: true,
+
+            flippingTime: 850,
+
+            swipeDistance: 25,
+
+            useMouseEvents: true,
+
+            startPage: 0,
+
+            drawShadow: true,
+
+            showPageCorners: true,
+
+            disableFlipByClick:
+              false,
+          }
+        );
+
+      /*
+       * Important:
+       * Another calculation may have happened
+       * while this instance was being created.
+       */
+      if (version !== renderVersion) {
+        try {
+          newPageFlip.destroy();
+        } catch (error) {
+          console.warn(
+            "Old flipbook cleanup warning:",
+            error
+          );
+        }
+
+        return;
+      }
+
+      pageFlip = newPageFlip;
+
+      pageFlip.loadFromHTML(
+        pageElements
+      );
+
+      pageFlip.on(
+        "flip",
+        function () {
+          updateCounter();
+        }
+      );
+
+      pageFlip.on(
+        "changeOrientation",
+        function () {
+          updateCounter();
+        }
+      );
+
+      pageFlip.on(
+        "init",
+        function () {
+          updateCounter();
+        }
+      );
+
+      /*
+       * Wait until PageFlip has finished
+       * creating its wrapper and page layers.
+       */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (
+            version !== renderVersion ||
+            !pageFlip
+          ) {
+            return;
+          }
+
+          updateCounter();
+        });
+      });
+    } catch (error) {
+      console.error(
+        "Flipbook initialization error:",
+        error
+      );
+
+      if (version === renderVersion) {
+        clear(
+          "Unable to start the animated flipbook. Check the browser console for details."
+        );
+      }
+    }
+  }
+
+  function render(
+    distribution,
+    size = {}
+  ) {
+    const host =
+      $("ryFlipbook");
+
+    if (!host) {
+      console.warn(
+        'Flipbook container "#ryFlipbook" was not found.'
+      );
+
+      return;
+    }
+
+    if (
+      !Array.isArray(distribution) ||
+      distribution.length === 0
+    ) {
       clear();
       return;
     }
 
-    if (!window.St || !window.St.PageFlip) {
-      clear("Flipbook animation library could not be loaded.");
-      console.error(
-        "StPageFlip library not found. Make sure page-flip.browser.js loads before flipbook.js."
-      );
-      return;
+    /*
+     * Create a new version number for
+     * every calculation.
+     *
+     * Only the newest calculation is
+     * allowed to render.
+     */
+    renderVersion++;
+
+    const thisVersion =
+      renderVersion;
+
+    cancelPendingRender();
+
+    /*
+     * Destroy previous PageFlip first.
+     */
+    if (pageFlip) {
+      const oldPageFlip =
+        pageFlip;
+
+      pageFlip = null;
+
+      try {
+        oldPageFlip.destroy();
+      } catch (error) {
+        console.warn(
+          "Flipbook destroy warning:",
+          error
+        );
+      }
     }
 
-    destroyFlipbook();
+    /*
+     * Clear old PageFlip generated DOM.
+     */
+    host.innerHTML = `
+      <div class="ry-flipbook-empty">
+        Generating photobook preview...
+      </div>
+    `;
 
-    host.innerHTML = "";
+    const counter =
+      $("ryFlipbookCounter");
 
-    const dimensions = getDimensions(size);
-
-    const temporaryContainer = document.createElement("div");
-
-    temporaryContainer.innerHTML = makeCover(size, false);
-
-    distribution.forEach((photoCount, index) => {
-      temporaryContainer.innerHTML += makeInsidePage(
-        photoCount,
-        index + 1,
-        size
-      );
-    });
-
-    temporaryContainer.innerHTML += makeCover(size, true);
-
-    const pages = Array.from(temporaryContainer.children);
-
-    pages.forEach((page) => {
-      host.appendChild(page);
-    });
-
-    try {
-      pageFlip = new window.St.PageFlip(host, {
-        width: dimensions.width,
-        height: dimensions.height,
-
-        size: "stretch",
-
-        minWidth: 220,
-        maxWidth: 620,
-
-        minHeight: 220,
-        maxHeight: 620,
-
-        maxShadowOpacity: 0.45,
-
-        showCover: true,
-
-        mobileScrollSupport: false,
-
-        usePortrait: true,
-
-        autoSize: true,
-
-        flippingTime: 850,
-
-        swipeDistance: 25,
-
-        useMouseEvents: true,
-
-        startPage: 0,
-
-        drawShadow: true,
-
-        showPageCorners: true,
-
-        disableFlipByClick: false,
-      });
-
-      pageFlip.loadFromHTML(
-        host.querySelectorAll(".ry-book-page")
-      );
-
-      pageFlip.on("flip", function () {
-        updateCounter();
-      });
-
-      pageFlip.on("changeOrientation", function () {
-        updateCounter();
-      });
-
-      updateCounter();
-    } catch (error) {
-      console.error("Flipbook initialization error:", error);
-
-      clear(
-        "Unable to start the animated flipbook. Check the browser console for details."
-      );
+    if (counter) {
+      counter.textContent =
+        "Loading preview...";
     }
+
+    /*
+     * Small delay gives PageFlip/DOM enough
+     * time to fully remove the old instance.
+     *
+     * If calculate() fires again during this
+     * delay, the old render is cancelled.
+     */
+    renderTimer = setTimeout(
+      function () {
+        renderTimer = null;
+
+        if (
+          thisVersion !==
+          renderVersion
+        ) {
+          return;
+        }
+
+        startPageFlip(
+          host,
+          distribution,
+          size,
+          thisVersion
+        );
+      },
+      80
+    );
   }
 
   function next() {
@@ -274,7 +553,10 @@
     try {
       pageFlip.flipNext();
     } catch (error) {
-      console.warn("Next page error:", error);
+      console.warn(
+        "Next page error:",
+        error
+      );
     }
   }
 
@@ -284,9 +566,23 @@
     try {
       pageFlip.flipPrev();
     } catch (error) {
-      console.warn("Previous page error:", error);
+      console.warn(
+        "Previous page error:",
+        error
+      );
     }
   }
+
+  /*
+   * Clean up if the browser leaves/reloads
+   * the page.
+   */
+  window.addEventListener(
+    "beforeunload",
+    function () {
+      destroyFlipbook();
+    }
+  );
 
   window.RYFlipbook = {
     render,
