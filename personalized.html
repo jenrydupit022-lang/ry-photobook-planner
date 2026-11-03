@@ -8,6 +8,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -800,22 +811,104 @@
       <div id="layoutSuggestionGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- PINTEREST-STYLE DESIGN INSPIRATION -->
+    <!-- DESIGN INSPIRATION SEARCH -->
     <section class="no-print mt-6 sm:mt-8 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-      <div class="p-5 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+      <div class="grid lg:grid-cols-[380px_1fr]">
+
+        <div class="p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-200">
           <p class="text-xs font-black text-green-600 uppercase tracking-wider">Design Inspiration</p>
-          <h3 class="font-black text-xl sm:text-2xl mt-1">Pinterest-Style Ideas</h3>
+          <h3 class="font-black text-xl sm:text-2xl mt-1">Build Your Own Idea</h3>
           <p class="text-sm text-slate-500 mt-2">
-            Quick visual ideas for backgrounds, decorations, text placement and photo composition.
+            Enter any theme you want, then choose a style and main color.
           </p>
+
+          <div class="space-y-5 mt-6">
+            <div>
+              <label class="block text-sm font-bold mb-2">Photobook Theme</label>
+              <input
+                id="inspirationTheme"
+                type="text"
+                value="Wedding"
+                placeholder="e.g. Wedding, Korea Trip, Baby, Graduation..."
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white font-bold"
+              >
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold mb-2">Style</label>
+              <select id="inspirationStyle" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white">
+                <option>Elegant</option>
+                <option>Minimalist</option>
+                <option>Modern</option>
+                <option>Classic</option>
+                <option>Luxury</option>
+                <option>Romantic</option>
+                <option>Cute</option>
+                <option>Vintage</option>
+                <option>Rustic</option>
+                <option>Scrapbook</option>
+                <option>Editorial</option>
+                <option>Colorful</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold mb-2">Main Color</label>
+              <select id="inspirationColor" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white">
+                <option>Black</option>
+                <option>White</option>
+                <option>Beige</option>
+                <option>Brown</option>
+                <option>Pink</option>
+                <option>Red</option>
+                <option>Orange</option>
+                <option>Yellow</option>
+                <option>Green</option>
+                <option>Blue</option>
+                <option>Purple</option>
+                <option>Gold</option>
+                <option>Silver</option>
+                <option>Pastel</option>
+              </select>
+            </div>
+
+            <div class="bg-[#eafaf6] border border-[#bceade] rounded-xl p-4">
+              <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                <div>
+                  <p class="text-xs font-black text-teal-700">Live Preview</p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Design suggestions update automatically.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-5">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Quick Themes</p>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Wedding">Wedding</button>
+                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Birthday">Birthday</button>
+                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Travel">Travel</button>
+                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Baby">Baby</button>
+                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Graduation">Graduation</button>
+                <button type="button" class="quick-theme bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl text-xs font-bold" data-theme="Family">Family</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <button type="button" id="shuffleInspiration"
-          class="border border-slate-300 bg-white hover:bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-black whitespace-nowrap">
-          Shuffle Ideas
-        </button>
+
+        <div>
+          <div class="p-5 sm:p-6 border-b border-slate-200">
+            <p class="text-xs font-black text-teal-600 uppercase tracking-wider">Design Direction</p>
+            <h3 id="designDirectionTitle" class="font-black text-xl sm:text-2xl mt-1">Elegant Black Wedding</h3>
+            <p id="designDirectionText" class="text-sm text-slate-500 mt-2">
+              Suggested design directions for an elegant wedding photobook using black as the main color.
+            </p>
+          </div>
+
+          <div id="designReferenceGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        </div>
+
       </div>
-      <div id="inspirationGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
   </main>
@@ -859,8 +952,12 @@
     const customHeightInput = document.getElementById("customHeight");
     const sizeInfoText = document.getElementById("sizeInfoText");
     const layoutSuggestionGrid = document.getElementById("layoutSuggestionGrid");
-    const inspirationGrid = document.getElementById("inspirationGrid");
-    const shuffleInspiration = document.getElementById("shuffleInspiration");
+    const inspirationTheme = document.getElementById("inspirationTheme");
+    const inspirationStyle = document.getElementById("inspirationStyle");
+    const inspirationColor = document.getElementById("inspirationColor");
+    const designDirectionTitle = document.getElementById("designDirectionTitle");
+    const designDirectionText = document.getElementById("designDirectionText");
+    const designReferenceGrid = document.getElementById("designReferenceGrid");
 
     const pageList =
       document.getElementById("pageList");
@@ -1404,489 +1501,94 @@
     }
 
 
-    const inspirationIdeas = [
-      {
-        title:"Soft Editorial",
-        tag:"Clean",
-        text:"Large feature photo, small supporting image, short title and lots of negative space.",
-        pinClass:"pin-clean",
-        boxes:3
-      },
-      {
-        title:"Scrapbook Memory",
-        tag:"Decorative",
-        text:"Use layered photos, tape-style accents, dates, handwritten notes and small decorative pieces.",
-        pinClass:"pin-scrapbook",
-        boxes:6
-      },
-      {
-        title:"Portrait Story",
-        tag:"Portrait",
-        text:"One tall hero image with two supporting photos and text beside the main subject.",
-        pinClass:"pin-portrait",
-        boxes:3
-      },
-      {
-        title:"Story Collage",
-        tag:"Photo Rich",
-        text:"One dominant moment surrounded by smaller detail photos for a Pinterest collage feel.",
-        pinClass:"pin-collage",
-        boxes:7
-      },
-      {
-        title:"Chapter Opener",
-        tag:"Feature",
-        text:"Use one wide hero photo, a title or date, then two smaller images underneath.",
-        pinClass:"pin-story",
-        boxes:3
-      }
-    ];
 
 
-    function generateInspiration() {
-      if (!inspirationGrid) return;
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
+
+    function pinterestSearchUrl(query) {
+      return "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(query);
+    }
+
+
+    function renderDesignInspiration() {
+      if (!designReferenceGrid) return;
+
+      const theme = inspirationTheme.value.trim() || "Photobook";
+      const style = inspirationStyle.value;
+      const color = inspirationColor.value;
       const size = getPhotobookSizeInfo();
-      const shuffled = [...inspirationIdeas].sort(() => Math.random() - 0.5);
-      const visible = shuffled.slice(0, 3);
 
-      inspirationGrid.innerHTML = visible.map(idea => `
-        <article class="inspiration-card border border-slate-200 rounded-2xl p-4 bg-white">
-          <div class="pin-board ${idea.pinClass}">
-            ${Array.from({length: idea.boxes}, () => '<div class="pin-photo"></div>').join("")}
+      designDirectionTitle.textContent = `${style} ${color} ${theme}`;
+      designDirectionText.textContent =
+        `Suggested design directions for a ${style.toLowerCase()} ${theme.toLowerCase()} photobook using ${color.toLowerCase()} as the main color.`;
+
+      const ideas = [
+        {
+          icon:"✦",
+          title:"Cover Design",
+          text:`Main ${style.toLowerCase()} cover direction using ${color.toLowerCase()}.`,
+          query:`${theme} photobook ${style} ${color} cover design`
+        },
+        {
+          icon:"□",
+          title:"Minimal Cover",
+          text:"Cleaner cover with fewer elements and more negative space.",
+          query:`${theme} photobook minimal ${color} cover ${style}`
+        },
+        {
+          icon:"▣",
+          title:"Photo Cover",
+          text:"Use one strong client photo as the main cover focus.",
+          query:`${theme} photo cover photobook ${style} ${color}`
+        },
+        {
+          icon:"Aa",
+          title:"Typography",
+          text:"Title, names, dates and typography inspiration.",
+          query:`${theme} photobook typography ${style} ${color}`
+        },
+        {
+          icon:"▦",
+          title:"Inside Layouts",
+          text:`Page composition ideas suited to a ${size.orientation.toLowerCase()} photobook.`,
+          query:`${theme} photobook layout ${style} ${color} ${size.orientation}`
+        },
+        {
+          icon:"◇",
+          title:"Decorations",
+          text:"Backgrounds, borders, accents and decorative element ideas.",
+          query:`${theme} scrapbook photobook decoration ${style} ${color}`
+        }
+      ];
+
+      designReferenceGrid.innerHTML = ideas.map(idea => `
+        <article class="inspiration-card border border-slate-200 rounded-2xl overflow-hidden bg-white">
+          <div class="brand-gradient h-32 flex flex-col items-center justify-center">
+            <div class="text-3xl font-black text-slate-900">${escapeHtml(idea.icon)}</div>
+            <div class="text-[9px] tracking-[.3em] uppercase text-slate-600 mt-4">${escapeHtml(theme)}</div>
           </div>
-          <div class="flex items-start justify-between gap-3 mt-4">
-            <div>
-              <p class="font-black">${idea.title}</p>
-              <p class="text-xs text-slate-500 mt-1 leading-relaxed">${idea.text}</p>
-            </div>
-            <span class="bg-[#eef9f6] text-teal-700 px-2.5 py-1 rounded-full text-[10px] font-black whitespace-nowrap">
-              ${idea.tag}
-            </span>
+          <div class="p-4">
+            <p class="font-black">${escapeHtml(idea.title)}</p>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">${escapeHtml(idea.text)}</p>
+            <a
+              href="${pinterestSearchUrl(idea.query)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex mt-4 text-xs font-black text-teal-600 hover:text-teal-700"
+            >
+              Find References →
+            </a>
           </div>
-          <p class="text-[10px] text-slate-400 font-bold mt-3">${size.orientation} • ${size.label}</p>
         </article>
       `).join("");
-    }
-
-    // =====================================================
-    // MINI PREVIEW
-    // =====================================================
-
-    function applyBookRatioToPreview(preview) {
-      const size = getPhotobookSizeInfo();
-
-      preview.classList.remove("book-square", "book-landscape", "book-portrait");
-
-      if (size.orientation === "Portrait") {
-        preview.classList.add("book-portrait");
-      } else if (size.orientation === "Landscape") {
-        preview.classList.add("book-landscape");
-      } else {
-        preview.classList.add("book-square");
-      }
-
-      if (size.width > 0 && size.height > 0) {
-        preview.style.aspectRatio = `${size.width} / ${size.height}`;
-      }
-    }
-
-
-    function createPreview(
-      count,
-      layoutClass
-    ) {
-
-      const preview =
-        document.createElement(
-          "div"
-        );
-
-
-      preview.className =
-        "layout-preview " +
-        layoutClass;
-
-      applyBookRatioToPreview(preview);
-
-
-      const boxCount =
-        count >= 7
-          ? Math.min(count,12)
-          : Math.max(count,1);
-
-
-      for (
-        let i = 0;
-        i < boxCount;
-        i++
-      ) {
-
-        const box =
-          document.createElement(
-            "div"
-          );
-
-
-        box.className =
-          "photo-box";
-
-
-        if (
-          count === 0
-        ) {
-
-          box.style.background =
-            "#edf3f0";
-        }
-
-
-        preview.appendChild(
-          box
-        );
-      }
-
-
-      return preview;
-    }
-
-
-    // =====================================================
-    // SUMMARY
-    // =====================================================
-
-    function buildSummary(
-      distribution,
-      total,
-      pages
-    ) {
-
-      const counts =
-        {};
-
-
-      distribution.forEach(
-        count => {
-
-          counts[count] =
-            (counts[count] || 0) + 1;
-        }
-      );
-
-
-      const parts =
-        Object.keys(counts)
-
-          .map(Number)
-
-          .sort(
-            (a,b) => a-b
-          )
-
-          .map(
-            photoCount => {
-
-              const pageCount =
-                counts[photoCount];
-
-
-              return (
-                `${pageCount} ` +
-                `${pageCount === 1 ? "page" : "pages"} × ` +
-                `${photoCount} ` +
-                `${photoCount === 1 ? "photo" : "photos"}`
-              );
-            }
-          );
-
-
-      return (
-        `${total} photos across ${pages} pages: ` +
-        parts.join(" + ") +
-        "."
-      );
-    }
-
-
-    // =====================================================
-    // DESIGN SPACE
-    // =====================================================
-
-    function getOverallSpace(
-      average
-    ) {
-
-      if (
-        average <= 2
-      ) {
-
-        return {
-          label: "Excellent",
-          text:
-            "Plenty of room for backgrounds, decorations, text and custom elements.",
-          classes:
-            "bg-emerald-50 border border-emerald-200 text-emerald-800"
-        };
-      }
-
-
-      if (
-        average <= 4
-      ) {
-
-        return {
-          label: "Good",
-          text:
-            "Good balance between photo content and personalized design space.",
-          classes:
-            "bg-teal-50 border border-teal-200 text-teal-800"
-        };
-      }
-
-
-      if (
-        average <= 6
-      ) {
-
-        return {
-          label: "Limited",
-          text:
-            "There is less room for decorations. Keep backgrounds and design elements cleaner.",
-          classes:
-            "bg-amber-50 border border-amber-200 text-amber-800"
-        };
-      }
-
-
-      return {
-        label: "Crowded",
-        text:
-          "The average photo count is high for a personalized layout. Consider adding pages or reducing photos.",
-        classes:
-          "bg-red-50 border border-red-200 text-red-800"
-      };
-    }
-
-
-    // =====================================================
-    // RENDER PAGES
-    // =====================================================
-
-    function renderPages(
-      distribution
-    ) {
-
-      pageList.innerHTML =
-        "";
-
-
-      distribution.forEach(
-        (count,index) => {
-
-          const info =
-            getPageInfo(
-              count
-            );
-
-
-          const card =
-            document.createElement(
-              "div"
-            );
-
-
-          card.className =
-            "page-card border border-slate-200 rounded-xl p-4 bg-white";
-
-
-          const top =
-            document.createElement(
-              "div"
-            );
-
-
-          top.className =
-            "flex items-center justify-between gap-3";
-
-
-          const text =
-            document.createElement(
-              "div"
-            );
-
-
-          text.className =
-            "min-w-0";
-
-
-          text.innerHTML = `
-
-            <p class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">
-              Page ${index + 1}
-            </p>
-
-            <p class="text-base sm:text-lg font-black mt-1">
-              ${count}
-              ${count === 1 ? "Photo" : "Photos"}
-            </p>
-
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
-              ${info.layout}
-            </p>
-          `;
-
-
-          top.appendChild(
-            text
-          );
-
-
-          top.appendChild(
-            createPreview(
-              count,
-              info.className
-            )
-          );
-
-
-          const bottom =
-            document.createElement(
-              "div"
-            );
-
-
-          bottom.className =
-            "border-t border-slate-100 mt-3 pt-3 flex flex-wrap gap-2";
-
-
-          bottom.innerHTML = `
-
-            <span class="bg-[#eef9f6] text-teal-700 px-2.5 py-1 rounded-full text-[10px] font-black">
-              ${info.role}
-            </span>
-
-            <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-[10px] font-bold">
-              ${info.space} Space
-            </span>
-          `;
-
-
-          card.appendChild(
-            top
-          );
-
-
-          card.appendChild(
-            bottom
-          );
-
-
-          pageList.appendChild(
-            card
-          );
-        }
-      );
-    }
-
-
-    // =====================================================
-    // CALCULATE
-    // =====================================================
-
-    function getPersonalizedCapacity() {
-      const size = getPhotobookSizeInfo();
-      const orientation = size.orientation;
-
-      const table = {
-        design: {
-          Portrait: {comfortable:2,max:4},
-          Square: {comfortable:2,max:4},
-          Landscape: {comfortable:2,max:4},
-          Custom: {comfortable:2,max:4}
-        },
-        balanced: {
-          Portrait: {comfortable:4,max:4},
-          Square: {comfortable:4,max:6},
-          Landscape: {comfortable:4,max:6},
-          Custom: {comfortable:4,max:4}
-        },
-        photo: {
-          Portrait: {comfortable:4,max:6},
-          Square: {comfortable:6,max:6},
-          Landscape: {comfortable:6,max:6},
-          Custom: {comfortable:4,max:6}
-        }
-      };
-
-      const chosen = table[currentMode][orientation] || table[currentMode].Custom;
-      return {...chosen, label:orientation};
-    }
-
-    function evaluatePersonalizedFit(total,pages,capacity) {
-      const comfortableTotal=pages*capacity.comfortable;
-      const maximumTotal=pages*capacity.max;
-      const minimumPages=Math.ceil(total/capacity.max);
-      return {
-        fits:total<=maximumTotal,
-        comfortable:total<=comfortableTotal,
-        maximumTotal,
-        minimumPages,
-        extraPages:Math.max(0,minimumPages-pages),
-        excessPhotos:Math.max(0,total-maximumTotal)
-      };
-    }
-
-    function buildPersonalizedRealisticDistribution(total,pages,maxPerPage) {
-      const allowed=[1,2,4,6].filter(x=>x<=maxPerPage);
-      const memo=new Map();
-
-      function solve(page,remaining) {
-        if(page===pages) return remaining===0 ? {score:0,values:[]} : null;
-        const left=pages-page;
-        if(remaining<left || remaining>left*maxPerPage) return null;
-        const key=`${page}|${remaining}`;
-        if(memo.has(key)) return memo.get(key);
-        const avg=remaining/left;
-        let best=null;
-        for(const value of allowed) {
-          if(value>remaining) continue;
-          const next=solve(page+1,remaining-value);
-          if(!next) continue;
-          let penalty=Math.pow(value-avg,2);
-          if(currentMode==="design" && value>2) penalty+=4;
-          if(currentMode==="balanced" && value===6) penalty+=2;
-          if(value===1) penalty+=.5;
-          const candidate={score:penalty+next.score,values:[value,...next.values]};
-          if(!best || candidate.score<best.score) best=candidate;
-        }
-        memo.set(key,best);
-        return best;
-      }
-
-      const result=solve(0,total);
-      return result ? result.values.sort((a,b)=>b-a) : null;
-    }
-
-    function renderPersonalizedDoesNotFit(total,pages,capacity,fit) {
-      const size=getPhotobookSizeInfo();
-      resultTitle.textContent=`${total} Photos • ${pages} Pages • ${size.label}`;
-      summaryText.innerHTML =
-        `<strong>Does not fit cleanly for this personalized setup.</strong> ` +
-        `${capacity.label} + ${modeBadge.textContent} is capped at about <strong>${capacity.max} photos per usable page</strong>.`;
-      designNote.className="mt-4 rounded-xl p-4 text-sm leading-relaxed bg-red-50 border border-red-200 text-red-800";
-      designNote.innerHTML =
-        `<strong>✕ Layout capacity exceeded.</strong><br>` +
-        `${pages} usable pages can hold about ${fit.maximumTotal} photos cleanly with this setting.`;
-      warningBox.classList.remove("hidden");
-      warningBox.innerHTML =
-        `<strong>Add ${fit.extraPages} usable page${fit.extraPages===1?"":"s"} or remove about ${fit.excessPhotos} photo${fit.excessPhotos===1?"":"s"}.</strong><br>` +
-        `Minimum recommended usable pages: <strong>${fit.minimumPages}</strong>.`;
-      verification.textContent="✕ Does not fit cleanly";
-      pageList.innerHTML =
-        `<div class="md:col-span-2 border border-red-200 bg-red-50 rounded-xl p-5 text-sm text-red-800">` +
-        `<strong>No forced layout generated.</strong><br>The planner will not squeeze photos into an unrealistic personalized page.` +
-        `</div>`;
-      renderLayoutSuggestions();
     }
 
 
@@ -2122,20 +1824,29 @@
 
     photobookSizeInput.addEventListener("change", () => {
       updatePhotobookSizeUI();
-      generateInspiration();
+      renderDesignInspiration();
     });
 
     customWidthInput.addEventListener("input", () => {
       updatePhotobookSizeUI();
-      generateInspiration();
+      renderDesignInspiration();
     });
 
     customHeightInput.addEventListener("input", () => {
       updatePhotobookSizeUI();
-      generateInspiration();
+      renderDesignInspiration();
     });
 
-    shuffleInspiration.addEventListener("click", generateInspiration);
+    inspirationTheme.addEventListener("input", renderDesignInspiration);
+    inspirationStyle.addEventListener("change", renderDesignInspiration);
+    inspirationColor.addEventListener("change", renderDesignInspiration);
+
+    document.querySelectorAll(".quick-theme").forEach(button => {
+      button.addEventListener("click", () => {
+        inspirationTheme.value = button.dataset.theme || "";
+        renderDesignInspiration();
+      });
+    });
 
 
     // =====================================================
@@ -2275,11 +1986,13 @@
 
     // INITIAL
     updatePhotobookSizeUI();
-    generateInspiration();
+    renderDesignInspiration();
 
   </script>
 
 </body>
 </html>
+
+
 
 
