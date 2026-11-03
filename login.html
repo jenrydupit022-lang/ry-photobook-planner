@@ -1,0 +1,125 @@
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | R&Y Photobook Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="min-h-screen bg-[#f6faf8] flex items-center justify-center p-4">
+  <main class="w-full max-w-md">
+    <div class="bg-white border border-slate-200 rounded-3xl shadow-xl p-6 sm:p-8">
+      <div class="text-center">
+        <img src="ryn.png" alt="R&Y Printing Lab" class="w-20 h-20 rounded-full object-cover mx-auto">
+        <h1 class="text-2xl font-black mt-4">R&Y Photobook Planner</h1>
+        <p class="text-sm text-slate-500 mt-1">Sign in to sync your workspace.</p>
+      </div>
+
+      <div id="message" class="hidden mt-5 p-3 rounded-xl text-sm font-bold"></div>
+
+      <form id="authForm" class="mt-6 space-y-4">
+        <div>
+          <label class="text-xs font-black text-slate-600">Email</label>
+          <input id="email" type="email" required autocomplete="email"
+            class="mt-1 w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:border-teal-400"
+            placeholder="you@example.com">
+        </div>
+        <div>
+          <label class="text-xs font-black text-slate-600">Password</label>
+          <input id="password" type="password" required minlength="6" autocomplete="current-password"
+            class="mt-1 w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:border-teal-400"
+            placeholder="At least 6 characters">
+        </div>
+        <button id="loginBtn" type="submit"
+          class="w-full bg-slate-900 text-white font-black rounded-xl py-3 hover:bg-slate-800">
+          Login
+        </button>
+      </form>
+
+      <div class="flex items-center gap-3 my-5">
+        <div class="h-px bg-slate-200 flex-1"></div>
+        <span class="text-xs text-slate-400">or</span>
+        <div class="h-px bg-slate-200 flex-1"></div>
+      </div>
+
+      <button id="signupBtn"
+        class="w-full border-2 border-teal-300 text-teal-700 font-black rounded-xl py-3 hover:bg-teal-50">
+        Create Account
+      </button>
+
+      <p class="text-[11px] text-slate-400 text-center mt-5">
+        Your R&Y workspace will be connected to your account.
+      </p>
+    </div>
+  </main>
+
+<script>
+const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const form = document.getElementById("authForm");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const message = document.getElementById("message");
+const signupBtn = document.getElementById("signupBtn");
+
+function showMessage(text, type = "error") {
+  message.textContent = text;
+  message.className = "mt-5 p-3 rounded-xl text-sm font-bold " +
+    (type === "success"
+      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+      : "bg-red-50 text-red-700 border border-red-200");
+}
+
+async function redirectIfLoggedIn() {
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session) window.location.href = "index.html";
+}
+redirectIfLoggedIn();
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return showMessage(error.message);
+
+  showMessage("Login successful. Opening dashboard...", "success");
+  setTimeout(() => window.location.href = "index.html", 500);
+});
+
+signupBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || password.length < 6) {
+    return showMessage("Enter your email and a password with at least 6 characters first.");
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) return showMessage(error.message);
+
+  if (data.session) {
+    showMessage("Account created. Opening dashboard...", "success");
+    setTimeout(() => window.location.href = "index.html", 500);
+  } else {
+    showMessage("Account created. Check your email for the confirmation link, then log in.", "success");
+  }
+});
+</script>
+</body>
+</html>
+
+

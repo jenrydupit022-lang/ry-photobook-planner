@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +16,7 @@
   <title>R&Y Photobook Planner</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -80,6 +90,9 @@
   <header class="bg-white/90 backdrop-blur border-b border-slate-200">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+      <div id="authLoading" class="fixed inset-0 z-[9999] bg-[#f6faf8] flex items-center justify-center">
+        <p class="font-black text-slate-700">Checking account...</p>
+      </div>
 
       <img
         src="ryn.png"
@@ -95,6 +108,13 @@
         <p class="text-[10px] sm:text-xs text-slate-500">
           Smart Photo Planning by R&Y Printing Lab
         </p>
+      </div>
+
+      <div class="ml-auto flex items-center gap-2">
+        <span id="userEmail" class="hidden sm:block text-xs font-bold text-slate-500 max-w-[220px] truncate"></span>
+        <button id="logoutBtn" class="px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-black hover:bg-slate-800">
+          Logout
+        </button>
       </div>
 
     </div>
@@ -553,5 +573,39 @@
 
   </footer>
 
+
+<script>
+const SUPABASE_URL = "https://vqyxzbdtsatxmlkjfemh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_uq_7P9z4Ig3DzPpF66Br3A_JzGNmmh7";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function protectDashboard() {
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (!data.session) {
+    window.location.replace("login.html");
+    return;
+  }
+
+  document.getElementById("userEmail").textContent = data.session.user.email || "R&Y Account";
+  document.getElementById("authLoading").remove();
+}
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await supabaseClient.auth.signOut();
+  window.location.replace("login.html");
+});
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_OUT" || !session) {
+    window.location.replace("login.html");
+  }
+});
+
+protectDashboard();
+</script>
+
 </body>
 </html>
+
+
