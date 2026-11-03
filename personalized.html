@@ -8,6 +8,21 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -178,6 +193,53 @@
         min-height: 44px;
       }
     }
+
+
+    .inspiration-card {
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .inspiration-card:hover {
+      transform: translateY(-3px);
+      border-color: #9de4da;
+      box-shadow: 0 12px 28px rgba(17,24,39,.08);
+    }
+
+    .pin-board {
+      min-height: 150px;
+      border-radius: 16px;
+      padding: 10px;
+      background:
+        radial-gradient(circle at top left, rgba(99,217,201,.18), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(139,203,120,.18), transparent 35%),
+        #f8fbfa;
+      display: grid;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .pin-photo {
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(99,217,201,.85), rgba(139,203,120,.75));
+      border: 3px solid white;
+      box-shadow: 0 3px 10px rgba(17,24,39,.08);
+    }
+
+    .pin-portrait { grid-template-columns: 1fr .72fr; grid-template-rows: 1fr 1fr; }
+    .pin-portrait .pin-photo:first-child { grid-row: 1 / 3; }
+
+    .pin-scrapbook { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(2,1fr); }
+    .pin-scrapbook .pin-photo:nth-child(2) { transform: rotate(4deg); }
+    .pin-scrapbook .pin-photo:nth-child(4) { transform: rotate(-4deg); }
+
+    .pin-clean { grid-template-columns: 1.5fr 1fr; grid-template-rows: 1fr 1fr; }
+    .pin-clean .pin-photo:first-child { grid-row: 1 / 3; }
+
+    .pin-collage { grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); }
+    .pin-collage .pin-photo:first-child { grid-column: 1 / 3; grid-row: 1 / 3; }
+
+    .pin-story { grid-template-columns: repeat(2,1fr); grid-template-rows: 1.35fr .65fr; }
+    .pin-story .pin-photo:first-child { grid-column: 1 / 3; }
 
     @media print {
       body {
@@ -375,6 +437,29 @@
               Use the actual pages available for layouts.
             </p>
 
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-2">Photobook Size</label>
+            <select id="photobookSize" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white font-bold">
+              <option value="6x6">6 × 6 inches</option>
+              <option value="8x7">8 × 7 inches</option>
+              <option value="7x10">7 × 10 inches</option>
+              <option value="10x7">10 × 7 inches</option>
+              <option value="custom">Custom Size</option>
+            </select>
+
+            <div id="customSizeFields" class="hidden grid grid-cols-2 gap-3 mt-3">
+              <input id="customWidth" type="number" min="1" step="0.1" placeholder="Width (in)"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 font-bold bg-white">
+              <input id="customHeight" type="number" min="1" step="0.1" placeholder="Height (in)"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 font-bold bg-white">
+            </div>
+
+            <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-3 mt-3">
+              <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">Page Shape</p>
+              <p id="sizeInfoText" class="text-xs text-slate-600 mt-1 font-bold">Square • 6 × 6 inches</p>
+            </div>
           </div>
 
         </div>
@@ -636,6 +721,36 @@
 
     </div>
 
+    <!-- PERSONALIZED LAYOUT SUGGESTIONS -->
+    <section class="mt-6 sm:mt-8 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div class="p-5 sm:p-6 border-b border-slate-200">
+        <p class="text-xs font-black text-green-600 uppercase tracking-wider">Layout Suggestions</p>
+        <h3 class="font-black text-xl sm:text-2xl mt-1">Personalized Layout Guide</h3>
+        <p class="text-sm text-slate-500 mt-2">
+          Suggested page styles based on the selected photobook size and design space.
+        </p>
+      </div>
+      <div id="layoutSuggestionGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </section>
+
+    <!-- PINTEREST-STYLE DESIGN INSPIRATION -->
+    <section class="no-print mt-6 sm:mt-8 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div class="p-5 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-black text-green-600 uppercase tracking-wider">Design Inspiration</p>
+          <h3 class="font-black text-xl sm:text-2xl mt-1">Pinterest-Style Ideas</h3>
+          <p class="text-sm text-slate-500 mt-2">
+            Quick visual ideas for backgrounds, decorations, text placement and photo composition.
+          </p>
+        </div>
+        <button type="button" id="shuffleInspiration"
+          class="border border-slate-300 bg-white hover:bg-slate-50 px-4 py-2.5 rounded-xl text-xs font-black whitespace-nowrap">
+          Shuffle Ideas
+        </button>
+      </div>
+      <div id="inspirationGrid" class="p-4 sm:p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
   </main>
 
 
@@ -670,6 +785,15 @@
 
     const usablePagesInput =
       document.getElementById("usablePages");
+
+    const photobookSizeInput = document.getElementById("photobookSize");
+    const customSizeFields = document.getElementById("customSizeFields");
+    const customWidthInput = document.getElementById("customWidth");
+    const customHeightInput = document.getElementById("customHeight");
+    const sizeInfoText = document.getElementById("sizeInfoText");
+    const layoutSuggestionGrid = document.getElementById("layoutSuggestionGrid");
+    const inspirationGrid = document.getElementById("inspirationGrid");
+    const shuffleInspiration = document.getElementById("shuffleInspiration");
 
     const pageList =
       document.getElementById("pageList");
@@ -1061,93 +1185,222 @@
     // PAGE INFORMATION
     // =====================================================
 
-    function getPageInfo(count) {
+    function getPhotobookSizeInfo() {
+      let width = 6, height = 6;
 
-      if (count === 0) {
-
-        return {
-          layout: "Empty Page",
-          role: "Design / Writing Space",
-          space: "Maximum",
-          className: "layout-1"
-        };
+      if (photobookSizeInput.value === "custom") {
+        width = Number(customWidthInput.value) || 0;
+        height = Number(customHeightInput.value) || 0;
+      } else {
+        [width, height] = photobookSizeInput.value.split("x").map(Number);
       }
 
+      const orientation = !width || !height
+        ? "Custom"
+        : Math.abs(width - height) < 0.01
+          ? "Square"
+          : width > height
+            ? "Landscape"
+            : "Portrait";
 
-      if (count === 1) {
+      const label = width && height
+        ? `${width} × ${height} inches`
+        : "Enter custom size";
 
-        return {
-          layout: "Feature Photo",
-          role: "Hero / Feature Page",
-          space: "Maximum",
-          className: "layout-1"
-        };
-      }
-
-
-      if (count === 2) {
-
-        return {
-          layout: "Side-by-Side",
-          role: "Designed Page",
-          space: "High",
-          className: "layout-2"
-        };
-      }
-
-
-      if (count === 3) {
-
-        return {
-          layout: "Hero + 2 Small",
-          role: "Flexible Page",
-          space: "Good",
-          className: "layout-3"
-        };
-      }
-
-
-      if (count === 4) {
-
-        return {
-          layout: "2×2 Grid",
-          role: "Balanced Design Page",
-          space: "Good",
-          className: "layout-4"
-        };
-      }
-
-
-      if (count === 5) {
-
-        return {
-          layout: "Center Focus",
-          role: "Photo-Focused Page",
-          space: "Limited",
-          className: "layout-5"
-        };
-      }
-
-
-      if (count === 6) {
-
-        return {
-          layout: "3×2 Grid",
-          role: "Photo-Heavy Page",
-          space: "Limited",
-          className: "layout-6"
-        };
-      }
-
-
-      return {
-        layout: "Mosaic Collage",
-        role: "Crowded Page",
-        space: "Very Limited",
-        className: "layout-dense"
-      };
+      return { width, height, orientation, label };
     }
 
+
+    function updatePhotobookSizeUI() {
+      customSizeFields.classList.toggle("hidden", photobookSizeInput.value !== "custom");
+      const size = getPhotobookSizeInfo();
+      sizeInfoText.textContent = `${size.orientation} • ${size.label}`;
+      calculate();
+    }
+
+
+    function setPhotobookSizeFromJob(bookSize) {
+      const match = String(bookSize || "").match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
+      if (!match) return;
+
+      const width = Number(match[1]);
+      const height = Number(match[2]);
+      const key = `${width}x${height}`;
+
+      if (["6x6","8x7","7x10","10x7"].includes(key)) {
+        photobookSizeInput.value = key;
+      } else {
+        photobookSizeInput.value = "custom";
+        customWidthInput.value = width;
+        customHeightInput.value = height;
+      }
+
+      updatePhotobookSizeUI();
+    }
+
+
+    function getPageInfo(count) {
+      const orientation = getPhotobookSizeInfo().orientation;
+
+      if (count === 0) {
+        return { layout:"Empty Design Page", role:"Design / Writing Space", space:"Maximum", className:"layout-1" };
+      }
+
+      if (count === 1) {
+        return {
+          layout: orientation === "Portrait" ? "Full Portrait Feature" :
+                  orientation === "Landscape" ? "Wide Hero Feature" : "Full Bleed Feature",
+          role:"Hero / Feature Page", space:"Maximum", className:"layout-1"
+        };
+      }
+
+      if (count === 2) {
+        return {
+          layout: orientation === "Portrait" ? "Top + Bottom Story" :
+                  orientation === "Landscape" ? "Side-by-Side Story" : "Balanced Pair",
+          role:"Designed Page", space:"High", className:"layout-2"
+        };
+      }
+
+      if (count === 3) {
+        return { layout:"Hero + 2 Supporting Photos", role:"Flexible Story Page", space:"Good", className:"layout-3" };
+      }
+
+      if (count === 4) {
+        return {
+          layout: orientation === "Portrait" ? "Portrait 2×2 Story Grid" :
+                  orientation === "Landscape" ? "Wide 2×2 Story Grid" : "2×2 Story Grid",
+          role:"Balanced Design Page", space:"Good", className:"layout-4"
+        };
+      }
+
+      if (count === 5) {
+        return { layout:"Feature + Supporting Collage", role:"Photo-Focused Page", space:"Limited", className:"layout-5" };
+      }
+
+      if (count === 6) {
+        return {
+          layout: orientation === "Portrait" ? "2×3 Portrait Grid" :
+                  orientation === "Landscape" ? "3×2 Wide Grid" : "3×2 Grid",
+          role:"Photo-Heavy Page", space:"Limited", className:"layout-6"
+        };
+      }
+
+      return { layout:"Creative Mosaic Collage", role:"Crowded Page", space:"Very Limited", className:"layout-dense" };
+    }
+
+
+    function renderLayoutSuggestions() {
+      if (!layoutSuggestionGrid) return;
+
+      const size = getPhotobookSizeInfo();
+      const ideas = currentMode === "design"
+        ? [
+            ["1 Photo", "Hero Feature", "Use one strong image with lots of room for title, quote or decorations.", 1],
+            ["2 Photos", size.orientation === "Portrait" ? "Top + Bottom Story" : "Editorial Pair", "Great for a before/after, couple, detail pair or short story.", 2],
+            ["4 Photos", "Scrapbook Feature", "Keep one area open for stickers, flowers, dates or client text.", 4]
+          ]
+        : currentMode === "photo"
+          ? [
+              ["4 Photos", "Balanced Grid", "Clean personalized page with enough room for small accents.", 4],
+              ["6 Photos", size.orientation === "Portrait" ? "2×3 Portrait Grid" : "3×2 Wide Grid", "Good when more photos must fit while keeping the page organized.", 6],
+              ["2 Photos", "Feature Break", "Use between busy pages to give the album visual breathing room.", 2]
+            ]
+          : [
+              ["2 Photos", size.orientation === "Portrait" ? "Vertical Story Pair" : "Editorial Pair", "A safe personalized layout with room for text and design.", 2],
+              ["4 Photos", "Story Grid", "Balanced choice for photos, backgrounds and small decorations.", 4],
+              ["1 Photo", "Hero Break", "Use on important moments so the photobook does not feel too crowded.", 1]
+            ];
+
+      layoutSuggestionGrid.innerHTML = "";
+
+      ideas.forEach(([countLabel, title, text, count]) => {
+        const info = getPageInfo(count);
+        const card = document.createElement("div");
+        card.className = "border border-slate-200 rounded-xl p-4 bg-[#fbfdfc]";
+
+        const top = document.createElement("div");
+        top.className = "flex items-center justify-between gap-3";
+
+        const copy = document.createElement("div");
+        copy.innerHTML = `
+          <p class="text-[10px] font-black text-teal-600 uppercase">${countLabel}</p>
+          <p class="font-black mt-1">${title}</p>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed">${text}</p>
+        `;
+
+        top.appendChild(copy);
+        top.appendChild(createPreview(count, info.className));
+        card.appendChild(top);
+        layoutSuggestionGrid.appendChild(card);
+      });
+    }
+
+
+    const inspirationIdeas = [
+      {
+        title:"Soft Editorial",
+        tag:"Clean",
+        text:"Large feature photo, small supporting image, short title and lots of negative space.",
+        pinClass:"pin-clean",
+        boxes:3
+      },
+      {
+        title:"Scrapbook Memory",
+        tag:"Decorative",
+        text:"Use layered photos, tape-style accents, dates, handwritten notes and small decorative pieces.",
+        pinClass:"pin-scrapbook",
+        boxes:6
+      },
+      {
+        title:"Portrait Story",
+        tag:"Portrait",
+        text:"One tall hero image with two supporting photos and text beside the main subject.",
+        pinClass:"pin-portrait",
+        boxes:3
+      },
+      {
+        title:"Story Collage",
+        tag:"Photo Rich",
+        text:"One dominant moment surrounded by smaller detail photos for a Pinterest collage feel.",
+        pinClass:"pin-collage",
+        boxes:7
+      },
+      {
+        title:"Chapter Opener",
+        tag:"Feature",
+        text:"Use one wide hero photo, a title or date, then two smaller images underneath.",
+        pinClass:"pin-story",
+        boxes:3
+      }
+    ];
+
+
+    function generateInspiration() {
+      if (!inspirationGrid) return;
+
+      const size = getPhotobookSizeInfo();
+      const shuffled = [...inspirationIdeas].sort(() => Math.random() - 0.5);
+      const visible = shuffled.slice(0, 3);
+
+      inspirationGrid.innerHTML = visible.map(idea => `
+        <article class="inspiration-card border border-slate-200 rounded-2xl p-4 bg-white">
+          <div class="pin-board ${idea.pinClass}">
+            ${Array.from({length: idea.boxes}, () => '<div class="pin-photo"></div>').join("")}
+          </div>
+          <div class="flex items-start justify-between gap-3 mt-4">
+            <div>
+              <p class="font-black">${idea.title}</p>
+              <p class="text-xs text-slate-500 mt-1 leading-relaxed">${idea.text}</p>
+            </div>
+            <span class="bg-[#eef9f6] text-teal-700 px-2.5 py-1 rounded-full text-[10px] font-black whitespace-nowrap">
+              ${idea.tag}
+            </span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-bold mt-3">${size.orientation} • ${size.label}</p>
+        </article>
+      `).join("");
+    }
 
     // =====================================================
     // MINI PREVIEW
@@ -1501,8 +1754,10 @@
         average.toFixed(2);
 
 
+      const sizeInfo = getPhotobookSizeInfo();
+
       resultTitle.textContent =
-        `${total} Photos • ${pages} Pages`;
+        `${total} Photos • ${pages} Pages • ${sizeInfo.label}`;
 
 
       const space =
@@ -1649,6 +1904,8 @@
       renderPages(
         distribution
       );
+
+      renderLayoutSuggestions();
     }
 
 
@@ -1666,6 +1923,23 @@
       "input",
       calculate
     );
+
+    photobookSizeInput.addEventListener("change", () => {
+      updatePhotobookSizeUI();
+      generateInspiration();
+    });
+
+    customWidthInput.addEventListener("input", () => {
+      updatePhotobookSizeUI();
+      generateInspiration();
+    });
+
+    customHeightInput.addEventListener("input", () => {
+      updatePhotobookSizeUI();
+      generateInspiration();
+    });
+
+    shuffleInspiration.addEventListener("click", generateInspiration);
 
 
     // =====================================================
@@ -1774,6 +2048,10 @@
         usablePagesInput.value = pagesInfo.usable;
       }
 
+      if (job.bookSize) {
+        setPhotobookSizeFromJob(job.bookSize);
+      }
+
       activeJobBanner.classList.remove("hidden");
       activeJobBanner.innerHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1800,11 +2078,14 @@
     renderPlannerQueue();
 
     // INITIAL
-    calculate();
+    updatePhotobookSizeUI();
+    generateInspiration();
 
   </script>
 
 </body>
 </html>
+
+
 
 

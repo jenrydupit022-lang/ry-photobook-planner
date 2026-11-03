@@ -19,6 +19,16 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -443,6 +453,25 @@
               Pages available for photo layouts.
             </p>
 
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold mb-2">Photobook Size</label>
+            <select id="photobookSize" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white font-bold">
+              <option value="6x6">6 × 6 inches</option>
+              <option value="8x7">8 × 7 inches</option>
+              <option value="7x10">7 × 10 inches</option>
+              <option value="10x7">10 × 7 inches</option>
+              <option value="custom">Custom Size</option>
+            </select>
+            <div id="customSizeFields" class="hidden grid grid-cols-2 gap-3 mt-3">
+              <input id="customWidth" type="number" min="1" step="0.1" placeholder="Width (in)" class="w-full border border-slate-300 rounded-xl px-4 py-3 font-bold bg-white">
+              <input id="customHeight" type="number" min="1" step="0.1" placeholder="Height (in)" class="w-full border border-slate-300 rounded-xl px-4 py-3 font-bold bg-white">
+            </div>
+            <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-3 mt-3">
+              <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">Page Shape</p>
+              <p id="sizeInfoText" class="text-xs text-slate-600 mt-1 font-bold">Square • 6 × 6 inches</p>
+            </div>
           </div>
 
         </div>
@@ -900,6 +929,12 @@
     const usablePagesInput =
       document.getElementById("usablePages");
 
+    const photobookSizeInput = document.getElementById("photobookSize");
+    const customSizeFields = document.getElementById("customSizeFields");
+    const customWidthInput = document.getElementById("customWidth");
+    const customHeightInput = document.getElementById("customHeight");
+    const sizeInfoText = document.getElementById("sizeInfoText");
+
     const pageList =
       document.getElementById("pageList");
 
@@ -1178,62 +1213,54 @@
     }
 
 
-    function getLayoutInfo(count) {
-
-      if (count === 0)
-        return [
-          "Empty Page",
-          "layout-1"
-        ];
-
-      if (count === 1)
-        return [
-          "Full Bleed",
-          "layout-1"
-        ];
-
-      if (count === 2)
-        return [
-          "Side-by-Side",
-          "layout-2"
-        ];
-
-      if (count === 3)
-        return [
-          "Hero + 2 Small",
-          "layout-3"
-        ];
-
-      if (count === 4)
-        return [
-          "2×2 Grid",
-          "layout-4"
-        ];
-
-      if (count === 5)
-        return [
-          "Center Focus",
-          "layout-5"
-        ];
-
-      if (count === 6)
-        return [
-          "3×2 Grid",
-          "layout-6"
-        ];
-
-      if (count === 7)
-        return [
-          "Polaroid Collage",
-          "layout-7"
-        ];
-
-      return [
-        "Mosaic Collage",
-        "layout-dense"
-      ];
+    function getPhotobookSizeInfo() {
+      let width = 6, height = 6;
+      if (photobookSizeInput.value === "custom") {
+        width = Number(customWidthInput.value) || 0;
+        height = Number(customHeightInput.value) || 0;
+      } else {
+        [width, height] = photobookSizeInput.value.split("x").map(Number);
+      }
+      const orientation = !width || !height ? "Custom" :
+        Math.abs(width-height) < 0.01 ? "Square" :
+        width > height ? "Landscape" : "Portrait";
+      const label = width && height ? `${width} × ${height} inches` : "Enter custom size";
+      return {width,height,orientation,label};
     }
 
+    function updatePhotobookSizeUI() {
+      customSizeFields.classList.toggle("hidden", photobookSizeInput.value !== "custom");
+      const size = getPhotobookSizeInfo();
+      sizeInfoText.textContent = `${size.orientation} • ${size.label}`;
+      calculate();
+    }
+
+    function setPhotobookSizeFromJob(bookSize) {
+      const match = String(bookSize || "").match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
+      if (!match) return;
+      const w=Number(match[1]), h=Number(match[2]), key=`${w}x${h}`;
+      if (["6x6","8x7","7x10","10x7"].includes(key)) {
+        photobookSizeInput.value=key;
+      } else {
+        photobookSizeInput.value="custom";
+        customWidthInput.value=w;
+        customHeightInput.value=h;
+      }
+      updatePhotobookSizeUI();
+    }
+
+    function getLayoutInfo(count) {
+      const o=getPhotobookSizeInfo().orientation;
+      if(count===0) return ["Empty Page","layout-1"];
+      if(count===1) return [o==="Portrait"?"Full Page Portrait":o==="Landscape"?"Full Page Landscape":"Full Bleed","layout-1"];
+      if(count===2) return [o==="Portrait"?"Top + Bottom":o==="Landscape"?"Side-by-Side":"Balanced Pair","layout-2"];
+      if(count===3) return ["Hero + 2 Small","layout-3"];
+      if(count===4) return [o==="Portrait"?"Portrait 2×2 Grid":o==="Landscape"?"Wide 2×2 Grid":"2×2 Grid","layout-4"];
+      if(count===5) return ["Center Focus","layout-5"];
+      if(count===6) return [o==="Portrait"?"2×3 Portrait Grid":o==="Landscape"?"3×2 Wide Grid":"3×2 Grid","layout-6"];
+      if(count===7) return ["Polaroid Collage","layout-7"];
+      return ["Mosaic Collage","layout-dense"];
+    }
 
     function createPreview(
       count,
@@ -1451,8 +1478,9 @@
       pageStat.textContent =
         pages;
 
+      const sizeInfo = getPhotobookSizeInfo();
       resultTitle.textContent =
-        `${total} Photos • ${pages} Pages`;
+        `${total} Photos • ${pages} Pages • ${sizeInfo.label}`;
 
 
       const distribution =
@@ -1530,6 +1558,10 @@
       "input",
       calculate
     );
+
+    photobookSizeInput.addEventListener("change", updatePhotobookSizeUI);
+    customWidthInput.addEventListener("input", updatePhotobookSizeUI);
+    customHeightInput.addEventListener("input", updatePhotobookSizeUI);
 
 
     // =====================================================
@@ -2061,6 +2093,10 @@
         usablePagesInput.value = pagesInfo.usable;
       }
 
+      if (job.bookSize) {
+        setPhotobookSizeFromJob(job.bookSize);
+      }
+
       activeJobBanner.classList.remove("hidden");
       activeJobBanner.innerHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -2086,13 +2122,15 @@
 
     renderPlannerQueue();
 
-    calculate();
+    updatePhotobookSizeUI();
     generateInspiration();
 
   </script>
 
 </body>
 </html>
+
+
 
 
 
