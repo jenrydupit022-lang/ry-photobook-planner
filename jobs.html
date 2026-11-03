@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -199,12 +208,28 @@
           class="hidden"
         >
 
+        <!-- HIDDEN GOOGLE FORM RESPONSES INPUT -->
+        <input
+          id="formResponsesInput"
+          type="file"
+          accept=".xlsx,.xls"
+          class="hidden"
+        >
+
         <button
           type="button"
           onclick="openExcelPicker()"
           class="border-2 border-teal-200 bg-teal-50 hover:bg-teal-100 text-teal-700 px-5 py-3 rounded-xl font-black text-sm transition"
         >
           ↑ Import Excel
+        </button>
+
+        <button
+          type="button"
+          onclick="openFormResponsesPicker()"
+          class="border-2 border-green-200 bg-green-50 hover:bg-green-100 text-green-700 px-5 py-3 rounded-xl font-black text-sm transition"
+        >
+          ↑ Import Form Responses
         </button>
 
         <button
@@ -287,50 +312,29 @@
 
 
     <!-- STATS -->
-    <section class="grid grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4">
+    <section class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
       <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-bold text-slate-500">Total Jobs</p>
-          <span class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">📋</span>
-        </div>
+        <p class="text-xs font-bold text-slate-500">Total Jobs</p>
         <p id="totalJobsStat" class="text-3xl font-black mt-3">0</p>
-        <p class="text-[10px] text-slate-400 font-bold mt-1">client / order rows</p>
       </div>
-
       <div class="bg-white border border-teal-200 rounded-2xl p-4 sm:p-5">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-bold text-teal-700">Total Photobooks</p>
-          <span class="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center">📚</span>
-        </div>
+        <p class="text-xs font-bold text-teal-700">Total Photobooks</p>
         <p id="totalPhotobooksStat" class="text-3xl font-black text-teal-600 mt-3">0</p>
-        <p class="text-[10px] text-slate-400 font-bold mt-1">based on quantity</p>
       </div>
-
       <div class="bg-white border border-amber-200 rounded-2xl p-4 sm:p-5">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-bold text-amber-700">Pending</p>
-          <span class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">⏳</span>
-        </div>
+        <p class="text-xs font-bold text-amber-700">Pending Photobooks</p>
         <p id="pendingStat" class="text-3xl font-black text-amber-600 mt-3">0</p>
-        <p class="text-[10px] text-slate-400 font-bold mt-1">photobooks</p>
+        <p id="pendingJobsLabel" class="text-[10px] font-bold text-slate-400 mt-1">0 jobs</p>
       </div>
-
       <div class="bg-white border border-blue-200 rounded-2xl p-4 sm:p-5">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-bold text-blue-700">Ongoing</p>
-          <span class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">✏️</span>
-        </div>
+        <p class="text-xs font-bold text-blue-700">Ongoing Photobooks</p>
         <p id="ongoingStat" class="text-3xl font-black text-blue-600 mt-3">0</p>
-        <p class="text-[10px] text-slate-400 font-bold mt-1">photobooks</p>
+        <p id="ongoingJobsLabel" class="text-[10px] font-bold text-slate-400 mt-1">0 jobs</p>
       </div>
-
       <div class="bg-white border border-emerald-200 rounded-2xl p-4 sm:p-5">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-bold text-emerald-700">Done Layout</p>
-          <span class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">✓</span>
-        </div>
+        <p class="text-xs font-bold text-emerald-700">Done Photobooks</p>
         <p id="doneStat" class="text-3xl font-black text-emerald-600 mt-3">0</p>
-        <p class="text-[10px] text-slate-400 font-bold mt-1">photobooks</p>
+        <p id="doneJobsLabel" class="text-[10px] font-bold text-slate-400 mt-1">0 jobs</p>
       </div>
     </section>
 
@@ -808,6 +812,15 @@
     const totalPhotobooksStat =
       document.getElementById("totalPhotobooksStat");
 
+    const pendingJobsLabel =
+      document.getElementById("pendingJobsLabel");
+
+    const ongoingJobsLabel =
+      document.getElementById("ongoingJobsLabel");
+
+    const doneJobsLabel =
+      document.getElementById("doneJobsLabel");
+
     const pendingStat =
       document.getElementById("pendingStat");
 
@@ -825,6 +838,9 @@
 
     const excelFileInput =
       document.getElementById("excelFileInput");
+
+    const formResponsesInput =
+      document.getElementById("formResponsesInput");
 
     const importInfo =
       document.getElementById("importInfo");
@@ -1709,6 +1725,176 @@
 
 
     // =====================================================
+    // IMPORT GOOGLE FORM RESPONSES
+    // =====================================================
+
+    function openFormResponsesPicker() {
+      formResponsesInput.value = "";
+      formResponsesInput.click();
+    }
+
+    function normalizePersonName(value) {
+      return cleanText(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function monthFromSheetName(sheetName) {
+      const text = cleanText(sheetName).toLowerCase();
+      const month = monthNames.find(item => text.includes(item));
+      const year = text.match(/\b20\d{2}\b/);
+
+      if (!month || !year) return "";
+
+      return month.charAt(0).toUpperCase() +
+        month.slice(1) + " " + year[0];
+    }
+
+    function findFullNameColumn(headers) {
+      return headers.findIndex(header => {
+        const text = normalizeText(header);
+        return text === "full name" ||
+          text === "name" ||
+          text.includes("full name");
+      });
+    }
+
+    function buildFormAnswers(headers, row) {
+      const answers = [];
+
+      headers.forEach((header, index) => {
+        const question = cleanText(header);
+        const answer = cleanText(row[index]);
+
+        if (!question || !answer) return;
+        if (/^column\s*\d*/i.test(question)) return;
+
+        answers.push({ question, answer });
+      });
+
+      return answers;
+    }
+
+    function findMatchingJob(fullName, month) {
+      const targetName = normalizePersonName(fullName);
+      if (!targetName) return null;
+
+      const exactMonthMatch = jobs.find(job =>
+        normalizePersonName(job.clientName) === targetName &&
+        normalizeText(job.month) === normalizeText(month)
+      );
+
+      if (exactMonthMatch) return exactMonthMatch;
+
+      const sameNameJobs = jobs.filter(job =>
+        normalizePersonName(job.clientName) === targetName
+      );
+
+      return sameNameJobs.length === 1
+        ? sameNameJobs[0]
+        : null;
+    }
+
+    formResponsesInput.addEventListener(
+      "change",
+      async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (typeof XLSX === "undefined") {
+          alert("Excel reader failed to load. Please refresh the page.");
+          return;
+        }
+
+        try {
+          const buffer = await file.arrayBuffer();
+          const workbook = XLSX.read(buffer, {
+            type: "array",
+            cellDates: false
+          });
+
+          let matchedCount = 0;
+          let responseCount = 0;
+          const unmatched = [];
+          const sheetsUsed = [];
+
+          workbook.SheetNames.forEach(sheetName => {
+            const month = monthFromSheetName(sheetName);
+            if (!month) return;
+
+            const worksheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(worksheet, {
+              header: 1,
+              defval: "",
+              raw: false
+            });
+
+            if (rows.length < 2) return;
+
+            const headers = rows[0].map(cleanText);
+            const fullNameIndex = findFullNameColumn(headers);
+            if (fullNameIndex === -1) return;
+
+            sheetsUsed.push(sheetName);
+
+            rows.slice(1).forEach((row, rowOffset) => {
+              const fullName = cleanText(row[fullNameIndex]);
+              if (!fullName) return;
+
+              const answers = buildFormAnswers(headers, row);
+              if (!answers.length) return;
+
+              responseCount++;
+
+              const job = findMatchingJob(fullName, month);
+
+              if (!job) {
+                unmatched.push(`${fullName} (${month})`);
+                return;
+              }
+
+              job.formResponses = answers;
+              job.formResponseMonth = month;
+              job.formResponseSheet = sheetName;
+              job.formResponseRow = rowOffset + 2;
+              job.formResponseFile = file.name;
+              job.formResponseImportedAt = Date.now();
+              job.updatedAt = Date.now();
+              matchedCount++;
+            });
+          });
+
+          if (responseCount === 0) {
+            alert("No Google Form responses were found in this Excel file.");
+            return;
+          }
+
+          saveJobs();
+          renderJobs();
+
+          importInfo.classList.remove("hidden");
+          importInfoText.textContent =
+            `${file.name} — ${matchedCount} form responses matched to layout jobs. ` +
+            `${unmatched.length} could not be matched automatically.`;
+
+          showToast(
+            `Form import complete: ${matchedCount} matched`
+          );
+
+          if (unmatched.length > 0) {
+            console.log("Unmatched Form Responses:", unmatched);
+          }
+
+        } catch (error) {
+          console.error(error);
+          alert("Something went wrong while reading the Form Responses Excel file.");
+        }
+      }
+    );
+
+    // =====================================================
     // MONTH SORTING
     // =====================================================
 
@@ -1852,44 +2038,29 @@
     }
 
 
+    function sumPhotobooks(list) {
+      return list.reduce(
+        (sum, job) => sum + (Number(job.quantity) || 0),
+        0
+      );
+    }
+
+
     function updateStats() {
+      const monthJobs = getMonthJobs();
+      const pendingJobs = monthJobs.filter(job => job.status === "pending");
+      const ongoingJobs = monthJobs.filter(job => job.status === "ongoing");
+      const doneJobs = monthJobs.filter(job => job.status === "done");
 
-      const monthJobs =
-        getMonthJobs();
+      totalJobsStat.textContent = monthJobs.length;
+      totalPhotobooksStat.textContent = sumPhotobooks(monthJobs);
+      pendingStat.textContent = sumPhotobooks(pendingJobs);
+      ongoingStat.textContent = sumPhotobooks(ongoingJobs);
+      doneStat.textContent = sumPhotobooks(doneJobs);
 
-      const quantityTotal = list =>
-        list.reduce(
-          (total, job) =>
-            total + Math.max(0, Number(job.quantity) || 0),
-          0
-        );
-
-      totalJobsStat.textContent =
-        monthJobs.length;
-
-      totalPhotobooksStat.textContent =
-        quantityTotal(monthJobs);
-
-      pendingStat.textContent =
-        quantityTotal(
-          monthJobs.filter(
-            job => job.status === "pending"
-          )
-        );
-
-      ongoingStat.textContent =
-        quantityTotal(
-          monthJobs.filter(
-            job => job.status === "ongoing"
-          )
-        );
-
-      doneStat.textContent =
-        quantityTotal(
-          monthJobs.filter(
-            job => job.status === "done"
-          )
-        );
+      pendingJobsLabel.textContent = `${pendingJobs.length} ${pendingJobs.length === 1 ? "job" : "jobs"}`;
+      ongoingJobsLabel.textContent = `${ongoingJobs.length} ${ongoingJobs.length === 1 ? "job" : "jobs"}`;
+      doneJobsLabel.textContent = `${doneJobs.length} ${doneJobs.length === 1 ? "job" : "jobs"}`;
     }
 
 
@@ -1947,6 +2118,37 @@
     }
 
 
+    function getFormResponsesHTML(job) {
+      if (!Array.isArray(job.formResponses) || job.formResponses.length === 0) {
+        return "";
+      }
+
+      const items = job.formResponses.map(item => `
+        <div class="border-b border-slate-100 last:border-b-0 py-3">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-wide leading-relaxed">
+            ${escapeHTML(item.question)}
+          </p>
+          <p class="text-sm text-slate-700 font-semibold mt-1 whitespace-pre-wrap break-words">
+            ${escapeHTML(item.answer)}
+          </p>
+        </div>
+      `).join("");
+
+      return `
+        <details class="mt-4 border border-green-200 bg-green-50/50 rounded-xl overflow-hidden">
+          <summary class="cursor-pointer select-none px-4 py-3 font-black text-xs text-green-700 flex items-center justify-between gap-3">
+            <span>📋 View Form Answers</span>
+            <span class="bg-white border border-green-200 px-2 py-1 rounded-full text-[10px]">
+              ${job.formResponses.length} answers
+            </span>
+          </summary>
+          <div class="bg-white border-t border-green-100 px-4 py-1 max-h-[520px] overflow-y-auto">
+            ${items}
+          </div>
+        </details>
+      `;
+    }
+
     // =====================================================
     // RENDER
     // =====================================================
@@ -1989,6 +2191,7 @@
               ${job.layoutType}
               ${job.originalLayoutType || ""}
               ${job.notes || ""}
+              ${(job.formResponses || []).map(item => `${item.question} ${item.answer}`).join(" ")}
             `.toLowerCase();
 
 
@@ -2304,6 +2507,8 @@
                 ${sourceBadge}
 
               </div>
+
+              ${getFormResponsesHTML(job)}
 
 
               ${
@@ -2954,3 +3159,5 @@
 
 </body>
 </html>
+
+
