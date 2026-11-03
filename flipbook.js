@@ -1,2350 +1,297 @@
+(function () {
+  let pageFlip = null;
 
+  const $ = (id) => document.getElementById(id);
 
+  function getOrientation(size = {}) {
+    const width = Number(size.width) || 10;
+    const height = Number(size.height) || 7;
 
+    if (Math.abs(width - height) < 0.01) return "square";
+    return width > height ? "landscape" : "portrait";
+  }
 
+  function getDimensions(size = {}) {
+    const width = Number(size.width) || 10;
+    const height = Number(size.height) || 7;
 
+    const maxSide = 420;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>R&Y Photobook Planner | R&Y Printing Lab</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    :root {
-      --mint: #63d9c9;
-      --mint-dark: #35bfae;
-      --green: #8bcb78;
-      --green-dark: #64ad54;
-      --dark: #111827;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background:
-        radial-gradient(circle at top left, rgba(99,217,201,.16), transparent 30%),
-        radial-gradient(circle at top right, rgba(139,203,120,.13), transparent 25%),
-        #f6faf8;
-      color: var(--dark);
-    }
-
-    input:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--mint-dark);
-      box-shadow: 0 0 0 3px rgba(99,217,201,.18);
-    }
-
-    .brand-gradient {
-      background: linear-gradient(
-        135deg,
-        var(--mint),
-        var(--green)
-      );
-    }
-
-    .brand-text {
-      background: linear-gradient(
-        90deg,
-        #23aa9b,
-        #63a953
-      );
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .mode-button {
-      transition: .2s ease;
-    }
-
-    .mode-active {
-      background: var(--dark);
-      color: white;
-      box-shadow: 0 5px 14px rgba(17,24,39,.15);
-    }
-
-    .page-card {
-      transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        border-color .2s ease;
-    }
-
-    .page-card:hover {
-      transform: translateY(-2px);
-      border-color: #9de4da;
-      box-shadow: 0 10px 25px rgba(17,24,39,.07);
-    }
-
-    .layout-preview {
-      width: 92px;
-      aspect-ratio: var(--book-ratio, 1 / 1);
-      height: auto;
-      padding: 5px;
-      border-radius: 10px;
-      border: 1px solid #dbe7e2;
-      background: #f7fbf9;
-      display: grid;
-      gap: 3px;
-      flex-shrink: 0;
-    }
-
-    .photo-box {
-      background: linear-gradient(
-        135deg,
-        rgba(99,217,201,.75),
-        rgba(139,203,120,.75)
-      );
-      border-radius: 3px;
-      min-width: 0;
-      min-height: 0;
-    }
-
-    .layout-1 {
-      grid-template-columns: 1fr;
-    }
-
-    .layout-2 {
-      grid-template-columns: repeat(2,1fr);
-    }
-
-    .layout-3 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: 1.4fr 1fr;
-    }
-
-    .layout-3 .photo-box:first-child {
-      grid-column: 1 / 3;
-    }
-
-    .layout-4 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-5 {
-      grid-template-columns: repeat(3,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-5 .photo-box:first-child {
-      grid-row: 1 / 3;
-    }
-
-    .layout-6 {
-      grid-template-columns: repeat(3,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-7 {
-      grid-template-columns: repeat(4,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-dense {
-      grid-template-columns: repeat(4,1fr);
-      grid-auto-rows: 1fr;
-    }
-
-    /* Size-aware visual layouts */
-    .layout-preview.book-square { --book-ratio: 1 / 1; }
-    .layout-preview.book-landscape { --book-ratio: 10 / 7; }
-    .layout-preview.book-portrait { --book-ratio: 7 / 10; }
-
-    .layout-preview.book-portrait.layout-2 {
-      grid-template-columns: 1fr;
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-2 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: 1fr;
-    }
-
-    .layout-preview.book-portrait.layout-3 {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1.45fr repeat(2,1fr);
-    }
-
-    .layout-preview.book-portrait.layout-3 .photo-box:first-child {
-      grid-column: auto;
-    }
-
-    .layout-preview.book-landscape.layout-3 {
-      grid-template-columns: 1.5fr 1fr;
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-3 .photo-box:first-child {
-      grid-column: auto;
-      grid-row: 1 / 3;
-    }
-
-    .layout-preview.book-portrait.layout-4 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-4 {
-      grid-template-columns: repeat(4,1fr);
-      grid-template-rows: 1fr;
-    }
-
-    .layout-preview.book-portrait.layout-5 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(3,1fr);
-    }
-
-    .layout-preview.book-portrait.layout-5 .photo-box:first-child {
-      grid-row: 1 / 3;
-    }
-
-    .layout-preview.book-landscape.layout-5 {
-      grid-template-columns: 1.5fr repeat(2,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-5 .photo-box:first-child {
-      grid-row: 1 / 3;
-    }
-
-    .layout-preview.book-portrait.layout-6 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(3,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-6 {
-      grid-template-columns: repeat(3,1fr);
-      grid-template-rows: repeat(2,1fr);
-    }
-
-    .layout-preview.book-portrait.layout-dense {
-      grid-template-columns: repeat(2,1fr);
-    }
-
-    .layout-preview.book-landscape.layout-dense {
-      grid-template-columns: repeat(4,1fr);
-    }
-
-
-    .inspiration-card {
-      transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        border-color .2s ease;
-    }
-
-    .inspiration-card:hover {
-      transform: translateY(-3px);
-      border-color: #8edfd4;
-      box-shadow: 0 12px 28px rgba(17,24,39,.08);
-    }
-
-    .quick-theme {
-      padding: 8px 12px;
-      background: #f1f5f3;
-      border-radius: 9px;
-      font-size: 12px;
-      font-weight: 600;
-      transition: .2s ease;
-    }
-
-    .quick-theme:hover {
-      background: #dff7f2;
-      color: #168c7f;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background: #10b981;
-      border-radius: 999px;
-      box-shadow: 0 0 0 4px rgba(16,185,129,.12);
-    }
-
-    .result-flash {
-      animation: resultFlash .8s ease;
-    }
-
-    @keyframes resultFlash {
-      0% {
-        box-shadow: 0 0 0 0 rgba(99,217,201,.55);
-      }
-
-      50% {
-        box-shadow: 0 0 0 5px rgba(99,217,201,.18);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(99,217,201,0);
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        background:
-          radial-gradient(circle at top, rgba(99,217,201,.14), transparent 22%),
-          #f6faf8;
-      }
-
-      .mobile-logo {
-        width: 46px !important;
-        height: 46px !important;
-      }
-
-      .layout-preview {
-        width: 78px;
-        height: auto;
-      }
-
-      .page-card {
-        padding: 14px;
-      }
-
-      button,
-      input,
-      select {
-        min-height: 44px;
-      }
-    }
-
-    @media print {
-      body {
-        background: white !important;
-      }
-
-      .no-print {
-        display: none !important;
-      }
-
-      .print-area {
-        border: none !important;
-        box-shadow: none !important;
-      }
-
-      .page-card {
-        break-inside: avoid;
-      }
-    }
-  </style>
-  <link rel="stylesheet" href="flipbook.css">
-</head>
-
-<body class="min-h-screen">
-<!-- HEADER -->
-  <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-
-      <div class="flex items-center gap-3 min-w-0">
-
-        <img
-          src="ryn.png"
-          alt="R&Y Printing Lab"
-          class="mobile-logo w-14 h-14 rounded-full object-cover flex-shrink-0"
-        >
-
-        <div class="min-w-0">
-
-          <h1 class="font-black text-sm sm:text-xl truncate">
-            R&amp;Y Photobook Planner
-          </h1>
-
-          <p class="text-[10px] sm:text-xs text-slate-500 truncate">
-            Smart Photo Planning by R&amp;Y Printing Lab
-          </p>
-
-        </div>
-
-      </div>
-
-      <div class="no-print flex items-center gap-2">
-        <a
-          href="index.html"
-          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap"
-        >
-          ← <span class="hidden sm:inline">Back to Dashboard</span><span class="sm:hidden">Dashboard</span>
-        </a>
-
-        <button
-          type="button"
-          onclick="window.print()"
-          class="bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap"
-        >
-          Print
-          <span class="hidden sm:inline">Plan</span>
-        </button>
-      </div>
-
-    </div>
-
-  </header>
-
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10">
-
-    <!-- HERO -->
-    <section class="mb-8 sm:mb-10">
-
-      <div class="flex items-center gap-2 mb-3">
-
-        <span class="brand-gradient w-2.5 h-2.5 rounded-full"></span>
-
-        <span class="text-[11px] font-black tracking-[.18em] text-slate-500">
-          R&amp;Y PRINTING LAB
-        </span>
-
-      </div>
-
-      <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight max-w-4xl leading-[1.05]">
-
-        Plan your photos.
-
-        <span class="brand-text">
-          Design your memories.
-        </span>
-
-      </h2>
-
-      <p class="text-sm sm:text-base text-slate-500 mt-4 max-w-2xl leading-relaxed">
-        Balance every photobook page, choose cleaner layouts and find design inspiration in one simple workspace.
-      </p>
-
-    </section>
-
-
-    <!-- ACTIVE JOB QUEUE -->
-    <section class="no-print bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">Layout Jobs</p>
-          <h3 class="font-black text-lg mt-1">Basic Layout Queue</h3>
-          <p class="text-xs text-slate-500 mt-1">Pending and ongoing Basic Layout jobs from Layout Jobs.</p>
-        </div>
-        <div class="flex gap-2">
-          <button type="button" id="queuePendingBtn" class="queue-filter border border-slate-200 px-3 py-2 rounded-xl text-xs font-black">Pending</button>
-          <button type="button" id="queueOngoingBtn" class="queue-filter border border-slate-200 px-3 py-2 rounded-xl text-xs font-black">Ongoing</button>
-          <button type="button" id="queueAllBtn" class="queue-filter border border-slate-200 px-3 py-2 rounded-xl text-xs font-black">All</button>
-        </div>
-      </div>
-      <div id="activeJobBanner" class="hidden mt-4 bg-[#f7faf9] border border-slate-200 rounded-xl p-3"></div>
-      <div id="plannerJobQueue" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4"></div>
-      <p id="queueEmpty" class="hidden text-sm text-slate-400 text-center py-6">No active jobs for this planner.</p>
-    </section>
-
-
-    <!-- PHOTO CALCULATOR -->
-    <div class="grid lg:grid-cols-[380px_1fr] gap-5 sm:gap-6 items-start">
-
-      <!-- LEFT PANEL -->
-      <section class="no-print bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6 lg:sticky lg:top-24">
-
-        <div>
-
-          <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
-            Step 1
-          </p>
-
-          <h3 class="font-black text-xl mt-1">
-            Photo Calculator
-          </h3>
-
-          <p class="text-sm text-slate-500 mt-1">
-            Enter the client's photobook details.
-          </p>
-
-        </div>
-
-
-        <div class="space-y-5 mt-6">
-
-          <div>
-
-            <label class="block text-sm font-bold mb-2">
-              Total Pictures
-            </label>
-
-            <input
-              id="totalPictures"
-              type="number"
-              min="1"
-              inputmode="numeric"
-              value="120"
-              class="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg font-black bg-white"
-            >
-
-            <p class="text-xs text-slate-400 mt-2">
-              Total photos provided by the client.
-            </p>
-
-          </div>
-
-
-          <div>
-
-            <label class="block text-sm font-bold mb-2">
-              Usable Pages
-            </label>
-
-            <input
-              id="usablePages"
-              type="number"
-              min="1"
-              inputmode="numeric"
-              value="18"
-              class="w-full border border-slate-300 rounded-xl px-4 py-3 text-lg font-black bg-white"
-            >
-
-            <p class="text-xs text-slate-400 mt-2">
-              Pages available for photo layouts.
-            </p>
-
-          </div>
-
-          <div>
-            <label class="block text-sm font-bold mb-2">Photobook Size</label>
-            <select id="photobookSize" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white font-bold">
-              <option value="6x6">6 × 6 inches</option>
-              <option value="8x7">8 × 7 inches</option>
-              <option value="7x10">7 × 10 inches</option>
-              <option value="10x7">10 × 7 inches</option>
-              <option value="custom">Custom Size</option>
-            </select>
-            <div id="customSizeFields" class="hidden grid grid-cols-2 gap-3 mt-3">
-              <input id="customWidth" type="number" min="1" step="0.1" placeholder="Width (in)" class="w-full border border-slate-300 rounded-xl px-4 py-3 font-bold bg-white">
-              <input id="customHeight" type="number" min="1" step="0.1" placeholder="Height (in)" class="w-full border border-slate-300 rounded-xl px-4 py-3 font-bold bg-white">
-            </div>
-            <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-3 mt-3">
-              <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">Page Shape</p>
-              <p id="sizeInfoText" class="text-xs text-slate-600 mt-1 font-bold">Square • 6 × 6 inches</p>
-            </div>
-          </div>
-
-        </div>
-
-
-        <!-- MODE -->
-        <div class="mt-7">
-
-          <p class="text-sm font-bold mb-3">
-            Distribution Mode
-          </p>
-
-          <div class="bg-slate-100 p-1.5 rounded-xl grid grid-cols-2 gap-1">
-
-            <button
-              type="button"
-              id="balancedButton"
-              onclick="setMode('balanced')"
-              class="mode-button mode-active rounded-lg py-2.5 px-2 text-xs sm:text-sm font-bold"
-            >
-              Balanced
-            </button>
-
-            <button
-              type="button"
-              id="preferredButton"
-              onclick="setMode('preferred')"
-              class="mode-button rounded-lg py-2.5 px-2 text-xs sm:text-sm font-bold text-slate-600"
-            >
-              Preferred
-            </button>
-
-          </div>
-
-          <div
-            id="modeDescription"
-            class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-3 mt-3 text-xs text-slate-500 leading-relaxed"
-          >
-            Photos are distributed as evenly as mathematically possible.
-          </div>
-
-        </div>
-
-
-        <!-- STATS -->
-        <div class="grid grid-cols-2 gap-3 mt-6">
-
-          <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-4">
-
-            <p class="text-xs text-slate-500">
-              Average
-            </p>
-
-            <p id="averageStat" class="text-xl font-black mt-1">
-              6.67
-            </p>
-
-            <p class="text-[11px] text-slate-400">
-              photos / page
-            </p>
-
-          </div>
-
-
-          <div class="bg-[#f5faf8] border border-[#dcebe6] rounded-xl p-4">
-
-            <p class="text-xs text-slate-500">
-              Pages
-            </p>
-
-            <p id="pageStat" class="text-xl font-black mt-1">
-              18
-            </p>
-
-            <p class="text-[11px] text-slate-400">
-              usable pages
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- RESULTS -->
-      <section class="print-area bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-
-        <div class="p-5 sm:p-6 border-b border-slate-200">
-
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-
-            <div>
-
-              <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
-                Distribution Plan
-              </p>
-
-              <h3
-                id="resultTitle"
-                class="text-xl sm:text-2xl font-black mt-1"
-              >
-                120 Photos • 18 Pages
-              </h3>
-
-            </div>
-
-            <span
-              id="modeBadge"
-              class="self-start bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-full"
-            >
-              Balanced
-            </span>
-
-          </div>
-
-
-          <div class="mt-5 bg-[#eafaf6] border border-[#bceade] rounded-xl p-4">
-
-            <p class="text-[11px] font-black text-teal-700 uppercase tracking-wide mb-1">
-              Summary
-            </p>
-
-            <p
-              id="summaryText"
-              class="text-sm sm:text-base text-slate-700 leading-relaxed"
-            ></p>
-
-          </div>
-
-          <div
-            id="warningBox"
-            class="hidden mt-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm"
-          ></div>
-
-        </div>
-
-
-        <div class="px-5 sm:px-6 py-4 bg-[#f8fbfa] border-b border-slate-200 flex items-center justify-between gap-3">
-
-          <div>
-
-            <h4 class="font-black text-sm sm:text-base">
-              Page-by-Page Plan
-            </h4>
-
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
-              Automatic layout suggestions
-            </p>
-
-          </div>
-
-          <span
-            id="verification"
-            class="text-[11px] sm:text-xs font-black text-emerald-600 whitespace-nowrap"
-          ></span>
-
-        </div>
-
-        <div
-          id="pageList"
-          class="p-3 sm:p-6 grid md:grid-cols-2 gap-3"
-        ></div>
-
-      </section>
-
-    </div>
-
-
-    <!-- DESIGN INSPIRATION -->
-    <section
-      id="inspiration"
-      class="no-print mt-14 sm:mt-20 scroll-mt-24"
-    >
-
-      <div class="mb-6">
-
-        <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
-          Step 2
-        </p>
-
-        <h2 class="text-2xl sm:text-3xl font-black mt-1">
-          Design Inspiration
-        </h2>
-
-        <p class="text-sm sm:text-base text-slate-500 mt-2 max-w-2xl leading-relaxed">
-          Enter the client's theme and instantly create useful Pinterest searches for covers and page designs.
-        </p>
-
-      </div>
-
-
-      <div class="grid lg:grid-cols-[380px_1fr] gap-5 sm:gap-6 items-start">
-
-        <!-- INSPIRATION CONTROLS -->
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6">
-
-          <div class="space-y-5">
-
-            <div>
-
-              <label class="block text-sm font-bold mb-2">
-                Photobook Theme
-              </label>
-
-              <input
-                id="themeInput"
-                type="text"
-                value="Wedding"
-                placeholder="Wedding, Birthday, Travel..."
-                class="w-full border border-slate-300 rounded-xl px-4 py-3 font-semibold"
-              >
-
-            </div>
-
-
-            <div>
-
-              <label class="block text-sm font-bold mb-2">
-                Style
-              </label>
-
-              <select
-                id="styleInput"
-                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white"
-              >
-                <option>Elegant</option>
-                <option>Minimalist</option>
-                <option>Modern</option>
-                <option>Luxury</option>
-                <option>Romantic</option>
-                <option>Vintage</option>
-                <option>Rustic</option>
-                <option>Classic</option>
-                <option>Playful</option>
-                <option>Editorial</option>
-              </select>
-
-            </div>
-
-
-            <div>
-
-              <label class="block text-sm font-bold mb-2">
-                Main Color
-              </label>
-
-              <select
-                id="colorInput"
-                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white"
-              >
-                <option>Black</option>
-                <option>White</option>
-                <option>Black and White</option>
-                <option>Beige</option>
-                <option>Brown</option>
-                <option>Green</option>
-                <option>Mint Green</option>
-                <option>Blue</option>
-                <option>Sky Blue</option>
-                <option>Pink</option>
-                <option>Red</option>
-                <option>Purple</option>
-                <option>Orange</option>
-                <option>Pastel</option>
-                <option>Neutral</option>
-              </select>
-
-            </div>
-
-
-            <!-- LIVE STATUS - REPLACES GENERATE BUTTON -->
-            <div class="bg-[#eafaf6] border border-[#bceade] rounded-xl p-3 flex items-center gap-3">
-
-              <span class="live-dot flex-shrink-0"></span>
-
-              <div>
-                <p class="text-xs font-black text-teal-700">
-                  Live Preview
-                </p>
-
-                <p class="text-[11px] text-slate-500 mt-0.5">
-                  Design suggestions update automatically.
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- QUICK THEMES -->
-          <div class="mt-6 pt-6 border-t border-slate-200">
-
-            <p class="text-[11px] font-black text-slate-400 uppercase tracking-wider">
-              Quick Themes
-            </p>
-
-            <div class="flex flex-wrap gap-2 mt-3">
-
-              <button
-                type="button"
-                onclick="quickTheme('Wedding')"
-                class="quick-theme"
-              >
-                Wedding
-              </button>
-
-              <button
-                type="button"
-                onclick="quickTheme('Birthday')"
-                class="quick-theme"
-              >
-                Birthday
-              </button>
-
-              <button
-                type="button"
-                onclick="quickTheme('Travel')"
-                class="quick-theme"
-              >
-                Travel
-              </button>
-
-              <button
-                type="button"
-                onclick="quickTheme('Baby')"
-                class="quick-theme"
-              >
-                Baby
-              </button>
-
-              <button
-                type="button"
-                onclick="quickTheme('Graduation')"
-                class="quick-theme"
-              >
-                Graduation
-              </button>
-
-              <button
-                type="button"
-                onclick="quickTheme('Family')"
-                class="quick-theme"
-              >
-                Family
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- INSPIRATION RESULTS -->
-        <div
-          id="inspirationResults"
-          class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden scroll-mt-24"
-        >
-
-          <div class="p-5 sm:p-6 border-b border-slate-200">
-
-            <p class="text-xs font-black text-teal-600 uppercase tracking-wider">
-              Design Direction
-            </p>
-
-            <h3
-              id="inspirationTitle"
-              class="text-xl sm:text-2xl font-black mt-1"
-            ></h3>
-
-            <p
-              id="inspirationDescription"
-              class="text-sm text-slate-500 mt-2 leading-relaxed"
-            ></p>
-
-          </div>
-
-
-          <div
-            id="inspirationCards"
-            class="p-4 sm:p-6 grid sm:grid-cols-2 xl:grid-cols-3 gap-4"
-          ></div>
-
-
-          <div class="p-5 sm:p-6 border-t border-slate-200 bg-[#f8fbfa]">
-
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-
-              <div>
-
-                <p class="text-sm font-black">
-                  Find real visual references
-                </p>
-
-                <p
-                  id="searchPreview"
-                  class="text-xs text-slate-500 mt-1 break-words"
-                ></p>
-
-              </div>
-
-              <button
-                type="button"
-                onclick="searchPinterest()"
-                class="bg-[#bd081c] hover:bg-[#a50718] text-white px-5 py-3 rounded-xl text-sm font-black whitespace-nowrap"
-              >
-                Search Pinterest
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  <!-- ANIMATED FLIPBOOK PREVIEW -->
-    <section class="ry-flipbook-section no-print" id="flipbookPreviewSection">
-      <div class="ry-flipbook-head">
-        <div>
-          <p class="ry-flipbook-kicker">Animated Photobook</p>
-          <h3 class="ry-flipbook-title">Flipbook Preview</h3>
-          <p class="ry-flipbook-sub">This preview uses the calculator's exact page distribution. Drag/click the page or use Previous / Next.</p>
-        </div>
-        <span class="text-[10px] font-black text-teal-700 bg-teal-50 border border-teal-100 rounded-full px-3 py-2">CALCULATOR SYNC</span>
-      </div>
-      <div class="ry-flipbook-stage">
-        <div id="ryFlipbook" class="ry-flipbook-book">
-          <div class="ry-flipbook-empty">Compute a valid layout to generate the flipbook preview.</div>
-        </div>
-      </div>
-      <div class="ry-flipbook-controls">
-        <button type="button" class="ry-flipbook-btn" onclick="RYFlipbook.prev()">← Previous</button>
-        <span id="ryFlipbookCounter" class="ry-flipbook-counter">No preview</span>
-        <button type="button" class="ry-flipbook-btn" onclick="RYFlipbook.next()">Next →</button>
-      </div>
-    </section>
-
-  </main>
-
-
-  <!-- FOOTER -->
-  <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-10 text-center">
-
-    <img
-      src="ryn.png"
-      alt="R&Y Printing Lab"
-      class="w-16 h-16 mx-auto rounded-full mb-3"
-    >
-
-    <p class="font-black text-sm">
-      R&amp;Y Printing Lab
-    </p>
-
-    <p class="text-xs text-slate-400 mt-1">
-      Homebased Printing Business
-    </p>
-
-  </footer>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-  <script src="flipbook.js"></script>
-  <script>
-    // =====================================================
-    // PHOTO CALCULATOR
-    // =====================================================
-
-    let currentMode = "balanced";
-
-    const totalPicturesInput =
-      document.getElementById("totalPictures");
-
-    const usablePagesInput =
-      document.getElementById("usablePages");
-
-    const photobookSizeInput = document.getElementById("photobookSize");
-    const customSizeFields = document.getElementById("customSizeFields");
-    const customWidthInput = document.getElementById("customWidth");
-    const customHeightInput = document.getElementById("customHeight");
-    const sizeInfoText = document.getElementById("sizeInfoText");
-
-    const pageList =
-      document.getElementById("pageList");
-
-    const summaryText =
-      document.getElementById("summaryText");
-
-    const warningBox =
-      document.getElementById("warningBox");
-
-    const resultTitle =
-      document.getElementById("resultTitle");
-
-    const averageStat =
-      document.getElementById("averageStat");
-
-    const pageStat =
-      document.getElementById("pageStat");
-
-    const balancedButton =
-      document.getElementById("balancedButton");
-
-    const preferredButton =
-      document.getElementById("preferredButton");
-
-    const modeDescription =
-      document.getElementById("modeDescription");
-
-    const modeBadge =
-      document.getElementById("modeBadge");
-
-    const verification =
-      document.getElementById("verification");
-
-
-    function setMode(mode) {
-
-      currentMode = mode;
-
-      balancedButton.classList.remove(
-        "mode-active",
-        "text-slate-600"
-      );
-
-      preferredButton.classList.remove(
-        "mode-active",
-        "text-slate-600"
-      );
-
-      if (mode === "balanced") {
-
-        balancedButton.classList.add(
-          "mode-active"
-        );
-
-        preferredButton.classList.add(
-          "text-slate-600"
-        );
-
-        modeDescription.textContent =
-          "Photos are distributed as evenly as mathematically possible.";
-
-        modeBadge.textContent =
-          "Balanced";
-
-      } else {
-
-        preferredButton.classList.add(
-          "mode-active"
-        );
-
-        balancedButton.classList.add(
-          "text-slate-600"
-        );
-
-        modeDescription.textContent =
-          "Prioritizes cleaner photobook layouts such as 1, 2, 4 and 6 photos.";
-
-        modeBadge.textContent =
-          "Preferred";
-      }
-
-      calculate();
-    }
-
-
-    function getBalancedDistribution(
-      total,
-      pages
-    ) {
-
-      const base =
-        Math.floor(total / pages);
-
-      const remainder =
-        total % pages;
-
-      const result = [];
-
-      for (
-        let i = 0;
-        i < pages;
-        i++
-      ) {
-
-        result.push(
-          i < remainder
-            ? base + 1
-            : base
-        );
-      }
-
-      return result;
-    }
-
-
-    function getPreferredDistribution(
-      total,
-      pages
-    ) {
-
-      if (total < pages) {
-
-        return getBalancedDistribution(
-          total,
-          pages
-        );
-      }
-
-      const preferred =
-        [1, 2, 4, 6];
-
-      const average =
-        total / pages;
-
-      let best = null;
-      let bestScore = Infinity;
-
-
-      function search(
-        index,
-        pagesLeft,
-        photosLeft,
-        counts
-      ) {
-
-        if (
-          index === preferred.length
-        ) {
-
-          if (
-            pagesLeft === 0 &&
-            photosLeft === 0
-          ) {
-
-            let distribution = [];
-
-            counts.forEach(
-              (count, i) => {
-
-                for (
-                  let x = 0;
-                  x < count;
-                  x++
-                ) {
-
-                  distribution.push(
-                    preferred[i]
-                  );
-                }
-
-              }
-            );
-
-
-            const variance =
-              distribution.reduce(
-                (sum, value) => {
-
-                  return (
-                    sum +
-                    Math.pow(
-                      value - average,
-                      2
-                    )
-                  );
-
-                },
-                0
-              );
-
-
-            const penalty =
-              distribution.filter(
-                x => x === 1
-              ).length * 2 +
-
-              distribution.filter(
-                x => x === 2
-              ).length * .5;
-
-
-            const score =
-              variance + penalty;
-
-
-            if (
-              score < bestScore
-            ) {
-
-              bestScore = score;
-              best = distribution;
-            }
-
-          }
-
-          return;
-        }
-
-
-        const value =
-          preferred[index];
-
-
-        for (
-          let count = 0;
-          count <= pagesLeft;
-          count++
-        ) {
-
-          const used =
-            count * value;
-
-          if (
-            used > photosLeft
-          ) {
-            break;
-          }
-
-
-          counts[index] =
-            count;
-
-
-          search(
-            index + 1,
-            pagesLeft - count,
-            photosLeft - used,
-            counts
-          );
-        }
-      }
-
-
-      search(
-        0,
-        pages,
-        total,
-        [0,0,0,0]
-      );
-
-
-      if (!best) {
-
-        return getBalancedDistribution(
-          total,
-          pages
-        );
-      }
-
-
-      best.sort(
-        (a,b) => b - a
-      );
-
-      return best;
-    }
-
-
-    function getPhotobookSizeInfo() {
-      let width = 6, height = 6;
-      if (photobookSizeInput.value === "custom") {
-        width = Number(customWidthInput.value) || 0;
-        height = Number(customHeightInput.value) || 0;
-      } else {
-        [width, height] = photobookSizeInput.value.split("x").map(Number);
-      }
-      const orientation = !width || !height ? "Custom" :
-        Math.abs(width-height) < 0.01 ? "Square" :
-        width > height ? "Landscape" : "Portrait";
-      const label = width && height ? `${width} × ${height} inches` : "Enter custom size";
-      return {width,height,orientation,label};
-    }
-
-    function updatePhotobookSizeUI() {
-      customSizeFields.classList.toggle("hidden", photobookSizeInput.value !== "custom");
-      const size = getPhotobookSizeInfo();
-      sizeInfoText.textContent = `${size.orientation} • ${size.label}`;
-      calculate();
-    }
-
-    function setPhotobookSizeFromJob(bookSize) {
-      const match = String(bookSize || "").match(/(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i);
-      if (!match) return;
-      const w=Number(match[1]), h=Number(match[2]), key=`${w}x${h}`;
-      if (["6x6","8x7","7x10","10x7"].includes(key)) {
-        photobookSizeInput.value=key;
-      } else {
-        photobookSizeInput.value="custom";
-        customWidthInput.value=w;
-        customHeightInput.value=h;
-      }
-      updatePhotobookSizeUI();
-    }
-
-    function getLayoutInfo(count) {
-      const o=getPhotobookSizeInfo().orientation;
-      if(count===0) return ["Empty Page","layout-1"];
-      if(count===1) return [o==="Portrait"?"Full Page Portrait":o==="Landscape"?"Full Page Landscape":"Full Bleed","layout-1"];
-      if(count===2) return [o==="Portrait"?"Top + Bottom":o==="Landscape"?"Side-by-Side":"Balanced Pair","layout-2"];
-      if(count===3) return ["Hero + 2 Small","layout-3"];
-      if(count===4) return [o==="Portrait"?"Portrait 2×2 Grid":o==="Landscape"?"Wide 2×2 Grid":"2×2 Grid","layout-4"];
-      if(count===5) return ["Center Focus","layout-5"];
-      if(count===6) return [o==="Portrait"?"2×3 Portrait Grid":o==="Landscape"?"3×2 Wide Grid":"3×2 Grid","layout-6"];
-      if(count===7) return ["Polaroid Collage","layout-7"];
-      return ["Mosaic Collage","layout-dense"];
-    }
-
-    function applyBookRatioToPreview(preview) {
-      const size = getPhotobookSizeInfo();
-
-      preview.classList.remove("book-square", "book-landscape", "book-portrait");
-
-      if (size.orientation === "Portrait") {
-        preview.classList.add("book-portrait");
-      } else if (size.orientation === "Landscape") {
-        preview.classList.add("book-landscape");
-      } else {
-        preview.classList.add("book-square");
-      }
-
-      if (size.width > 0 && size.height > 0) {
-        preview.style.aspectRatio = `${size.width} / ${size.height}`;
-      }
-    }
-
-
-    function createPreview(
-      count,
-      layoutClass
-    ) {
-
-      const preview =
-        document.createElement("div");
-
-      preview.className =
-        "layout-preview " +
-        layoutClass;
-
-      applyBookRatioToPreview(preview);
-
-
-      const boxCount =
-        count >= 8
-          ? Math.min(count,12)
-          : Math.max(count,1);
-
-
-      for (
-        let i = 0;
-        i < boxCount;
-        i++
-      ) {
-
-        const box =
-          document.createElement("div");
-
-        box.className =
-          "photo-box";
-
-        if (count === 0) {
-
-          box.style.background =
-            "#edf3f0";
-        }
-
-        preview.appendChild(box);
-      }
-
-      return preview;
-    }
-
-
-    function buildSummary(
-      distribution,
-      total,
-      pages
-    ) {
-
-      const counts = {};
-
-      distribution.forEach(
-        count => {
-
-          counts[count] =
-            (counts[count] || 0) + 1;
-        }
-      );
-
-
-      if (total < pages) {
-
-        return (
-          `${total} pages will have 1 photo and ` +
-          `${pages-total} pages will remain empty.`
-        );
-      }
-
-
-      const parts =
-        Object.keys(counts)
-
-          .map(Number)
-
-          .sort(
-            (a,b) => b-a
-          )
-
-          .map(
-            photoCount => {
-
-              const pageCount =
-                counts[photoCount];
-
-              return (
-                `${pageCount} ` +
-                `${pageCount === 1 ? "page" : "pages"} × ` +
-                `${photoCount} ` +
-                `${photoCount === 1 ? "photo" : "photos"}`
-              );
-            }
-          );
-
-
-      return (
-        `${total} photos across ${pages} pages: ` +
-        parts.join(" + ") +
-        "."
-      );
-    }
-
-
-    function renderPages(
-      distribution
-    ) {
-
-      pageList.innerHTML = "";
-
-      distribution.forEach(
-        (count,index) => {
-
-          const [
-            layoutName,
-            layoutClass
-          ] = getLayoutInfo(count);
-
-
-          const card =
-            document.createElement("div");
-
-          card.className =
-            "page-card border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3 bg-white";
-
-
-          const text =
-            document.createElement("div");
-
-          text.className =
-            "min-w-0";
-
-          text.innerHTML = `
-
-            <p class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">
-              Page ${index+1}
-            </p>
-
-            <p class="text-base sm:text-lg font-black mt-1">
-              ${count}
-              ${count === 1 ? "Photo" : "Photos"}
-            </p>
-
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1 leading-relaxed">
-
-              <span class="font-bold text-slate-700">
-                Suggested:
-              </span>
-
-              ${layoutName}
-
-            </p>
-          `;
-
-
-          card.appendChild(text);
-
-          card.appendChild(
-            createPreview(
-              count,
-              layoutClass
-            )
-          );
-
-          pageList.appendChild(
-            card
-          );
-        }
-      );
-    }
-
-
-    function getNormalCapacity() {
-      const size = getPhotobookSizeInfo();
-      const orientation = size.orientation;
-
-      // "Comfortable" means a clean everyday layout.
-      // "max" is the highest density this planner will recommend as still workable.
-      if (orientation === "Portrait") return { comfortable: 4, max: 6, label: "Portrait" };
-      if (orientation === "Landscape") return { comfortable: 6, max: 8, label: "Landscape" };
-      return { comfortable: 6, max: 6, label: orientation === "Custom" ? "Custom" : "Square" };
-    }
-
-    function evaluatePhotobookFit(total, pages, capacity) {
-      const comfortableTotal = pages * capacity.comfortable;
-      const maximumTotal = pages * capacity.max;
-      const minimumPages = Math.ceil(total / capacity.max);
+    if (width >= height) {
       return {
-        fits: total <= maximumTotal,
-        comfortable: total <= comfortableTotal,
-        maximumTotal,
-        comfortableTotal,
-        minimumPages,
-        extraPages: Math.max(0, minimumPages - pages),
-        excessPhotos: Math.max(0, total - maximumTotal)
+        width: maxSide,
+        height: Math.round(maxSide * (height / width)),
       };
     }
 
-    function buildRealisticDistribution(total, pages, maxPerPage) {
-      // Prefer the layout counts R&Y actually uses. 3 and 5 are avoided.
-      const allowed = [1,2,4,6,8].filter(x => x <= maxPerPage);
-      const memo = new Map();
-
-      function solve(page, remaining) {
-        if (page === pages) return remaining === 0 ? {score:0, values:[]} : null;
-        const pagesLeft = pages - page;
-        if (remaining < 0 || remaining > pagesLeft * maxPerPage) return null;
-        if (remaining < pagesLeft) return null;
-
-        const key = `${page}|${remaining}`;
-        if (memo.has(key)) return memo.get(key);
-
-        const avg = remaining / pagesLeft;
-        let best = null;
-
-        for (const value of allowed) {
-          if (value > remaining) continue;
-          const next = solve(page + 1, remaining - value);
-          if (!next) continue;
-
-          // Keep pages balanced, prefer 2/4/6, and only use 8 when necessary.
-          let penalty = Math.pow(value - avg, 2);
-          if (value === 1) penalty += 1.5;
-          if (value === 8) penalty += 2.5;
-          const candidate = {score: penalty + next.score, values:[value, ...next.values]};
-          if (!best || candidate.score < best.score) best = candidate;
-        }
-
-        memo.set(key, best);
-        return best;
-      }
-
-      const result = solve(0,total);
-      return result ? result.values.sort((a,b)=>b-a) : getBalancedDistribution(total,pages);
-    }
-
-    function renderDoesNotFit(total, pages, capacity, fit) {
-      const size = getPhotobookSizeInfo();
-      resultTitle.textContent = `${total} Photos • ${pages} Pages • ${size.label}`;
-      summaryText.innerHTML =
-        `<strong>Does not fit cleanly.</strong> A ${capacity.label.toLowerCase()} ${size.label} layout is limited to about ` +
-        `<strong>${capacity.max} photos per usable page</strong> in this planner. ` +
-        `With ${pages} usable pages, the clean maximum is about <strong>${fit.maximumTotal} photos</strong>.`;
-
-      warningBox.classList.remove("hidden");
-      warningBox.innerHTML =
-        `<strong>✕ Add ${fit.extraPages} usable page${fit.extraPages === 1 ? "" : "s"} or remove about ${fit.excessPhotos} photo${fit.excessPhotos === 1 ? "" : "s"}.</strong><br>` +
-        `Minimum recommended usable pages for ${total} photos: <strong>${fit.minimumPages}</strong>.`;
-
-      verification.textContent = "✕ Does not fit cleanly";
-      pageList.innerHTML =
-        `<div class="md:col-span-2 border border-red-200 bg-red-50 rounded-xl p-5 text-sm text-red-800">` +
-        `<strong>No fake layout plan generated.</strong><br>` +
-        `The calculator stopped instead of forcing too many photos into each page.` +
-        `</div>`;
-      if (window.RYFlipbook) RYFlipbook.clear("This calculation does not fit cleanly, so no misleading flipbook was generated.");
-    }
-
-
-    function calculate() {
-
-      const total =
-        parseInt(
-          totalPicturesInput.value
-        );
-
-      const pages =
-        parseInt(
-          usablePagesInput.value
-        );
-
-
-      if (
-        !total ||
-        !pages ||
-        total < 1 ||
-        pages < 1
-      ) {
-
-        pageList.innerHTML = `
-
-          <div class="md:col-span-2 text-center py-10 text-slate-400">
-            Enter valid numbers.
-          </div>
-        `;
-
-        summaryText.textContent =
-          "Enter the number of photos and usable pages.";
-
-        verification.textContent =
-          "";
-        if (window.RYFlipbook) RYFlipbook.clear();
-
-        return;
-      }
-
-
-      averageStat.textContent =
-        (
-          total / pages
-        ).toFixed(2);
-
-      pageStat.textContent =
-        pages;
-
-      const sizeInfo = getPhotobookSizeInfo();
-      resultTitle.textContent =
-        `${total} Photos • ${pages} Pages • ${sizeInfo.label}`;
-
-
-      const capacity = getNormalCapacity();
-      const fit = evaluatePhotobookFit(total, pages, capacity);
-
-      if (!fit.fits) {
-        renderDoesNotFit(total, pages, capacity, fit);
-        return;
-      }
-
-      const distribution =
-        buildRealisticDistribution(total, pages, capacity.max);
-
-      summaryText.textContent =
-        buildSummary(
-          distribution,
-          total,
-          pages
-        );
-
-
-      const distributed =
-        distribution.reduce(
-          (a,b) => a+b,
-          0
-        );
-
-
-      verification.textContent =
-        `✓ ${distributed} / ${total}`;
-
-
-      if (
-        total < pages
-      ) {
-
-        warningBox.classList.remove(
-          "hidden"
-        );
-
-        warningBox.innerHTML = `
-
-          <strong>
-            Not enough photos to fill every page.
-          </strong>
-
-          <br>
-
-          ${pages-total} page(s) will be empty.
-        `;
-
-      } else {
-
-        warningBox.classList.add(
-          "hidden"
-        );
-      }
-
-
-      if (fit.fits && !fit.comfortable && warningBox.classList.contains("hidden")) {
-        warningBox.classList.remove("hidden");
-        warningBox.innerHTML =
-          `<strong>△ Tight but workable.</strong><br>` +
-          `This ${capacity.label.toLowerCase()} book needs some pages above the comfortable ${capacity.comfortable}-photo density, ` +
-          `but it stays within the ${capacity.max}-photo recommended maximum.`;
-      }
-
-      renderPages(
-        distribution
-      );
-
-      if (window.RYFlipbook) {
-        RYFlipbook.render(distribution, getPhotobookSizeInfo());
-      }
-    }
-
-
-    totalPicturesInput.addEventListener(
-      "input",
-      calculate
-    );
-
-    usablePagesInput.addEventListener(
-      "input",
-      calculate
-    );
-
-    photobookSizeInput.addEventListener("change", updatePhotobookSizeUI);
-    customWidthInput.addEventListener("input", updatePhotobookSizeUI);
-    customHeightInput.addEventListener("input", updatePhotobookSizeUI);
-
-
-    // =====================================================
-    // DESIGN INSPIRATION - LIVE UPDATE
-    // =====================================================
-
-    const themeInput =
-      document.getElementById(
-        "themeInput"
-      );
-
-    const styleInput =
-      document.getElementById(
-        "styleInput"
-      );
-
-    const colorInput =
-      document.getElementById(
-        "colorInput"
-      );
-
-    const inspirationTitle =
-      document.getElementById(
-        "inspirationTitle"
-      );
-
-    const inspirationDescription =
-      document.getElementById(
-        "inspirationDescription"
-      );
-
-    const inspirationCards =
-      document.getElementById(
-        "inspirationCards"
-      );
-
-    const searchPreview =
-      document.getElementById(
-        "searchPreview"
-      );
-
-    const inspirationResults =
-      document.getElementById(
-        "inspirationResults"
-      );
-
-
-    let currentPinterestQuery =
-      "";
-
-
-    function isPhone() {
-
-      return window.matchMedia(
-        "(max-width: 767px)"
-      ).matches;
-    }
-
-
-    function scrollToInspirationResults() {
-
-      if (!isPhone()) {
-        return;
-      }
-
-      setTimeout(
-        () => {
-
-          inspirationResults.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-          });
-
-          inspirationResults.classList.remove(
-            "result-flash"
-          );
-
-          void inspirationResults.offsetWidth;
-
-          inspirationResults.classList.add(
-            "result-flash"
-          );
-
-        },
-        100
-      );
-    }
-
-
-    function quickTheme(theme) {
-
-      themeInput.value =
-        theme;
-
-      generateInspiration();
-
-      scrollToInspirationResults();
-    }
-
-
-    function generateInspiration() {
-
-      const theme =
-        themeInput.value.trim()
-        || "Wedding";
-
-      const style =
-        styleInput.value;
-
-      const color =
-        colorInput.value;
-
-
-      inspirationTitle.textContent =
-        `${style} ${color} ${theme}`;
-
-
-      inspirationDescription.textContent =
-        `Suggested design directions for a ${style.toLowerCase()} ${theme.toLowerCase()} photobook using ${color.toLowerCase()} as the main color.`;
-
-
-      currentPinterestQuery =
-        `${style} ${color} ${theme} photobook cover design`;
-
-
-      searchPreview.textContent =
-        `Search: "${currentPinterestQuery}"`;
-
-
-      const ideas = [
-
-        {
-          title:
-            "Cover Design",
-
-          symbol:
-            "✦",
-
-          text:
-            `Main ${style.toLowerCase()} cover direction using ${color.toLowerCase()}.`,
-
-          query:
-            `${style} ${color} ${theme} photobook cover design`
-        },
-
-
-        {
-          title:
-            "Minimal Cover",
-
-          symbol:
-            "□",
-
-          text:
-            "Cleaner cover with fewer elements and more negative space.",
-
-          query:
-            `minimal ${color} ${theme} photo album cover`
-        },
-
-
-        {
-          title:
-            "Photo Cover",
-
-          symbol:
-            "▣",
-
-          text:
-            "Use one strong client photo as the main cover focus.",
-
-          query:
-            `${style} ${theme} photo cover album design`
-        },
-
-
-        {
-          title:
-            "Typography",
-
-          symbol:
-            "Aa",
-
-          text:
-            "Find matching fonts, title placement and text hierarchy.",
-
-          query:
-            `${theme} photobook typography ${style}`
-        },
-
-
-        {
-          title:
-            "Inside Pages",
-
-          symbol:
-            "▦",
-
-          text:
-            "Find matching interior photobook spreads and layouts.",
-
-          query:
-            `${style} ${theme} photobook page layout ${color}`
-        },
-
-
-        {
-          title:
-            "Premium Look",
-
-          symbol:
-            "◇",
-
-          text:
-            "Explore luxury and editorial album presentation.",
-
-          query:
-            `luxury ${style} ${theme} photo album design ${color}`
-        }
-
-      ];
-
-
-      inspirationCards.innerHTML =
-        "";
-
-
-      ideas.forEach(
-        idea => {
-
-          const card =
-            document.createElement(
-              "div"
-            );
-
-          card.className =
-            "inspiration-card border border-slate-200 rounded-xl overflow-hidden bg-white";
-
-
-          const preview =
-            document.createElement(
-              "div"
-            );
-
-          preview.className =
-            "brand-gradient h-28 sm:h-32 flex items-center justify-center";
-
-
-          const previewContent =
-            document.createElement(
-              "div"
-            );
-
-          previewContent.className =
-            "text-center text-slate-900";
-
-
-          const symbol =
-            document.createElement(
-              "div"
-            );
-
-          symbol.className =
-            "text-3xl font-serif font-black";
-
-          symbol.textContent =
-            idea.symbol;
-
-
-          const themeLabel =
-            document.createElement(
-              "p"
-            );
-
-          themeLabel.className =
-            "text-[9px] uppercase tracking-[.25em] opacity-60 mt-3";
-
-          themeLabel.textContent =
-            theme;
-
-
-          previewContent.appendChild(
-            symbol
-          );
-
-          previewContent.appendChild(
-            themeLabel
-          );
-
-          preview.appendChild(
-            previewContent
-          );
-
-
-          const body =
-            document.createElement(
-              "div"
-            );
-
-          body.className =
-            "p-4";
-
-
-          const title =
-            document.createElement(
-              "p"
-            );
-
-          title.className =
-            "font-black";
-
-          title.textContent =
-            idea.title;
-
-
-          const description =
-            document.createElement(
-              "p"
-            );
-
-          description.className =
-            "text-xs text-slate-500 mt-2 leading-relaxed min-h-[40px]";
-
-          description.textContent =
-            idea.text;
-
-
-          const button =
-            document.createElement(
-              "button"
-            );
-
-          button.type =
-            "button";
-
-          button.className =
-            "mt-4 text-xs font-black text-teal-600 hover:text-teal-700";
-
-          button.textContent =
-            "Find References →";
-
-          button.addEventListener(
-            "click",
-            () => {
-              openPinterest(
-                idea.query
-              );
-            }
-          );
-
-
-          body.appendChild(
-            title
-          );
-
-          body.appendChild(
-            description
-          );
-
-          body.appendChild(
-            button
-          );
-
-
-          card.appendChild(
-            preview
-          );
-
-          card.appendChild(
-            body
-          );
-
-
-          inspirationCards.appendChild(
-            card
-          );
-        }
-      );
-    }
-
-
-    function openPinterest(query) {
-
-      const url =
-        "https://www.pinterest.com/search/pins/?q=" +
-        encodeURIComponent(query);
-
-      window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
-
-
-    function searchPinterest() {
-
-      openPinterest(
-        currentPinterestQuery
-      );
-    }
-
-
-    // LIVE UPDATE WHILE TYPING
-    themeInput.addEventListener(
-      "input",
-      generateInspiration
-    );
-
-
-    // LIVE UPDATE WHEN STYLE CHANGES
-    styleInput.addEventListener(
-      "change",
-      generateInspiration
-    );
-
-
-    // LIVE UPDATE WHEN COLOR CHANGES
-    colorInput.addEventListener(
-      "change",
-      generateInspiration
-    );
-
-
-    // INITIAL LOAD
-    // =====================================================
-    // ACTIVE LAYOUT JOB QUEUE
-    // =====================================================
-
-    const JOBS_STORAGE_KEY = "ryLayoutJobsV2";
-    const PLANNER_LAYOUT_TYPE = "normal";
-    const plannerJobQueue = document.getElementById("plannerJobQueue");
-    const queueEmpty = document.getElementById("queueEmpty");
-    const activeJobBanner = document.getElementById("activeJobBanner");
-    const queuePendingBtn = document.getElementById("queuePendingBtn");
-    const queueOngoingBtn = document.getElementById("queueOngoingBtn");
-    const queueAllBtn = document.getElementById("queueAllBtn");
-    let plannerQueueFilter = "all";
-    let selectedPlannerJobId = null;
-
-    function getPlannerJobs() {
-      try {
-        return JSON.parse(localStorage.getItem(JOBS_STORAGE_KEY)) || [];
-      } catch (error) {
-        return [];
-      }
-    }
-
-    function plannerEscape(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function cleanPlannerPages(value) {
-      const text = String(value ?? "").trim();
-      if (!/^\d+$/.test(text)) return null;
-      const totalPages = Number(text);
-      if (!Number.isFinite(totalPages) || totalPages < 1) return null;
-      return { total: totalPages, usable: Math.max(1, totalPages - 4) };
-    }
-
-    function setQueueFilter(filter) {
-      plannerQueueFilter = filter;
-      renderPlannerQueue();
-    }
-
-    function renderPlannerQueue() {
-      const allJobs = getPlannerJobs().filter(job =>
-        job.layoutType === PLANNER_LAYOUT_TYPE &&
-        (job.status === "pending" || job.status === "ongoing")
-      );
-
-      const visibleJobs = allJobs.filter(job =>
-        plannerQueueFilter === "all" || job.status === plannerQueueFilter
-      );
-
-      [queuePendingBtn, queueOngoingBtn, queueAllBtn].forEach(button => {
-        button.classList.remove("bg-slate-900", "text-white", "border-slate-900");
-      });
-      const activeButton = plannerQueueFilter === "pending"
-        ? queuePendingBtn
-        : plannerQueueFilter === "ongoing"
-          ? queueOngoingBtn
-          : queueAllBtn;
-      activeButton.classList.add("bg-slate-900", "text-white", "border-slate-900");
-
-      plannerJobQueue.innerHTML = "";
-      queueEmpty.classList.toggle("hidden", visibleJobs.length !== 0);
-
-      visibleJobs.forEach(job => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "text-left border border-slate-200 hover:border-teal-300 rounded-xl p-3 bg-white transition";
-        const statusClass = job.status === "ongoing" ? "text-blue-600" : "text-amber-600";
-        const pagesInfo = cleanPlannerPages(job.pages);
-        const pagesLabel = pagesInfo ? `${pagesInfo.total} pages → ${pagesInfo.usable} usable` : (job.pages || "Pages not set");
-        button.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0">
-              <p class="font-black text-sm break-words">${plannerEscape(job.clientName)}</p>
-              <p class="text-[11px] text-slate-500 mt-1">${plannerEscape(job.month || "No month")}</p>
-            </div>
-            <span class="text-[10px] font-black uppercase ${statusClass}">${plannerEscape(job.status)}</span>
-          </div>
-          <p class="text-xs text-slate-600 mt-2">${plannerEscape(job.quantity || 1)} pc • ${plannerEscape(job.bookSize || "No size")}</p>
-          <p class="text-[11px] text-slate-400 mt-1">${plannerEscape(pagesLabel)}${job.photoCount ? ` • ${plannerEscape(job.photoCount)} photos` : ""}</p>
-          <p class="text-[10px] font-black text-teal-600 mt-3">USE THIS JOB →</p>
-        `;
-        button.addEventListener("click", () => selectPlannerJob(job.id));
-        plannerJobQueue.appendChild(button);
-      });
-    }
-
-    function selectPlannerJob(id) {
-      const job = getPlannerJobs().find(item => item.id === id);
-      if (!job) return;
-      selectedPlannerJobId = id;
-
-      if (Number(job.photoCount) > 0) {
-        totalPicturesInput.value = Number(job.photoCount);
-      }
-
-      const pagesInfo = cleanPlannerPages(job.pages);
-      if (pagesInfo) {
-        usablePagesInput.value = pagesInfo.usable;
-      }
-
-      if (job.bookSize) {
-        setPhotobookSizeFromJob(job.bookSize);
-      }
-
-      activeJobBanner.classList.remove("hidden");
-      activeJobBanner.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <p class="text-[10px] font-black text-teal-600 uppercase">Selected Job</p>
-            <p class="font-black mt-1">${plannerEscape(job.clientName)}</p>
-            <p class="text-xs text-slate-500 mt-1">${plannerEscape(job.quantity || 1)} pc • ${plannerEscape(job.bookSize || "")} • ${plannerEscape(job.month || "")}</p>
-          </div>
-          <a href="jobs.html" class="text-xs font-black border border-slate-300 rounded-lg px-3 py-2 bg-white">Open Layout Jobs</a>
+    return {
+      width: Math.round(maxSide * (width / height)),
+      height: maxSide,
+    };
+  }
+
+  function makePhotoSlots(count, orientation) {
+    const safeCount = Math.max(0, Math.min(8, Number(count) || 0));
+
+    if (safeCount === 0) {
+      return `
+        <div class="ry-empty-page">
+          <span>Blank Page</span>
         </div>
-        ${!job.photoCount ? '<p class="text-[11px] text-amber-600 font-bold mt-2">Photo Count is not set yet. Enter the client photo count below.</p>' : ''}
-        ${pagesInfo ? `<p class="text-[11px] text-slate-400 mt-2">${pagesInfo.total} total photobook pages → ${pagesInfo.usable} usable layout pages (minus front, back and 2 blank pages).</p>` : '<p class="text-[11px] text-amber-600 font-bold mt-2">Pages/details is not one clean number, so usable pages were not changed.</p>'}
       `;
-
-      calculate();
-      document.getElementById("totalPictures").scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    queuePendingBtn.addEventListener("click", () => setQueueFilter("pending"));
-    queueOngoingBtn.addEventListener("click", () => setQueueFilter("ongoing"));
-    queueAllBtn.addEventListener("click", () => setQueueFilter("all"));
-    window.addEventListener("storage", renderPlannerQueue);
+    let slots = "";
 
-    renderPlannerQueue();
+    for (let i = 1; i <= safeCount; i++) {
+      slots += `
+        <div class="ry-photo-slot">
+          <span>PHOTO ${i}</span>
+        </div>
+      `;
+    }
 
-    updatePhotobookSizeUI();
-    generateInspiration();
+    return `
+      <div class="ry-photo-grid count-${safeCount} ${orientation}">
+        ${slots}
+      </div>
+    `;
+  }
 
-  </script>
+  function makeInsidePage(count, pageNumber, size) {
+    const orientation = getOrientation(size);
 
-</body>
-</html>
+    return `
+      <div class="ry-book-page">
+        <div class="ry-page-inner">
+          <div class="ry-page-label">
+            PAGE ${pageNumber}
+          </div>
 
+          ${makePhotoSlots(count, orientation)}
 
+          <div class="ry-page-footer">
+            ${count} ${Number(count) === 1 ? "photo" : "photos"}
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
+  function makeCover(size, isBack = false) {
+    const orientation = getOrientation(size);
 
+    if (isBack) {
+      return `
+        <div class="ry-book-page ry-cover-page ${orientation}" data-density="hard">
+          <div class="ry-cover-content">
+            <div class="ry-cover-small">R&Y PRINTING LAB</div>
+            <div class="ry-cover-title">Back Cover</div>
+            <div class="ry-cover-subtitle">
+              Photobook Preview
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="ry-book-page ry-cover-page ${orientation}" data-density="hard">
+        <div class="ry-cover-content">
+          <div class="ry-cover-small">R&Y PRINTING LAB</div>
+          <div class="ry-cover-title">Photobook Preview</div>
+          <div class="ry-cover-subtitle">
+            Calculator Layout Preview
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function destroyFlipbook() {
+    if (pageFlip) {
+      try {
+        pageFlip.destroy();
+      } catch (error) {
+        console.warn("Flipbook destroy warning:", error);
+      }
+
+      pageFlip = null;
+    }
+  }
+
+  function updateCounter() {
+    const counter = $("ryFlipbookCounter");
+
+    if (!counter || !pageFlip) return;
+
+    const current = pageFlip.getCurrentPageIndex();
+    const total = pageFlip.getPageCount();
+
+    if (current === 0) {
+      counter.textContent = `Front Cover • ${total} total pages`;
+      return;
+    }
+
+    if (current >= total - 1) {
+      counter.textContent = `Back Cover • ${total} total pages`;
+      return;
+    }
+
+    counter.textContent = `Page ${current} of ${total - 2}`;
+  }
+
+  function clear(message = "Calculate a layout to generate the flipbook preview.") {
+    destroyFlipbook();
+
+    const host = $("ryFlipbook");
+
+    if (host) {
+      host.innerHTML = `
+        <div class="ry-flipbook-empty">
+          ${message}
+        </div>
+      `;
+    }
+
+    const counter = $("ryFlipbookCounter");
+
+    if (counter) {
+      counter.textContent = "No preview";
+    }
+  }
+
+  function render(distribution, size = {}) {
+    const host = $("ryFlipbook");
+
+    if (!host) {
+      console.warn('Flipbook container "#ryFlipbook" was not found.');
+      return;
+    }
+
+    if (!Array.isArray(distribution) || distribution.length === 0) {
+      clear();
+      return;
+    }
+
+    if (!window.St || !window.St.PageFlip) {
+      clear("Flipbook animation library could not be loaded.");
+      console.error(
+        "StPageFlip library not found. Make sure page-flip.browser.js loads before flipbook.js."
+      );
+      return;
+    }
+
+    destroyFlipbook();
+
+    host.innerHTML = "";
+
+    const dimensions = getDimensions(size);
+
+    const temporaryContainer = document.createElement("div");
+
+    temporaryContainer.innerHTML = makeCover(size, false);
+
+    distribution.forEach((photoCount, index) => {
+      temporaryContainer.innerHTML += makeInsidePage(
+        photoCount,
+        index + 1,
+        size
+      );
+    });
+
+    temporaryContainer.innerHTML += makeCover(size, true);
+
+    const pages = Array.from(temporaryContainer.children);
+
+    pages.forEach((page) => {
+      host.appendChild(page);
+    });
+
+    try {
+      pageFlip = new window.St.PageFlip(host, {
+        width: dimensions.width,
+        height: dimensions.height,
+
+        size: "stretch",
+
+        minWidth: 220,
+        maxWidth: 620,
+
+        minHeight: 220,
+        maxHeight: 620,
+
+        maxShadowOpacity: 0.45,
+
+        showCover: true,
+
+        mobileScrollSupport: false,
+
+        usePortrait: true,
+
+        autoSize: true,
+
+        flippingTime: 850,
+
+        swipeDistance: 25,
+
+        useMouseEvents: true,
+
+        startPage: 0,
+
+        drawShadow: true,
+
+        showPageCorners: true,
+
+        disableFlipByClick: false,
+      });
+
+      pageFlip.loadFromHTML(
+        host.querySelectorAll(".ry-book-page")
+      );
+
+      pageFlip.on("flip", function () {
+        updateCounter();
+      });
+
+      pageFlip.on("changeOrientation", function () {
+        updateCounter();
+      });
+
+      updateCounter();
+    } catch (error) {
+      console.error("Flipbook initialization error:", error);
+
+      clear(
+        "Unable to start the animated flipbook. Check the browser console for details."
+      );
+    }
+  }
+
+  function next() {
+    if (!pageFlip) return;
+
+    try {
+      pageFlip.flipNext();
+    } catch (error) {
+      console.warn("Next page error:", error);
+    }
+  }
+
+  function prev() {
+    if (!pageFlip) return;
+
+    try {
+      pageFlip.flipPrev();
+    } catch (error) {
+      console.warn("Previous page error:", error);
+    }
+  }
+
+  window.RYFlipbook = {
+    render,
+    clear,
+    next,
+    prev,
+  };
+})();
