@@ -59,6 +59,18 @@
       transform: translateY(-5px);
       box-shadow: 0 20px 45px rgba(17,24,39,.10);
     }
+
+    .job-row {
+      background: white;
+      border: 1px solid #dbe7e2;
+      border-radius: 10px;
+      height: 16px;
+    }
+
+    .job-status {
+      width: 32px;
+      border-radius: 999px;
+    }
   </style>
 </head>
 
@@ -109,10 +121,10 @@
 
       <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight mt-5 leading-tight">
 
-        Choose your
+        Your photobook
 
         <span class="brand-text">
-          photobook workflow.
+          workspace.
         </span>
 
       </h2>
@@ -120,173 +132,396 @@
 
       <p class="text-sm sm:text-base text-slate-500 mt-4 leading-relaxed">
 
-        Select the type of photobook you're working on.
-        Normal and personalized orders use different layout strategies.
+        Plan photo distributions, create personalized design directions
+        and manage your current layout jobs in one place.
 
       </p>
 
     </section>
 
 
-    <!-- CARDS -->
-    <section class="grid md:grid-cols-2 gap-6 mt-10 sm:mt-14">
+    <!-- ================================================= -->
+    <!-- PHOTOBOOK PLANNERS -->
+    <!-- ================================================= -->
 
-      <!-- NORMAL -->
+    <section class="mt-10 sm:mt-14">
+
+      <div class="flex items-end justify-between gap-4 mb-5">
+
+        <div>
+
+          <p class="text-[10px] font-black text-teal-600 uppercase tracking-[.18em]">
+            Planning Tools
+          </p>
+
+          <h2 class="text-xl sm:text-2xl font-black mt-1">
+            Photobook Planners
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <!-- NORMAL -->
+        <a
+          href="normal.html"
+          class="planner-card block bg-white border-2 border-slate-200 hover:border-teal-300 rounded-3xl overflow-hidden"
+        >
+
+          <div class="h-44 sm:h-52 bg-gradient-to-br from-[#dff8f3] to-[#c9f1e8] flex items-center justify-center">
+
+            <div class="w-36 bg-white rounded-xl shadow-sm p-3 rotate-[-3deg]">
+
+              <div class="grid grid-cols-2 gap-2">
+
+                <div class="h-14 brand-gradient rounded-md"></div>
+                <div class="h-14 brand-gradient rounded-md"></div>
+                <div class="h-14 brand-gradient rounded-md"></div>
+                <div class="h-14 brand-gradient rounded-md"></div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="p-6 sm:p-7">
+
+            <div class="flex items-start justify-between gap-3">
+
+              <div>
+
+                <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">
+                  Regular Workflow
+                </p>
+
+                <h3 class="text-2xl font-black mt-1">
+                  Normal Photobook
+                </h3>
+
+              </div>
+
+
+              <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center">
+                →
+              </div>
+
+            </div>
+
+
+            <p class="text-sm text-slate-500 mt-3 leading-relaxed">
+
+              For regular photobooks where the goal is balanced
+              photo distribution and clean page layouts.
+
+            </p>
+
+
+            <div class="flex flex-wrap gap-2 mt-5">
+
+              <span class="bg-slate-100 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Balanced
+              </span>
+
+              <span class="bg-slate-100 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Preferred Layout
+              </span>
+
+              <span class="bg-slate-100 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Design Inspiration
+              </span>
+
+            </div>
+
+          </div>
+
+        </a>
+
+
+        <!-- PERSONALIZED -->
+        <a
+          href="personalized.html"
+          class="planner-card block bg-white border-2 border-slate-200 hover:border-green-300 rounded-3xl overflow-hidden"
+        >
+
+          <div class="h-44 sm:h-52 bg-gradient-to-br from-[#eef9e8] to-[#dff5d7] flex items-center justify-center relative overflow-hidden">
+
+            <span class="absolute top-6 left-8 text-3xl opacity-30">
+              ✦
+            </span>
+
+            <span class="absolute bottom-5 right-8 text-3xl opacity-30">
+              ✿
+            </span>
+
+
+            <div class="w-36 bg-white rounded-xl shadow-sm p-3 rotate-[3deg]">
+
+              <div class="h-20 brand-gradient rounded-md"></div>
+
+              <div class="flex gap-2 mt-2">
+
+                <div class="h-6 flex-1 bg-[#e8f7e3] rounded"></div>
+
+                <div class="h-6 w-9 bg-[#d8f2ec] rounded"></div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="p-6 sm:p-7">
+
+            <div class="flex items-start justify-between gap-3">
+
+              <div>
+
+                <p class="text-[10px] font-black text-green-600 uppercase tracking-wider">
+                  Design-Focused Workflow
+                </p>
+
+                <h3 class="text-2xl font-black mt-1">
+                  Personalized Photobook
+                </h3>
+
+              </div>
+
+
+              <div class="brand-gradient w-10 h-10 rounded-full flex items-center justify-center font-black">
+                →
+              </div>
+
+            </div>
+
+
+            <p class="text-sm text-slate-500 mt-3 leading-relaxed">
+
+              For personalized orders with custom themes,
+              backgrounds, decorations and more room for design.
+
+            </p>
+
+
+            <div class="flex flex-wrap gap-2 mt-5">
+
+              <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Design Space
+              </span>
+
+              <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Custom Layouts
+              </span>
+
+              <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Design Inspiration
+              </span>
+
+            </div>
+
+          </div>
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- WORK MANAGEMENT -->
+    <!-- ================================================= -->
+
+    <section class="mt-10 sm:mt-12">
+
+      <div class="mb-5">
+
+        <p class="text-[10px] font-black text-green-600 uppercase tracking-[.18em]">
+          Work Management
+        </p>
+
+        <h2 class="text-xl sm:text-2xl font-black mt-1">
+          Layout Workflow
+        </h2>
+
+        <p class="text-sm text-slate-500 mt-1">
+          Keep track of layouts that still need to be worked on.
+        </p>
+
+      </div>
+
+
+      <!-- LAYOUT JOBS -->
       <a
-        href="normal.html"
+        href="jobs.html"
         class="planner-card block bg-white border-2 border-slate-200 hover:border-teal-300 rounded-3xl overflow-hidden"
       >
 
-        <div class="h-44 sm:h-52 bg-gradient-to-br from-[#dff8f3] to-[#c9f1e8] flex items-center justify-center">
+        <div class="grid lg:grid-cols-[.9fr_1.1fr]">
 
-          <div class="w-36 bg-white rounded-xl shadow-sm p-3 rotate-[-3deg]">
+          <!-- VISUAL -->
+          <div class="min-h-[230px] bg-gradient-to-br from-[#e5faf6] via-[#eefaf2] to-[#e8f6e3] p-7 sm:p-9 flex items-center justify-center">
 
-            <div class="grid grid-cols-2 gap-2">
+            <div class="w-full max-w-sm bg-white/90 border border-white rounded-2xl shadow-lg p-5 rotate-[-1deg]">
 
-              <div class="h-14 brand-gradient rounded-md"></div>
-              <div class="h-14 brand-gradient rounded-md"></div>
-              <div class="h-14 brand-gradient rounded-md"></div>
-              <div class="h-14 brand-gradient rounded-md"></div>
+              <!-- MINI HEADER -->
+              <div class="flex items-center justify-between gap-3 mb-4">
+
+                <div>
+
+                  <div class="w-24 h-2.5 bg-slate-800 rounded-full"></div>
+
+                  <div class="w-16 h-2 bg-slate-200 rounded-full mt-2"></div>
+
+                </div>
+
+                <div class="w-9 h-9 brand-gradient rounded-xl"></div>
+
+              </div>
+
+
+              <!-- JOB 1 -->
+              <div class="job-row flex items-center gap-2 px-2 mb-2">
+
+                <span class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></span>
+
+                <span class="h-1.5 w-24 bg-slate-300 rounded-full"></span>
+
+                <span class="job-status h-1.5 bg-amber-200 ml-auto"></span>
+
+              </div>
+
+
+              <!-- JOB 2 -->
+              <div class="job-row flex items-center gap-2 px-2 mb-2">
+
+                <span class="w-2 h-2 rounded-full bg-blue-400 flex-shrink-0"></span>
+
+                <span class="h-1.5 w-32 bg-slate-300 rounded-full"></span>
+
+                <span class="job-status h-1.5 bg-blue-200 ml-auto"></span>
+
+              </div>
+
+
+              <!-- JOB 3 -->
+              <div class="job-row flex items-center gap-2 px-2">
+
+                <span class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
+
+                <span class="h-1.5 w-20 bg-slate-300 rounded-full"></span>
+
+                <span class="job-status h-1.5 bg-emerald-200 ml-auto"></span>
+
+              </div>
+
+
+              <!-- MINI STATS -->
+              <div class="grid grid-cols-3 gap-2 mt-4">
+
+                <div class="bg-amber-50 rounded-lg py-3 text-center">
+
+                  <p class="text-lg font-black text-amber-600">
+                    —
+                  </p>
+
+                  <p class="text-[8px] font-black text-slate-400 uppercase">
+                    Pending
+                  </p>
+
+                </div>
+
+
+                <div class="bg-blue-50 rounded-lg py-3 text-center">
+
+                  <p class="text-lg font-black text-blue-600">
+                    —
+                  </p>
+
+                  <p class="text-[8px] font-black text-slate-400 uppercase">
+                    Ongoing
+                  </p>
+
+                </div>
+
+
+                <div class="bg-emerald-50 rounded-lg py-3 text-center">
+
+                  <p class="text-lg font-black text-emerald-600">
+                    —
+                  </p>
+
+                  <p class="text-[8px] font-black text-slate-400 uppercase">
+                    Done
+                  </p>
+
+                </div>
+
+              </div>
 
             </div>
 
           </div>
 
-        </div>
+
+          <!-- CONTENT -->
+          <div class="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
+
+            <div class="flex items-start justify-between gap-4">
+
+              <div>
+
+                <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">
+                  Production Tool
+                </p>
+
+                <h3 class="text-2xl sm:text-3xl font-black mt-1">
+                  Layout Jobs
+                </h3>
+
+              </div>
 
 
-        <div class="p-6 sm:p-7">
-
-          <div class="flex items-start justify-between gap-3">
-
-            <div>
-
-              <p class="text-[10px] font-black text-teal-600 uppercase tracking-wider">
-                Regular Workflow
-              </p>
-
-              <h3 class="text-2xl font-black mt-1">
-                Normal Photobook
-              </h3>
-
-            </div>
-
-
-            <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center">
-              →
-            </div>
-
-          </div>
-
-
-          <p class="text-sm text-slate-500 mt-3 leading-relaxed">
-
-            For regular photobooks where the goal is balanced
-            photo distribution and clean page layouts.
-
-          </p>
-
-
-          <div class="flex flex-wrap gap-2 mt-5">
-
-            <span class="bg-slate-100 px-3 py-1.5 rounded-full text-[11px] font-bold">
-              Balanced
-            </span>
-
-            <span class="bg-slate-100 px-3 py-1.5 rounded-full text-[11px] font-bold">
-              Preferred Layout
-            </span>
-
-            <span class="bg-slate-100 px-3 py-1.5 rounded-full text-[11px] font-bold">
-              Design Inspiration
-            </span>
-
-          </div>
-
-        </div>
-
-      </a>
-
-
-      <!-- PERSONALIZED -->
-      <a
-        href="personalized.html"
-        class="planner-card block bg-white border-2 border-slate-200 hover:border-green-300 rounded-3xl overflow-hidden"
-      >
-
-        <div class="h-44 sm:h-52 bg-gradient-to-br from-[#eef9e8] to-[#dff5d7] flex items-center justify-center relative overflow-hidden">
-
-          <span class="absolute top-6 left-8 text-3xl opacity-30">
-            ✦
-          </span>
-
-          <span class="absolute bottom-5 right-8 text-3xl opacity-30">
-            ✿
-          </span>
-
-
-          <div class="w-36 bg-white rounded-xl shadow-sm p-3 rotate-[3deg]">
-
-            <div class="h-20 brand-gradient rounded-md"></div>
-
-            <div class="flex gap-2 mt-2">
-
-              <div class="h-6 flex-1 bg-[#e8f7e3] rounded"></div>
-
-              <div class="h-6 w-9 bg-[#d8f2ec] rounded"></div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="p-6 sm:p-7">
-
-          <div class="flex items-start justify-between gap-3">
-
-            <div>
-
-              <p class="text-[10px] font-black text-green-600 uppercase tracking-wider">
-                Design-Focused Workflow
-              </p>
-
-              <h3 class="text-2xl font-black mt-1">
-                Personalized Photobook
-              </h3>
+              <div class="w-11 h-11 rounded-full bg-slate-900 text-white flex items-center justify-center text-lg">
+                →
+              </div>
 
             </div>
 
 
-            <div class="brand-gradient w-10 h-10 rounded-full flex items-center justify-center font-black">
-              →
+            <p class="text-sm text-slate-500 mt-4 leading-relaxed max-w-xl">
+
+              Organize pending, ongoing and completed layout jobs.
+              Quickly find the next client to work on and open the
+              correct photobook planner.
+
+            </p>
+
+
+            <div class="flex flex-wrap gap-2 mt-6">
+
+              <span class="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Pending Jobs
+              </span>
+
+              <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Ongoing
+              </span>
+
+              <span class="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Done Layout
+              </span>
+
+              <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
+                Search Clients
+              </span>
+
             </div>
-
-          </div>
-
-
-          <p class="text-sm text-slate-500 mt-3 leading-relaxed">
-
-            For personalized orders with custom themes,
-            backgrounds, decorations and more room for design.
-
-          </p>
-
-
-          <div class="flex flex-wrap gap-2 mt-5">
-
-            <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
-              Design Space
-            </span>
-
-            <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
-              Custom Layouts
-            </span>
-
-            <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-[11px] font-bold">
-              Personalized
-            </span>
 
           </div>
 

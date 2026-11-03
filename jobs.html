@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Layout Jobs | R&Y Printing Lab</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --mint: #63d9c9;
+      --mint-dark: #35bfae;
+      --green: #8bcb78;
+      --dark: #111827;
+      --soft: #f6faf8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(99,217,201,.16), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(139,203,120,.14), transparent 30%),
+        var(--soft);
+
+      color: var(--dark);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--mint-dark);
+      box-shadow: 0 0 0 3px rgba(99,217,201,.18);
+    }
+
+    .brand-gradient {
+      background: linear-gradient(
+        135deg,
+        var(--mint),
+        var(--green)
+      );
+    }
+
+    .brand-text {
+      background: linear-gradient(
+        90deg,
+        #23aa9b,
+        #63a953
+      );
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .job-card {
+      transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+    }
+
+    .job-card:hover {
+      transform: translateY(-2px);
+      border-color: #9de4da;
+      box-shadow: 0 12px 30px rgba(17,24,39,.07);
+    }
+
+    .filter-active {
+      background: #111827 !important;
+      color: white !important;
+      border-color: #111827 !important;
+    }
+
+    .modal-backdrop {
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(4px);
+    }
+
+    @media (max-width: 640px) {
+      button,
+      input,
+      select,
+      textarea {
+        min-height: 44px;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+
+      <div class="flex items-center gap-3 min-w-0">
+
+        <img
+          src="ryn.png"
+          alt="R&Y Printing Lab"
+          class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover flex-shrink-0"
+        >
+
+        <div class="min-w-0">
+
+          <h1 class="font-black text-sm sm:text-xl truncate">
+            Layout Jobs
+          </h1>
+
+          <p class="text-[10px] sm:text-xs text-slate-500 truncate">
+            R&amp;Y Printing Lab
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <a
+        href="index.html"
+        class="border border-slate-300 bg-white hover:bg-slate-50 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap"
+      >
+        ← Dashboard
+      </a>
+
+    </div>
+
+  </header>
+
+
+  <!-- MAIN -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10">
+
+    <!-- HERO -->
+    <section class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-8">
+
+      <div>
+
+        <div class="flex items-center gap-2">
+
+          <span class="brand-gradient w-2.5 h-2.5 rounded-full"></span>
+
+          <span class="text-[11px] font-black tracking-[.18em] text-slate-500">
+            WORK MANAGEMENT
+          </span>
+
+        </div>
+
+
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight mt-3">
+
+          Layout
+
+          <span class="brand-text">
+            Job Queue.
+          </span>
+
+        </h2>
+
+
+        <p class="text-sm sm:text-base text-slate-500 mt-3 max-w-2xl leading-relaxed">
+          Keep track of pending, ongoing and completed photobook layouts.
+          Find the next job and open the correct planner quickly.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        onclick="openAddModal()"
+        class="brand-gradient px-5 py-3 rounded-xl font-black text-sm shadow-sm hover:shadow-md transition"
+      >
+        + Add Job
+      </button>
+
+    </section>
+
+
+    <!-- STATS -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+
+      <!-- TOTAL -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5">
+
+        <div class="flex items-center justify-between">
+
+          <p class="text-xs font-bold text-slate-500">
+            Total Jobs
+          </p>
+
+          <span class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
+            📋
+          </span>
+
+        </div>
+
+        <p
+          id="totalJobsStat"
+          class="text-3xl font-black mt-3"
+        >
+          0
+        </p>
+
+      </div>
+
+
+      <!-- PENDING -->
+      <div class="bg-white border border-amber-200 rounded-2xl p-4 sm:p-5">
+
+        <div class="flex items-center justify-between">
+
+          <p class="text-xs font-bold text-amber-700">
+            Pending
+          </p>
+
+          <span class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
+            ⏳
+          </span>
+
+        </div>
+
+        <p
+          id="pendingStat"
+          class="text-3xl font-black text-amber-600 mt-3"
+        >
+          0
+        </p>
+
+      </div>
+
+
+      <!-- ONGOING -->
+      <div class="bg-white border border-blue-200 rounded-2xl p-4 sm:p-5">
+
+        <div class="flex items-center justify-between">
+
+          <p class="text-xs font-bold text-blue-700">
+            Ongoing
+          </p>
+
+          <span class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+            ✏️
+          </span>
+
+        </div>
+
+        <p
+          id="ongoingStat"
+          class="text-3xl font-black text-blue-600 mt-3"
+        >
+          0
+        </p>
+
+      </div>
+
+
+      <!-- DONE -->
+      <div class="bg-white border border-emerald-200 rounded-2xl p-4 sm:p-5">
+
+        <div class="flex items-center justify-between">
+
+          <p class="text-xs font-bold text-emerald-700">
+            Done Layout
+          </p>
+
+          <span class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
+            ✓
+          </span>
+
+        </div>
+
+        <p
+          id="doneStat"
+          class="text-3xl font-black text-emerald-600 mt-3"
+        >
+          0
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- TOOLBAR -->
+    <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mt-6">
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+
+        <!-- SEARCH -->
+        <div class="relative flex-1 max-w-xl">
+
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search client, size, layout..."
+            class="w-full border border-slate-300 rounded-xl px-4 py-3 pr-10 text-sm"
+          >
+
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+            ⌕
+          </span>
+
+        </div>
+
+
+        <!-- FILTERS -->
+        <div class="flex gap-2 overflow-x-auto pb-1">
+
+          <button
+            type="button"
+            id="filterAll"
+            onclick="setFilter('all')"
+            class="filter-active filter-button border border-slate-200 bg-white px-4 py-2.5 rounded-xl text-xs font-black whitespace-nowrap"
+          >
+            All
+          </button>
+
+          <button
+            type="button"
+            id="filterPending"
+            onclick="setFilter('pending')"
+            class="filter-button border border-slate-200 bg-white px-4 py-2.5 rounded-xl text-xs font-black whitespace-nowrap"
+          >
+            Pending
+          </button>
+
+          <button
+            type="button"
+            id="filterOngoing"
+            onclick="setFilter('ongoing')"
+            class="filter-button border border-slate-200 bg-white px-4 py-2.5 rounded-xl text-xs font-black whitespace-nowrap"
+          >
+            Ongoing
+          </button>
+
+          <button
+            type="button"
+            id="filterDone"
+            onclick="setFilter('done')"
+            class="filter-button border border-slate-200 bg-white px-4 py-2.5 rounded-xl text-xs font-black whitespace-nowrap"
+          >
+            Done
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- QUEUE HEADER -->
+    <section class="mt-7 flex items-center justify-between gap-3">
+
+      <div>
+
+        <p class="text-xs font-black text-green-600 uppercase tracking-wider">
+          Current Queue
+        </p>
+
+        <h3 class="font-black text-xl mt-1">
+          Layout Jobs
+        </h3>
+
+      </div>
+
+
+      <p
+        id="visibleCount"
+        class="text-xs font-bold text-slate-400"
+      >
+        0 jobs
+      </p>
+
+    </section>
+
+
+    <!-- JOB LIST -->
+    <section
+      id="jobList"
+      class="grid lg:grid-cols-2 gap-4 mt-4"
+    ></section>
+
+  </main>
+
+
+  <!-- ================================================= -->
+  <!-- ADD / EDIT MODAL -->
+  <!-- ================================================= -->
+
+  <div
+    id="jobModal"
+    class="hidden fixed inset-0 z-50 modal-backdrop p-4 overflow-y-auto"
+  >
+
+    <div class="min-h-full flex items-center justify-center">
+
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
+
+        <!-- MODAL HEADER -->
+        <div class="px-5 sm:px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-4">
+
+          <div>
+
+            <p class="text-xs font-black text-green-600 uppercase tracking-wider">
+              Layout Job
+            </p>
+
+            <h3
+              id="modalTitle"
+              class="text-xl font-black mt-1"
+            >
+              Add New Job
+            </h3>
+
+          </div>
+
+
+          <button
+            type="button"
+            onclick="closeModal()"
+            class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 font-black"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <!-- FORM -->
+        <form
+          id="jobForm"
+          class="p-5 sm:p-6"
+        >
+
+          <div class="grid sm:grid-cols-2 gap-4">
+
+            <!-- CLIENT -->
+            <div class="sm:col-span-2">
+
+              <label class="block text-sm font-bold mb-2">
+                Client Name
+              </label>
+
+              <input
+                id="clientName"
+                type="text"
+                required
+                placeholder="Example: Divina Manzano"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3"
+              >
+
+            </div>
+
+
+            <!-- QUANTITY -->
+            <div>
+
+              <label class="block text-sm font-bold mb-2">
+                Quantity
+              </label>
+
+              <input
+                id="quantity"
+                type="number"
+                min="1"
+                value="1"
+                required
+                class="w-full border border-slate-300 rounded-xl px-4 py-3"
+              >
+
+            </div>
+
+
+            <!-- SIZE -->
+            <div>
+
+              <label class="block text-sm font-bold mb-2">
+                Photobook Size
+              </label>
+
+              <input
+                id="bookSize"
+                type="text"
+                required
+                placeholder="Example: 8x7 inches"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3"
+              >
+
+            </div>
+
+
+            <!-- PAGES -->
+            <div>
+
+              <label class="block text-sm font-bold mb-2">
+                Pages
+              </label>
+
+              <input
+                id="pages"
+                type="text"
+                placeholder="Example: 20 or 20-30"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3"
+              >
+
+            </div>
+
+
+            <!-- PHOTO COUNT -->
+            <div>
+
+              <label class="block text-sm font-bold mb-2">
+                Photo Count
+              </label>
+
+              <input
+                id="photoCount"
+                type="number"
+                min="0"
+                placeholder="Optional"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3"
+              >
+
+            </div>
+
+
+            <!-- LAYOUT TYPE -->
+            <div>
+
+              <label class="block text-sm font-bold mb-2">
+                Layout Type
+              </label>
+
+              <select
+                id="layoutType"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white"
+              >
+                <option value="normal">
+                  Basic / Normal Layout
+                </option>
+
+                <option value="personalized">
+                  Personalized Layout
+                </option>
+              </select>
+
+            </div>
+
+
+            <!-- STATUS -->
+            <div>
+
+              <label class="block text-sm font-bold mb-2">
+                Status
+              </label>
+
+              <select
+                id="status"
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-white"
+              >
+                <option value="pending">
+                  Pending
+                </option>
+
+                <option value="ongoing">
+                  Ongoing
+                </option>
+
+                <option value="done">
+                  Done Layout
+                </option>
+              </select>
+
+            </div>
+
+
+            <!-- NOTES -->
+            <div class="sm:col-span-2">
+
+              <label class="block text-sm font-bold mb-2">
+                Notes
+              </label>
+
+              <textarea
+                id="notes"
+                rows="3"
+                placeholder="Optional notes..."
+                class="w-full border border-slate-300 rounded-xl px-4 py-3 resize-none"
+              ></textarea>
+
+            </div>
+
+          </div>
+
+
+          <!-- BUTTONS -->
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
+
+            <button
+              type="button"
+              onclick="closeModal()"
+              class="border border-slate-300 bg-white hover:bg-slate-50 px-5 py-3 rounded-xl text-sm font-bold"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="brand-gradient px-5 py-3 rounded-xl text-sm font-black"
+            >
+              Save Job
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    // =====================================================
+    // STORAGE
+    // =====================================================
+
+    const STORAGE_KEY =
+      "ryLayoutJobs";
+
+
+    function getJobs() {
+
+      try {
+
+        return JSON.parse(
+          localStorage.getItem(STORAGE_KEY)
+        ) || [];
+
+      } catch (error) {
+
+        return [];
+      }
+    }
+
+
+    function saveJobs() {
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(jobs)
+      );
+    }
+
+
+    let jobs =
+      getJobs();
+
+
+    let currentFilter =
+      "all";
+
+
+    let editingJobId =
+      null;
+
+
+    // =====================================================
+    // ELEMENTS
+    // =====================================================
+
+    const jobList =
+      document.getElementById("jobList");
+
+    const searchInput =
+      document.getElementById("searchInput");
+
+    const visibleCount =
+      document.getElementById("visibleCount");
+
+    const totalJobsStat =
+      document.getElementById("totalJobsStat");
+
+    const pendingStat =
+      document.getElementById("pendingStat");
+
+    const ongoingStat =
+      document.getElementById("ongoingStat");
+
+    const doneStat =
+      document.getElementById("doneStat");
+
+    const jobModal =
+      document.getElementById("jobModal");
+
+    const modalTitle =
+      document.getElementById("modalTitle");
+
+    const jobForm =
+      document.getElementById("jobForm");
+
+    const clientNameInput =
+      document.getElementById("clientName");
+
+    const quantityInput =
+      document.getElementById("quantity");
+
+    const bookSizeInput =
+      document.getElementById("bookSize");
+
+    const pagesInput =
+      document.getElementById("pages");
+
+    const photoCountInput =
+      document.getElementById("photoCount");
+
+    const layoutTypeInput =
+      document.getElementById("layoutType");
+
+    const statusInput =
+      document.getElementById("status");
+
+    const notesInput =
+      document.getElementById("notes");
+
+
+    // =====================================================
+    // STATUS INFORMATION
+    // =====================================================
+
+    function getStatusInfo(status) {
+
+      if (status === "ongoing") {
+
+        return {
+          label: "Ongoing",
+          badge:
+            "bg-blue-50 text-blue-700 border-blue-200",
+          dot:
+            "bg-blue-500"
+        };
+      }
+
+
+      if (status === "done") {
+
+        return {
+          label: "Done Layout",
+          badge:
+            "bg-emerald-50 text-emerald-700 border-emerald-200",
+          dot:
+            "bg-emerald-500"
+        };
+      }
+
+
+      return {
+        label: "Pending",
+        badge:
+          "bg-amber-50 text-amber-700 border-amber-200",
+        dot:
+          "bg-amber-500"
+      };
+    }
+
+
+    // =====================================================
+    // STATS
+    // =====================================================
+
+    function updateStats() {
+
+      totalJobsStat.textContent =
+        jobs.length;
+
+
+      pendingStat.textContent =
+        jobs.filter(
+          job => job.status === "pending"
+        ).length;
+
+
+      ongoingStat.textContent =
+        jobs.filter(
+          job => job.status === "ongoing"
+        ).length;
+
+
+      doneStat.textContent =
+        jobs.filter(
+          job => job.status === "done"
+        ).length;
+    }
+
+
+    // =====================================================
+    // FILTER
+    // =====================================================
+
+    function setFilter(filter) {
+
+      currentFilter =
+        filter;
+
+
+      document
+        .querySelectorAll(".filter-button")
+        .forEach(
+          button => {
+
+            button.classList.remove(
+              "filter-active"
+            );
+          }
+        );
+
+
+      const buttonMap = {
+        all:
+          "filterAll",
+
+        pending:
+          "filterPending",
+
+        ongoing:
+          "filterOngoing",
+
+        done:
+          "filterDone"
+      };
+
+
+      document
+        .getElementById(
+          buttonMap[filter]
+        )
+        .classList.add(
+          "filter-active"
+        );
+
+
+      renderJobs();
+    }
+
+
+    // =====================================================
+    // ESCAPE HTML
+    // =====================================================
+
+    function escapeHTML(value) {
+
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+    // =====================================================
+    // RENDER
+    // =====================================================
+
+    function renderJobs() {
+
+      const search =
+        searchInput.value
+          .trim()
+          .toLowerCase();
+
+
+      let filtered =
+        jobs.filter(
+          job => {
+
+            const matchesFilter =
+              currentFilter === "all" ||
+              job.status === currentFilter;
+
+
+            const searchableText = `
+              ${job.clientName}
+              ${job.bookSize}
+              ${job.pages}
+              ${job.layoutType}
+              ${job.notes}
+            `.toLowerCase();
+
+
+            const matchesSearch =
+              !search ||
+              searchableText.includes(
+                search
+              );
+
+
+            return (
+              matchesFilter &&
+              matchesSearch
+            );
+          }
+        );
+
+
+      // Pending first, then ongoing, then done.
+      const statusOrder = {
+        pending: 0,
+        ongoing: 1,
+        done: 2
+      };
+
+
+      filtered.sort(
+        (a,b) => {
+
+          const statusDifference =
+            statusOrder[a.status] -
+            statusOrder[b.status];
+
+
+          if (statusDifference !== 0) {
+
+            return statusDifference;
+          }
+
+
+          return (
+            b.createdAt -
+            a.createdAt
+          );
+        }
+      );
+
+
+      visibleCount.textContent =
+        `${filtered.length} ${
+          filtered.length === 1
+            ? "job"
+            : "jobs"
+        }`;
+
+
+      jobList.innerHTML =
+        "";
+
+
+      if (filtered.length === 0) {
+
+        jobList.innerHTML = `
+
+          <div class="lg:col-span-2 bg-white border border-dashed border-slate-300 rounded-2xl px-5 py-14 text-center">
+
+            <div class="w-14 h-14 bg-[#eef9f6] rounded-2xl flex items-center justify-center mx-auto text-2xl">
+              📋
+            </div>
+
+            <h4 class="font-black text-lg mt-4">
+              No layout jobs found
+            </h4>
+
+            <p class="text-sm text-slate-500 mt-2">
+              Add your first job or change the current filter.
+            </p>
+
+            <button
+              type="button"
+              onclick="openAddModal()"
+              class="brand-gradient px-5 py-3 rounded-xl font-black text-sm mt-5"
+            >
+              + Add Job
+            </button>
+
+          </div>
+        `;
+
+        updateStats();
+
+        return;
+      }
+
+
+      filtered.forEach(
+        job => {
+
+          const status =
+            getStatusInfo(
+              job.status
+            );
+
+
+          const card =
+            document.createElement(
+              "article"
+            );
+
+
+          card.className =
+            "job-card bg-white border border-slate-200 rounded-2xl overflow-hidden";
+
+
+          const layoutLabel =
+            job.layoutType === "personalized"
+              ? "Personalized Layout"
+              : "Basic / Normal Layout";
+
+
+          const layoutClasses =
+            job.layoutType === "personalized"
+              ? "bg-green-50 text-green-700"
+              : "bg-teal-50 text-teal-700";
+
+
+          const photoText =
+            job.photoCount
+              ? `${job.photoCount} photos`
+              : "Photo count not set";
+
+
+          card.innerHTML = `
+
+            <div class="p-5">
+
+              <!-- TOP -->
+              <div class="flex items-start justify-between gap-3">
+
+                <div class="min-w-0">
+
+                  <div class="flex items-center gap-2">
+
+                    <span class="w-2.5 h-2.5 rounded-full ${status.dot} flex-shrink-0"></span>
+
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      Layout Job
+                    </p>
+
+                  </div>
+
+                  <h4 class="font-black text-lg sm:text-xl mt-2 break-words">
+                    ${escapeHTML(job.clientName)}
+                  </h4>
+
+                </div>
+
+
+                <span class="border ${status.badge} px-3 py-1.5 rounded-full text-[10px] font-black whitespace-nowrap">
+                  ${status.label}
+                </span>
+
+              </div>
+
+
+              <!-- DETAILS -->
+              <div class="grid grid-cols-2 gap-3 mt-5">
+
+                <div class="bg-[#f7faf9] rounded-xl p-3">
+
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">
+                    Quantity
+                  </p>
+
+                  <p class="text-sm font-black mt-1">
+                    ${escapeHTML(job.quantity)} pc${Number(job.quantity) === 1 ? "" : "s"}
+                  </p>
+
+                </div>
+
+
+                <div class="bg-[#f7faf9] rounded-xl p-3">
+
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">
+                    Size
+                  </p>
+
+                  <p class="text-sm font-black mt-1 break-words">
+                    ${escapeHTML(job.bookSize)}
+                  </p>
+
+                </div>
+
+
+                <div class="bg-[#f7faf9] rounded-xl p-3">
+
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">
+                    Pages
+                  </p>
+
+                  <p class="text-sm font-black mt-1">
+                    ${escapeHTML(job.pages || "—")}
+                  </p>
+
+                </div>
+
+
+                <div class="bg-[#f7faf9] rounded-xl p-3">
+
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">
+                    Photos
+                  </p>
+
+                  <p class="text-sm font-black mt-1">
+                    ${escapeHTML(photoText)}
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <!-- LAYOUT -->
+              <div class="flex flex-wrap gap-2 mt-4">
+
+                <span class="${layoutClasses} px-3 py-1.5 rounded-full text-[10px] font-black">
+                  ${layoutLabel}
+                </span>
+
+              </div>
+
+
+              ${
+                job.notes
+                  ? `
+
+                    <div class="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
+
+                      <p class="text-[10px] font-black text-slate-400 uppercase">
+                        Notes
+                      </p>
+
+                      <p class="text-xs text-slate-600 mt-1 leading-relaxed break-words">
+                        ${escapeHTML(job.notes)}
+                      </p>
+
+                    </div>
+
+                  `
+                  : ""
+              }
+
+            </div>
+
+
+            <!-- ACTIONS -->
+            <div class="border-t border-slate-200 bg-[#fafcfb] p-3 flex flex-wrap gap-2">
+
+              <button
+                type="button"
+                onclick="openPlanner('${job.id}')"
+                class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+              >
+                Plan Layout
+              </button>
+
+
+              ${
+                job.status === "pending"
+                  ? `
+
+                    <button
+                      type="button"
+                      onclick="changeStatus('${job.id}','ongoing')"
+                      class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+                    >
+                      Start Layout
+                    </button>
+
+                  `
+                  : ""
+              }
+
+
+              ${
+                job.status === "ongoing"
+                  ? `
+
+                    <button
+                      type="button"
+                      onclick="changeStatus('${job.id}','done')"
+                      class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+                    >
+                      ✓ Done Layout
+                    </button>
+
+                  `
+                  : ""
+              }
+
+
+              ${
+                job.status === "done"
+                  ? `
+
+                    <button
+                      type="button"
+                      onclick="changeStatus('${job.id}','ongoing')"
+                      class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+                    >
+                      Reopen
+                    </button>
+
+                  `
+                  : ""
+              }
+
+
+              <button
+                type="button"
+                onclick="editJob('${job.id}')"
+                class="border border-slate-300 bg-white hover:bg-slate-50 px-3.5 py-2.5 rounded-lg text-[11px] font-black"
+              >
+                Edit
+              </button>
+
+
+              <button
+                type="button"
+                onclick="deleteJob('${job.id}')"
+                class="ml-auto text-red-500 hover:bg-red-50 px-3 py-2.5 rounded-lg text-[11px] font-black"
+              >
+                Delete
+              </button>
+
+            </div>
+          `;
+
+
+          jobList.appendChild(
+            card
+          );
+        }
+      );
+
+
+      updateStats();
+    }
+
+
+    // =====================================================
+    // ADD MODAL
+    // =====================================================
+
+    function openAddModal() {
+
+      editingJobId =
+        null;
+
+
+      modalTitle.textContent =
+        "Add New Job";
+
+
+      jobForm.reset();
+
+
+      quantityInput.value =
+        "1";
+
+
+      layoutTypeInput.value =
+        "normal";
+
+
+      statusInput.value =
+        "pending";
+
+
+      jobModal.classList.remove(
+        "hidden"
+      );
+
+
+      document.body.style.overflow =
+        "hidden";
+
+
+      setTimeout(
+        () => clientNameInput.focus(),
+        100
+      );
+    }
+
+
+    function closeModal() {
+
+      jobModal.classList.add(
+        "hidden"
+      );
+
+
+      document.body.style.overflow =
+        "";
+    }
+
+
+    // =====================================================
+    // SAVE JOB
+    // =====================================================
+
+    jobForm.addEventListener(
+      "submit",
+      function(event) {
+
+        event.preventDefault();
+
+
+        const data = {
+
+          clientName:
+            clientNameInput.value.trim(),
+
+          quantity:
+            parseInt(quantityInput.value) || 1,
+
+          bookSize:
+            bookSizeInput.value.trim(),
+
+          pages:
+            pagesInput.value.trim(),
+
+          photoCount:
+            parseInt(photoCountInput.value) || 0,
+
+          layoutType:
+            layoutTypeInput.value,
+
+          status:
+            statusInput.value,
+
+          notes:
+            notesInput.value.trim()
+
+        };
+
+
+        if (
+          !data.clientName ||
+          !data.bookSize
+        ) {
+
+          return;
+        }
+
+
+        if (editingJobId) {
+
+          jobs =
+            jobs.map(
+              job => {
+
+                if (
+                  job.id === editingJobId
+                ) {
+
+                  return {
+                    ...job,
+                    ...data,
+                    updatedAt:
+                      Date.now()
+                  };
+                }
+
+
+                return job;
+              }
+            );
+
+        } else {
+
+          jobs.push({
+
+            id:
+              String(
+                Date.now()
+              ),
+
+            ...data,
+
+            createdAt:
+              Date.now(),
+
+            updatedAt:
+              Date.now()
+
+          });
+        }
+
+
+        saveJobs();
+
+        closeModal();
+
+        renderJobs();
+      }
+    );
+
+
+    // =====================================================
+    // EDIT
+    // =====================================================
+
+    function editJob(id) {
+
+      const job =
+        jobs.find(
+          item => item.id === id
+        );
+
+
+      if (!job) {
+        return;
+      }
+
+
+      editingJobId =
+        id;
+
+
+      modalTitle.textContent =
+        "Edit Layout Job";
+
+
+      clientNameInput.value =
+        job.clientName;
+
+      quantityInput.value =
+        job.quantity;
+
+      bookSizeInput.value =
+        job.bookSize;
+
+      pagesInput.value =
+        job.pages || "";
+
+      photoCountInput.value =
+        job.photoCount || "";
+
+      layoutTypeInput.value =
+        job.layoutType;
+
+      statusInput.value =
+        job.status;
+
+      notesInput.value =
+        job.notes || "";
+
+
+      jobModal.classList.remove(
+        "hidden"
+      );
+
+
+      document.body.style.overflow =
+        "hidden";
+    }
+
+
+    // =====================================================
+    // STATUS
+    // =====================================================
+
+    function changeStatus(
+      id,
+      newStatus
+    ) {
+
+      jobs =
+        jobs.map(
+          job => {
+
+            if (job.id === id) {
+
+              return {
+                ...job,
+                status:
+                  newStatus,
+                updatedAt:
+                  Date.now()
+              };
+            }
+
+
+            return job;
+          }
+        );
+
+
+      saveJobs();
+
+      renderJobs();
+    }
+
+
+    // =====================================================
+    // DELETE
+    // =====================================================
+
+    function deleteJob(id) {
+
+      const job =
+        jobs.find(
+          item => item.id === id
+        );
+
+
+      if (!job) {
+        return;
+      }
+
+
+      const confirmed =
+        confirm(
+          `Delete layout job for ${job.clientName}?`
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      jobs =
+        jobs.filter(
+          item => item.id !== id
+        );
+
+
+      saveJobs();
+
+      renderJobs();
+    }
+
+
+    // =====================================================
+    // OPEN PLANNER
+    // =====================================================
+
+    function openPlanner(id) {
+
+      const job =
+        jobs.find(
+          item => item.id === id
+        );
+
+
+      if (!job) {
+        return;
+      }
+
+
+      const target =
+        job.layoutType === "personalized"
+          ? "personalized.html"
+          : "normal.html";
+
+
+      /*
+        Pass the photo count and pages
+        through the URL.
+
+        Example:
+        normal.html?photos=104&pages=28
+      */
+
+      const params =
+        new URLSearchParams();
+
+
+      if (job.photoCount) {
+
+        params.set(
+          "photos",
+          job.photoCount
+        );
+      }
+
+
+      /*
+        Only send pages automatically
+        when the Pages field contains
+        one clear number.
+
+        Example:
+        28 = okay
+        20-30 = not automatic
+      */
+
+      const pageNumber =
+        Number(job.pages);
+
+
+      if (
+        Number.isFinite(pageNumber) &&
+        pageNumber > 0
+      ) {
+
+        params.set(
+          "pages",
+          pageNumber
+        );
+      }
+
+
+      const query =
+        params.toString();
+
+
+      window.location.href =
+        query
+          ? `${target}?${query}`
+          : target;
+    }
+
+
+    // =====================================================
+    // SEARCH
+    // =====================================================
+
+    searchInput.addEventListener(
+      "input",
+      renderJobs
+    );
+
+
+    // =====================================================
+    // CLOSE MODAL WHEN CLICKING BACKDROP
+    // =====================================================
+
+    jobModal.addEventListener(
+      "click",
+      function(event) {
+
+        if (
+          event.target === jobModal
+        ) {
+
+          closeModal();
+        }
+      }
+    );
+
+
+    // =====================================================
+    // ESC KEY
+    // =====================================================
+
+    document.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key === "Escape" &&
+          !jobModal.classList.contains(
+            "hidden"
+          )
+        ) {
+
+          closeModal();
+        }
+      }
+    );
+
+
+    // =====================================================
+    // INITIAL
+    // =====================================================
+
+    renderJobs();
+
+  </script>
+
+</body>
+</html>
